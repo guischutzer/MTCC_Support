@@ -6,20 +6,44 @@
 \usepackage{wrapfig}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{diagbox, eqparbox, hhline}
 
-\title{Inteligência Artificial em Magic: The Gathering\\
-        Proposta}
-\author{Guilherme Souto Schützer - 8658544 \\
-        Tomás Bezerra Marcondes Paim - 7157602}
-\date{28 de abril de 2017}
+% \usepackage[executivepaper,margin=1in]{geometry}
+% \usepackage[charter]{mathdesign}
+
+% \title{\textbf{Inteligência Artificial em \textit{Magic: The Gathering}}}
+% \author{Guilherme Souto Schützer - 8658544 \\
+%         Tomás Bezerra Marcondes Paim - 7157602 \\
+        % \begin{figure}[]
+        % \centering
+        %     \includegraphics[width=0.25\textwidth]{picstcc/ime.png}
+        % \end{figure}}
+% \date{2017}
+
 
 \begin{document}
 
-\maketitle
+  \begin{titlepage}
+  \begin{center}
+   {\huge\bfseries Inteligência Artificial \\ em \textit{Magic: the Gathering}\\}
+   % ----------------------------------------------------------------
+   \vspace{1.5cm}
+   {\bfseries Guilherme Souto Schützer}\\[5pt]
+   guischutzer@gmail.com\\[14pt]
+   \vspace{0.5cm}
+   {\bfseries Tomás Marcondes Bezerra Paim}\\[5pt]
+   tomasbmp@gmail.com\\[14pt]
+    % ----------------------------------------------------------------
+   \vspace{2cm}
+  {\begin{figure}[!h]
+          \centering
+              \includegraphics[width=0.25\textwidth]{picstcc/ime.png}
+  \end{figure}}
+   \vspace{0.4cm}
+ \end{center}
+  \end{titlepage}
 
-\chapter{Introdução}
-
-\section{Regras}
+\chapter*{Objetivo}
 \textbf{Magic: The Gathering} é um jogo de cartas criado em 1993 por
 Richard Garfield que introduziu o conceito moderno de \textit{trading
 card game} (jogo de cartas colecionáveis). Com um acervo de mais de 15
@@ -44,18 +68,7 @@ do jogo (limitando o conjunto de cartas disponíveis, adicionando
 restrições à construção dos baralhos e simplificando algumas regras do
 jogo).
 
-\section{Objetivos}
-
-\begin{itemize}
-    \item{} Modelar com diferentes níveis de complexidade as decisões
-possíveis e representações do espaço de estados.
-    \item{} Implementar diferentes algoritmos de Inteligência Artificial
-em um cliente-jogador e comparar os resultados.
-    \item{} Implementação e treino de uma ou mais IAs baseadas em
-aprendizado de máquina.
-    \item{} Usar jogos entre duas IAs (próprias ou existentes) para
-avaliação de desempenho.
-\end{itemize}
+\chapter{Introdução}
 
 \section{Regras básicas}
 
@@ -69,12 +82,6 @@ nesses três). Feitiços são \textit{cards} que têm um efeito que acontece
 no momento em que são jogados e então são colocados no cemitério (como é
 chamada a pilha de descarte no jogo).\\
 
-\begin{wrapfigure}{R}{5cm}
-    \centering
-    \includegraphics[width=0.25\textwidth]{picstcc/divination.jpg}
-    \caption{Divinação (Feitiço)}
-    \label{divination}
-\end{wrapfigure}
 
 Por exemplo, o feitiço Divinação tem um efeito simples: "Compre dois
 cards". O jogador que joga este card pega os dois cards do topo de seu
@@ -86,19 +93,28 @@ criatura) e são a principal forma de interagir com o oponente ou
 desenvolver o seu lado do campo de batalha (como é chamada a zona em que
 ficam as criaturas e terrenos).
 
+\begin{figure}[!h]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{picstcc/divination.jpg}
+        \caption{Divinação (Feitiço)}
+        \label{divination}
+    \end{minipage}\hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{picstcc/angelOfMercy.jpg}
+        \caption{Anjo da Misericórdia (Criatura)}
+        \label{anjo}
+    \end{minipage}
+\end{figure}
+
 \textbf{Criaturas} são cards permanentes (uma vez jogados eles
 permanecem no campo de batalha até que sejam destruídos por algum
 feitiço ou durante o combate) que possuem poder (quantidade de dano
 causado em combate), resistência (quantidade de dano necessária para ser
 destruída) e muitas vezes habilidades que afetam o andamento do combate
 ou que fazem algum efeito no momento em que são jogadas.
-
-\begin{wrapfigure}{L}{5cm}
-\centering
-    \includegraphics[width=0.25\textwidth]{picstcc/angelOfMercy.jpg}
-    \caption{Anjo da Misericórdia (Criatura)}
-    \label{anjo}
-\end{wrapfigure}
 
 Por exemplo, Anjo da Misericórdia tem a habilidade de Voar (que limita
 as interações do oponente durante o combate) e concede a seu controlador
@@ -217,8 +233,10 @@ representa um turno de atraso em relação a uma mão com sete cartas (uma
 vez que cada jogador compra
 uma carta por turno). Dessa maneira, em uma mão com $h$ cartas, temos
 $h+1$ possibilidades, cada uma com probabilidade
-\begin{equation} \label{eq:stateprob} P_h(i) = \frac{\binom{t}{i}\binom{60 - t}{h - i}}{\binom{60}{h}}, \ \
-i = 0,\ldots, h, \end{equation} onde $t$ é o número de terrenos no deck e $i$ o
+\begin{equation} \label{eq:stateprob} P_h(i) =
+\frac{\binom{t}{i}\binom{60 - t}{h - i}}{\binom{60}{h}}, \ \
+i = 0,\ldots, h, \end{equation} onde $t$ é o número de terrenos no deck
+e $i$ o
 número de terrenos
 na mão. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
 agente deve decidir entre realizar um \textit{mulligan}
@@ -260,24 +278,38 @@ $R(s)$
 do estado somada à soma da utilidade de cada estado sucessor $s'$ vezes
 a probabilidade de chegar em $s'$ a partir de $s$ e da política adotada
 em $s$ (esta soma é multiplicada por um fator de desconto $\gamma$).
-Assim, temos que cada estado pode ser representado pelo par $(h, i)$ e a função de Bellman, reescrita:
-\begin{equation} \label{eq:mullbellman}U^\pi(h, i) = R(h, i) + \gamma \sum\limits_{i' = 0}^{h - 1}P(h-1, i' | h , i )U^\pi(h - 1, i').\end{equation}
-A probabilidade de cada estado sucessor $(h- 1, i')$ é dada pela equação \ref{eq:stateprob}:
-\[P(h-1, i' | h, i) = P_{h-1}(i') = \frac{\binom{t}{i'}\binom{60 - t}{h - 1 -
+Assim, temos que cada estado pode ser representado pelo par $(h, i)$ e a
+função de Bellman, reescrita:
+\begin{equation} \label{eq:mullbellman}U^\pi(h, i) = R(h, i) + \gamma
+\sum\limits_{i' = 0}^{h - 1}P(h-1, i' | h , i )U^\pi(h - 1,
+i').\end{equation}
+A probabilidade de cada estado sucessor $(h- 1, i')$ é dada pela equação
+\ref{eq:stateprob}:
+\[P(h-1, i' | h, i) = P_{h-1}(i') = \frac{\binom{t}{i'}\binom{60 - t}{h
+- 1 -
 i'}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1.\]
 
-Por fim, ainda precisamos determinar as recompensas $R(h, i)$ e o fator de desconto $\gamma$.
-Uma boa relação $R(h,i)$ de recompensas, por experiências pessoais, deve seguir as seguintes restrições:
+Por fim, ainda precisamos determinar as recompensas $R(h, i)$ e o fator
+de desconto $\gamma$.
+Uma boa relação $R(h,i)$ de recompensas, por experiências pessoais, deve
+seguir as seguintes restrições:
 \begin{itemize}
-  \item Com $h = h_0$, as recompensas (se existem) devem seguir a seguinte relação:
-  \begin{equation} \label{eq:idealhand}R(h_0, 3) > R(h_0, 2) > R(h_0, 4) > R(h_0, 5) > R(h_0, 1) > R(h_0, 6) > R(h_0, 7) \gg R(h_0, 0),\end{equation}
-  pois na média, uma mão ideal tem 3 terrenos, em segundo lugar 2 terrenos, etc. Uma mão sem terrenos é considerada \textbf{muito} ruim.
-  \item $R(h, i) > R(h - 1, i), \forall (h, i):$ uma mão com o mesmo número de terrenos e uma carta a menos deve sempre ser considerada pior do que a alternativa.
-  \item $R(h, i) > R(h - 1, i - 1), \forall (h, i):$ uma mão com o mesmo número de não-terrenos e uma carta a menos deve sempre ser considerada pior do que a alternativa.
+  \item Com $h = h_0$, as recompensas (se existem) devem seguir a
+seguinte relação:
+  \begin{equation} \label{eq:idealhand}R(h_0, 3) > R(h_0, 2) > R(h_0, 4)
+> R(h_0, 5) > R(h_0, 1) > R(h_0, 6) > R(h_0, 7) \gg R(h_0,
+0),\end{equation}
+  pois na média, uma mão ideal tem 3 terrenos, em segundo lugar 2
+terrenos, etc. Uma mão sem terrenos é considerada \textbf{muito} ruim.
+  \item $R(h, i) > R(h - 1, i), \forall (h, i):$ uma mão com o mesmo
+número de terrenos e uma carta a menos deve sempre ser considerada pior
+do que a alternativa.
+  \item $R(h, i) > R(h - 1, i - 1), \forall (h, i):$ uma mão com o mesmo
+número de não-terrenos e uma carta a menos deve sempre ser considerada
+pior do que a alternativa.
 \end{itemize}
 
 \begin{table}[!b]
-
 \parbox{.45\linewidth}{
 \centering
 \vspace{0.2cm}
@@ -299,7 +331,7 @@ $i$  & $r(i)$ \\ \hline
 \parbox{.45\linewidth}{
 \centering
 \begin{tabular}{l|rrrrrrrr}
-  & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
+ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
 7 & -979  & 17 & 21 & 22 & 20 & 18 & 16 & 14 \\
 6 & -982  & 14 & 18 & 19 & 17 & 15 & 13 &    \\
 5 & -985  & 11 & 15 & 16 & 14 & 12 &    &    \\
@@ -314,15 +346,10 @@ $i$  & $r(i)$ \\ \hline
 }
 \end{table}
 
-Dessa maneira, chegamos a uma fórmula geral, $R(h, i) = r(i) + \alpha h$, onde $r(i)$ assume valores pré-determinados de acordo com (\ref{eq:idealhand}). Para $\alpha = 3$ e $r(i)$ determinado pela tabela \ref{tab:ri}, podemos atribuir as recompensas de acordo com a tabela \ref{tab:Rhi}
-
-
-
-
-
-
-
-
-
+Dessa maneira, chegamos a uma fórmula geral, $R(h, i) = r(i) + \alpha
+h$, onde $r(i)$ assume valores pré-determinados de acordo com
+(\ref{eq:idealhand}). Para $\alpha = 3$ e $r(i)$ determinado pela tabela
+\ref{tab:ri}, podemos atribuir as recompensas de acordo com a tabela
+\ref{tab:Rhi}.
 
 \end{document}
