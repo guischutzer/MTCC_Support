@@ -6,6 +6,7 @@
 \usepackage{wrapfig}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 
 \title{Inteligência Artificial em Magic: The Gathering\\
         Proposta}
@@ -118,18 +119,56 @@ Definimos vagamente uma mão jogável se esta contém tanto cartas que impactam 
 Para este efeito, separaremos as cartas do deck em duas categorias: terrenos (recursos) e não-terrenos (impactam o jogo).
 Outro fator importante é o tamanho da mão, pois cada carta perdida representa um turno de atraso em relação a uma mão com sete cartas (uma vez que cada jogador compra
 uma carta por turno). Dessa maneira, em uma mão com $h$ cartas, temos $h+1$ possibilidades, cada uma com probabilidade
-\[ P_h(i) = \frac{\binom{t}{i}\binom{60 - t}{h - i}}{\binom{60}{h}}, \ \ i = 0,\ldots, h,\] onde $t$ é o número de terrenos no deck e $i$ o número de terrenos
+\[ \mathcal{P}_h(i) = \frac{\binom{t}{i}\binom{60 - t}{h - i}}{\binom{60}{h}}, \ \ i = 0,\ldots, h,\] onde $t$ é o número de terrenos no deck e $i$ o número de terrenos
 na mão. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o agente deve decidir entre realizar um \textit{mulligan}
 (denotado por $M$), que resultará em uma mão com $h-1$ cartas, sendo $i$ terrenos com probabilidade
- \[ P_{h - 1}(i) = \frac{\binom{t}{i}\binom{60 - t}{h - 1 - i}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1\]
+ \[ \mathcal{P}_{h - 1}(i) = \frac{\binom{t}{i}\binom{60 - t}{h - 1 - i}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1\]
  ou manter a mão (denotado por $K$), o que termina o problema, seguido (para $h < 7$) de uma ação \textit{scry}, que permite uma pequena ``filtragrem''
  do deck para os jogadores que já acumularam alguma desvantagem (em relação ao número de cartas na mão) no processo. Por fim, a decisão também é influenciada
  pela informação de quem é o jogador inicial, pois ele tem virtualmente uma carta a menos, dado que no primeiro turno do jogo não se compra uma carta.
 
-\subsection{Aprendizado por Reforço}
+\subsection{Processo de decisão de Markov}
+
+Processos de Decisão de Markov (MDP) são uma forma de representar alguns problemas de decisão sequenciais. Um problema representado por um MDP consiste em
+uma tupla $(S, A, P, R)$ onde
+\begin{itemize}
+  \item $S$ é o conjunto de estados;
+  \item $A$ é o conjunto de ações que podem ser tomadas a cada ``época de decisão'' (sendo que nem toda ação pode ser realizada a partir de qualquer estado);
+  \item $P: S \times A \times S \mapsto [0,1]$ é uma função que dá a probabilidade do sistema passar do estado $s \in S$ para o estado $s' \in S$
+  realizando a ação $a \in A$ ($P(s'|s, a)$);
+  \item $R: S \times A \mapsto \mathbb{R}$ é uma função que dá a recompensa por tomar uma decisão $a \in A$ quando o processo está no estado $s \in S$.
+\end{itemize}
+
+Além disso, há a definição de \textit{horizonte}, que é o número de épocas de decisão disponíveis para a tomada de decisão. Um horizonte pode ser finito (caso haja
+um número fixo de decisões a serem tomadas), infinito (quando a tomada de decisão nunca acaba) ou indefinido (semelhante ao infinito mas com a possibilidade de parada).
+O caso que iremos ver é será representado por um \textit{MDP de horizonte finito}.
+
+Uma \textit{política} para um MDP é o conjunto de todas as regras de decisão $d: S \mapsto A$ que determinam, a partir de cada dado estado, qual decisão deve ser tomada
+(é possível considerar também a época do sistema, mas para o caso que será analisado essa informação não faz diferença). Desejamos encontrar uma política para o
+nosso MDP que seja ótima, ou seja, que nos leve à maior recompensa esperada possível.
+
+Na próxima subseção iremos modelar o problema de decidir a mão inicial como um MDP.
+
+\subsection{Mulligan como um MDP}
 
 
-Dada a estrutura bem conhecida do problema, o Aprendizado por Reforço é uma técnica que pode ser aplicada
+O conjunto de estados $S$ é composto por um estado inicial $s_I$ (que representa o estado antes do jogador comprar a sua primeira mão inicial),
+um estado final absorvente $s_F$ (que representa o jogador após ter decidido manter uma mão) e os estados intermediários
+$s_{i, j}, i=0 \ldots 7, j=0 \ldots i$ (que representam os estados onde o jogador tem $i$ cartas na mão, sendo que $j$ são terrenos).
+
+O conjunto de ações $A$ e a função de probabilidade $P$ estão definidas para cada estado da seguinte maneira:
+\begin{itemize}
+  \item A partir do estado $s_I$ só é possível tomar a ação \textit{start}, que leva para o estado $s_{7, j}, j = 0 \ldots 7$ com probabilidade $\mathcal{P}_7(j)$;
+  \item A partir de um estado $s_{i, j}, i=1 \ldots 7, j=0 \ldots i$ é possível tomar a ação \textit{keep}, que leva para o estado $s_F$ com probabilidade $1$,
+  e a ação \textit{mulligan}, que leva ao estado $s_{i-1, j'}, j'=0 \ldots i-1$ com probabilidade $\mathcal{P}_{i-1}(j')$;
+  \item A partir do estado $s_{0, 0}$ só é possível tomar a ação \textit{keep}, que leva ao estado $s_F$ com probabilidade $1$;
+  \item A partir do estado $s_F$ só é possível tomar a ação \textit{wait}, que leva ao próprio estado $s_F$ com probabilidade $1$.
+\end{itemize}
+
+
+Dada a estrutura bem conhecida do problema,
+
+o Aprendizado por Reforço é uma técnica que pode ser aplicada
 para que o agente determine um comportamento (política) para alcançar uma mão ``jogável'' para uma partida de \textit{Magic}.
 
 O problema pode ser representado como uma série de estados, cada um representando uma configuração de quantidade de cartas na mão
@@ -139,7 +178,7 @@ distribuição de terrenos descrita na subseção anterior. Assim, depois de vá
 que maximize a utilidade total $U(\pi) = \sum U^\pi(s)$, onde $U^\pi(s)$ é a função-utilidade do estado $s$. Usando a equação de
 Bellman, temos \[ U^\pi(s) = R(s) + \gamma\sum\limits_{s'}P(s' | s, \pi(s))U^\pi(s'),\] ou seja, a utilidade de cada estado é a recompensa $R(s)$
 do estado somada à soma da utilidade de cada estado sucessor $s'$ vezes a probabilidade de chegar em $s'$ a partir de $s$ e da política adotada
-em $s$ (esta soma é multiplicada por um fator de desconto $\gamma$). Assim, temos que cada estado pode ser representado pelo par $(h, i)$ 
+em $s$ (esta soma é multiplicada por um fator de desconto $\gamma$). Assim, temos que cada estado pode ser representado pelo par $(h, i)$
 
  para que o agente aprenda
 um comportamento (chamado política) ao se deparar com o problema do \textit{mulligan}.
