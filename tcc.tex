@@ -6,11 +6,24 @@
 \usepackage{wrapfig}
 \usepackage{tikz}
 \usepackage{amsmath}
-<<<<<<< HEAD
 \usepackage{amsfonts}
-=======
 \usepackage{diagbox, eqparbox, hhline}
->>>>>>> b0ae6cc234b42259d2370c8c5e1e65b0126f2428
+\usepackage{mathtools}
+
+\makeatletter
+\newcases{lrdcases}
+  {\quad}
+  {$\m@th\displaystyle{##}$\hfil}
+  {$\m@th\displaystyle{##}$\hfil}
+  {\lbrace}
+  {\rbrace}
+\newcases{lrdcases*}
+  {\quad}
+  {$\m@th\displaystyle{##}$\hfil}
+  {{##}\hfil}
+  {\lbrace}
+  {\rbrace}
+\makeatother
 
 % \usepackage[executivepaper,margin=1in]{geometry}
 % \usepackage[charter]{mathdesign}
@@ -158,7 +171,7 @@ abstrato, nas estratégias associadas à montagem e uso dos
 \textit{decks}.
 Por exemplo: comprar \textit{cards} representa acumular conhecimento,
 portanto Divinação é um feitiço que representa bem sua cor.
-Entraremos mais a fundo no assunto na seção (INSERIR SEÇÂO), na
+Entraremos mais a fundo no assunto nas seções futuras, na
 apresentação dos decks usados para teste e jogo.
 
 No começo do jogo é decidido aleatoriamente quem será o jogador inicial,
@@ -225,7 +238,7 @@ de estados.
   \label{mulligan}
   \input{mulligan.tex}
   \caption{Espaço de estados de um problema de \textit{mulligan}. Cada
-nível $h$ representa o número de cartas na mão inicial do jogador.}
+nível $i$ representa o número de cartas na mão inicial do jogador.}
 \end{figure}
 
 Definimos vagamente uma mão jogável se esta contém tanto cartas que
@@ -235,21 +248,21 @@ terrenos (recursos) e não-terrenos (impactam o jogo).
 Outro fator importante é o tamanho da mão, pois cada carta perdida
 representa um turno de atraso em relação a uma mão com sete cartas (uma
 vez que cada jogador compra
-uma carta por turno). Dessa maneira, em uma mão com $h$ cartas, temos
+uma carta por turno). Dessa maneira, em uma mão com $i$ cartas, temos
 $h+1$ possibilidades, cada uma com probabilidade
-\begin{equation} \label{eq:stateprob} P_h(i) =
-\frac{\binom{t}{i}\binom{60 - t}{h - i}}{\binom{60}{h}}, \ \
-i = 0,\ldots, h, \end{equation} onde $t$ é o número de terrenos no deck
-e $i$ o
+\begin{equation} \label{eq:stateprob} \mathcal{P}_i(j) =
+\frac{\binom{T}{j}\binom{60 - T}{i - j}}{\binom{60}{i}}, \ \
+j = 0,\ldots, i, \end{equation} onde $t$ é o número de terrenos no deck
+e $j$ o
 número de terrenos
 na mão. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
 agente deve decidir entre realizar um \textit{mulligan}
-(denotado por $M$), que resultará em uma mão com $h-1$ cartas, sendo $i$
+(denotado por $M$), que resultará em uma mão com $i-1$ cartas, sendo $i$
 terrenos com probabilidade
- \[ P_{h - 1}(i) = \frac{\binom{t}{i}\binom{60 - t}{h - 1 -
-i}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1\]
+ \[ \mathcal{P}_{i - 1}(j) = \frac{\binom{T}{j}\binom{60 - T}{i - 1 -
+j}}{\binom{60}{i - 1}}, \ \  j = 0,\ldots, i - 1\]
  ou manter a mão (denotado por $K$), o que termina o problema, seguido
-(para $h < 7$) de uma ação \textit{scry}, que permite uma pequena
+(para $i < 7$) de uma ação \textit{scry}, que permite uma pequena
 ``filtragrem''
  do deck para os jogadores que já acumularam alguma desvantagem (em
 relação ao número de cartas na mão) no processo. Por fim, a decisão
@@ -258,9 +271,10 @@ também é influenciada
 uma carta a menos, dado que no primeiro turno do jogo não se compra uma
 carta.
 
-\subsection{Processo de decisão de Markov}
+\pagebreak
+\subsection{Processo De decisão de Markov}
 
-Processos de Decisão de Markov (MDP) são uma forma de representar alguns problemas de decisão sequenciais. Um problema representado por um MDP consiste em
+Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP}) são uma forma de representar alguns problemas de decisão sequenciais. Um problema representado por um MDP consiste em
 uma tupla $(S, A, P, R)$ onde
 \begin{itemize}
   \item $S$ é o conjunto de estados;
@@ -270,93 +284,102 @@ uma tupla $(S, A, P, R)$ onde
   \item $R: S \times A \mapsto \mathbb{R}$ é uma função que dá a recompensa por tomar uma decisão $a \in A$ quando o processo está no estado $s \in S$.
 \end{itemize}
 
-Além disso, há a definição de \textit{horizonte}, que é o número de épocas de decisão disponíveis para a tomada de decisão. Um horizonte pode ser finito (caso haja
+Além disso, há a definição de \textbf{horizonte}, que é o número de épocas de decisão disponíveis para a tomada de decisão. Um horizonte pode ser finito (caso haja
 um número fixo de decisões a serem tomadas), infinito (quando a tomada de decisão nunca acaba) ou indefinido (semelhante ao infinito mas com a possibilidade de parada).
-O caso que iremos ver é será representado por um \textit{MDP de horizonte finito}.
+O caso que iremos ver é será representado por um \textbf{MDP de horizonte finito}.
 
-Uma \textit{política} para um MDP é o conjunto de todas as regras de decisão $d: S \mapsto A$ que determinam, a partir de cada dado estado, qual decisão deve ser tomada
+Uma \textbf{política} para um MDP é o conjunto de todas as regras de decisão $d: S \mapsto A$ que determinam, a partir de cada dado estado, qual decisão deve ser tomada
 (é possível considerar também a época do sistema, mas para o caso que será analisado essa informação não faz diferença). Desejamos encontrar uma política para o
 nosso MDP que seja ótima, ou seja, que nos leve à maior recompensa esperada possível.
 
-Na próxima subseção iremos modelar o problema de decidir a mão inicial como um MDP.
+Na próxima subseção iremos modelar o problema de decidir a mão inicial como um MDP de horizonte finito.
 
 \subsection{Mulligan como um MDP}
 
+Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um determinado horizonte), podemos determinar todos os parâmetros de um MDP de horizonte finito para que o agente siga uma política com a inteção de alcançar uma mão ``jogável'' para uma partida de \textit{Magic}.
 
-O conjunto de estados $S$ é composto por um estado inicial $s_I$ (que representa o estado antes do jogador comprar a sua primeira mão inicial),
-um estado final absorvente $s_F$ (que representa o jogador após ter decidido manter uma mão) e os estados intermediários
-$s_{i, j}, i=0 \ldots 7, j=0 \ldots i$ (que representam os estados onde o jogador tem $i$ cartas na mão, sendo que $j$ são terrenos).
+O conjunto de estados $S$ é composto por um estado inicial $S_I$ (que representa o estado antes do jogador comprar a sua primeira mão inicial),
+um estado final absorvente $S_F$ (que representa o jogador após ter decidido manter uma mão) e os estados intermediários, dados por um par
+$(i, j), i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representam os estados onde o jogador tem $i$ cartas na mão, sendo que $j$ são terrenos). Assim, as ações $A(s)$ e as probabilidades $P(s'|s, A(s))$ de cada estado $s$ são definidas da seguinte maneira (com $s \rightarrow s'$ representando a transição de estados):
 
-O conjunto de ações $A$ e a função de probabilidade $P$ estão definidas para cada estado da seguinte maneira:
 \begin{itemize}
-  \item A partir do estado $s_I$ só é possível tomar a ação \textit{start}, que leva para o estado $s_{7, j}, j = 0 \ldots 7$ com probabilidade $\mathcal{P}_7(j)$;
-  \item A partir de um estado $s_{i, j}, i=1 \ldots 7, j=0 \ldots i$ é possível tomar a ação \textit{keep}, que leva para o estado $s_F$ com probabilidade $1$,
-  e a ação \textit{mulligan}, que leva ao estado $s_{i-1, j'}, j'=0 \ldots i-1$ com probabilidade $\mathcal{P}_{i-1}(j')$;
-  \item A partir do estado $s_{0, 0}$ só é possível tomar a ação \textit{keep}, que leva ao estado $s_F$ com probabilidade $1$;
-  \item A partir do estado $s_F$ só é possível tomar a ação \textit{wait}, que leva ao próprio estado $s_F$ com probabilidade $1$.
+  \item $A(S_I) := \left\{ Start : S_I \rightarrow (7, j), j \in \{ 0, 1, \ldots, 7\} \right\} $;
+  \\ \\
+   A partir de $S_I$ é possível tomar a ação \textit{Start}, que leva para o estado $(7, j)$ com probabilidade \\ $P\left((7, j) |S_I, Start\right) = \mathcal{P}_7(j)$, descrita na equação \ref{eq:stateprob}.
+
+  \item $A(i, j) := \begin{lrdcases} Mulligan : &(i, j) \rightarrow (i - 1, j'), \ \ i \in \{ 1, 2, \ldots, 7\}, j'\in \{ 0, 1, \ldots, i - 1\}, \\
+                                     Keep :     &(i, j) \rightarrow S_F, \hspace{1.9cm} i \in \{ 0, 1, \ldots, 7\}, j\in \{ 0, 1, \ldots, i\} \end{lrdcases};$
+   \\ \\
+   A partir de $(i, j)$, analogamente à ação $Start$, temos a ação $Mulligan$, que leva ao estado $(i -1, j')$ com probabilidade $P((i-1, j') | (i, j), Mulligan) = \mathcal{P}_{i-1}(j')$. Um detalhe importante é a impossibilidade de $Mulligan$ quando $i = 0$. A outra ação, $Keep$, leva ao estado final com probabilidade $P(S_F | (i, j), Keep) = 1.$
+
+   \pagebreak
+
+   \item $A(S_F) := \left\{ Wait : S_F \rightarrow S_F \right\}$
+   \\ \\ No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de épocas de decisão (e constitua um problema de horizonte finito), com probabilidade $P(S_F | S_F, Wait) = 1$.
 \end{itemize}
 
-
-Dada a estrutura bem conhecida do problema,
-
-Dada a estrutura bem conhecida do problema, o Aprendizado por Reforço é
-uma técnica que pode ser aplicada
-para que o agente determine um comportamento (política) para alcançar
-uma mão ``jogável'' para uma partida de \textit{Magic}.
-
-O problema pode ser representado como uma série de estados, cada um
-representando uma configuração de quantidade de cartas na mão
-e quantidade de terrenos presentes entre essas cartas. Em cada mão, o
-agente pode decidir ou manter a mão e ``resgatar''
-os pontos que aquela configuração representa, ou realizar um
-\textit{mulligan}, que resultará em uma mão com uma carta a menos e
-distribuição de terrenos descrita na subseção anterior. Assim, depois de
-várias iterações, o agente irá encontrar uma política $\pi$
-que maximize a utilidade total $U(\pi) = \sum U^\pi(s)$, onde $U^\pi(s)$
-é a função-utilidade do estado $s$. Usando a equação de
-Bellman, temos \[ U^\pi(s) = R(s) + \gamma\sum\limits_{s'}P(s' | s,
-\pi(s))U^\pi(s'),\] ou seja, a utilidade de cada estado é a recompensa
-$R(s)$
-do estado somada à soma da utilidade de cada estado sucessor $s'$ vezes
-a probabilidade de chegar em $s'$ a partir de $s$ e da política adotada
-em $s$ (esta soma é multiplicada por um fator de desconto $\gamma$).
-Assim, temos que cada estado pode ser representado pelo par $(h, i)$ e a
-função de Bellman, reescrita:
-\begin{equation} \label{eq:mullbellman}U^\pi(h, i) = R(h, i) + \gamma
-\sum\limits_{i' = 0}^{h - 1}P(h-1, i' | h , i )U^\pi(h - 1,
-i').\end{equation}
-A probabilidade de cada estado sucessor $(h- 1, i')$ é dada pela equação
-\ref{eq:stateprob}:
-\[P(h-1, i' | h, i) = P_{h-1}(i') = \frac{\binom{t}{i'}\binom{60 - t}{h
-- 1 -
-i'}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1.\]
-
-Por fim, ainda precisamos determinar as recompensas $R(h, i)$ e o fator
-de desconto $\gamma$.
-Uma boa relação $R(h,i)$ de recompensas, por experiências pessoais, deve
-seguir as seguintes restrições:
+% Dada a estrutura bem conhecida do problema, o Aprendizado por Reforço é
+% uma técnica que pode ser aplicada
+% para que o agente determine um comportamento (política) para alcançar
+% uma mão ``jogável'' para uma partida de \textit{Magic}.
+%
+% O problema pode ser representado como uma série de estados, cada um
+% representando uma configuração de quantidade de cartas na mão
+% e quantidade de terrenos presentes entre essas cartas. Em cada mão, o
+% agente pode decidir ou manter a mão e ``resgatar''
+% os pontos que aquela configuração representa, ou realizar um
+% \textit{mulligan}, que resultará em uma mão com uma carta a menos e
+% distribuição de terrenos descrita na subseção anterior. Assim, depois de
+% várias iterações, o agente irá encontrar uma política $\pi$
+% que maximize a utilidade total $U(\pi) = \sum U^\pi(s)$, onde $U^\pi(s)$
+% é a função-utilidade do estado $s$. Usando a equação de
+% Bellman, temos \[ U^\pi(s) = R(s) + \gamma\sum\limits_{s'}P(s' | s,
+% \pi(s))U^\pi(s'),\] ou seja, a utilidade de cada estado é a recompensa
+% $R(s)$
+% do estado somada à soma da utilidade de cada estado sucessor $s'$ vezes
+% a probabilidade de chegar em $s'$ a partir de $s$ e da política adotada
+% em $s$ (esta soma é multiplicada por um fator de desconto $\gamma$).
+% Assim, temos que cada estado pode ser representado pelo par $(h, i)$ e a
+% função de Bellman, reescrita:
+% \begin{equation} \label{eq:mullbellman}U^\pi(h, i) = R(h, i) + \gamma
+% \sum\limits_{i' = 0}^{h - 1}P(h-1, i' | h , i )U^\pi(h - 1,
+% i').\end{equation}
+% A probabilidade de cada estado sucessor $(h- 1, i')$ é dada pela equação
+% \ref{eq:stateprob}:
+% \[P(h-1, i' | h, i) = P_{h-1}(i') = \frac{\binom{t}{i'}\binom{60 - t}{h
+% - 1 -
+% i'}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1.\]
+Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$ cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação $Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições tem recompensa nula. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes restrições:
 \begin{itemize}
-  \item Com $h = h_0$, as recompensas (se existem) devem seguir a
+  \item Com $i= i_0$ fixo e $j\in\{0,1,\ldots,i_0\}$, as recompensas $R_k(i_0, j)$(se existem) devem seguir a
 seguinte relação:
-  \begin{equation} \label{eq:idealhand}R(h_0, 3) > R(h_0, 2) > R(h_0, 4)
-> R(h_0, 5) > R(h_0, 1) > R(h_0, 6) > R(h_0, 7) \gg R(h_0,
+  \begin{equation} \label{eq:idealhand}R_k (i_0, 3) > R_k(i_0, 2) > R_k(i_0, 4)
+> R_k(i_0, 5) > R_k(i_0, 1) > R_k(i_0, 6) > R_k(i_0, 7) \gg R_k(i_0,
 0),\end{equation}
   pois na média, uma mão ideal tem 3 terrenos, em segundo lugar 2
 terrenos, etc. Uma mão sem terrenos é considerada \textbf{muito} ruim.
-  \item $R(h, i) > R(h - 1, i), \forall (h, i):$ uma mão com o mesmo
+  \item $R_k(i, j) > R_k(i - 1, j), \forall (i, j):$ uma mão com o mesmo
 número de terrenos e uma carta a menos deve sempre ser considerada pior
 do que a alternativa.
-  \item $R(h, i) > R(h - 1, i - 1), \forall (h, i):$ uma mão com o mesmo
+  \item $R_k(i, j) > R_k(i - 1, j - 1), \forall (i, j):$ uma mão com o mesmo
 número de não-terrenos e uma carta a menos deve sempre ser considerada
 pior do que a alternativa.
 \end{itemize}
 
-\begin{table}[!b]
+
+
+Dessa maneira, chegamos a uma fórmula geral, $R_k(i, j) = r(j) + \alpha
+i$, onde $r(j)$ assume valores pré-determinados de acordo com
+as desigualdades \ref{eq:idealhand}. Para $\alpha = 3$ e $r(i)$ determinado pela tabela
+\ref{tab:rj}, podemos atribuir as recompensas de acordo com a tabela
+\ref{tab:Rij}.
+
+\begin{table}[!h]
 \parbox{.45\linewidth}{
 \centering
 \vspace{0.2cm}
 \begin{tabular}{l|r}
-$i$  & $r(i)$ \\ \hline
+$j$  & $r(j)$ \\ \hline
 0 & -1000  \\
 1 & -4     \\
 2 & 0      \\
@@ -366,8 +389,8 @@ $i$  & $r(i)$ \\ \hline
 6 & -5     \\
 7 & -7
 \end{tabular}
-\caption{recompensas-base para $i = 0, \ldots, 7$}
-\label{tab:ri}
+\caption{recompensas-base para $j = 0, \ldots, 7$}
+\label{tab:rj}
 }
 \hfill
 \parbox{.45\linewidth}{
@@ -383,15 +406,10 @@ $i$  & $r(i)$ \\ \hline
 1 & -997  & -1 &    &    &    &    &    &    \\
 0 & -1000 &    &    &    &    &    &    &
 \end{tabular}
-\caption{recompensas de cada estado calculadas com $R(i,h) = r(i) + 3h$}
-\label{tab:Rhi}
+\caption{recompensas de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
+\label{tab:Rij}
 }
 \end{table}
-
-Dessa maneira, chegamos a uma fórmula geral, $R(h, i) = r(i) + \alpha
-h$, onde $r(i)$ assume valores pré-determinados de acordo com
-(\ref{eq:idealhand}). Para $\alpha = 3$ e $r(i)$ determinado pela tabela
-\ref{tab:ri}, podemos atribuir as recompensas de acordo com a tabela
-\ref{tab:Rhi}.
+Assim, temos um MDP de horizonte finito (sempre acabará na época 9) e podemos determinar uma política ótima para a determinação da mão inicial.
 
 \end{document}
