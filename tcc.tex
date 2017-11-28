@@ -237,8 +237,8 @@ de estados.
   \centering
   \label{mulligan}
   \input{mulligan.tex}
-  \caption{Espaço de estados de um problema de \textit{mulligan}. Cada
-nível $i$ representa o número de cartas na mão inicial do jogador.}
+  \caption{Representação visual de um problema de \textit{mulligan}. Cada
+nível $i$ representa o número de cartas na mão inicial do jogador. $K$ significa a decisão de manter a mão, $M$ realizar um \textit{mulligan}, $T$ deixar a carta no topo em um \textit{scry} e $B$ colocá-la no fundo.}
 \end{figure}
 
 Definimos vagamente uma mão jogável se esta contém tanto cartas que
@@ -251,15 +251,15 @@ vez que cada jogador compra
 uma carta por turno). Dessa maneira, em uma mão com $i$ cartas, temos
 $h+1$ possibilidades, cada uma com probabilidade
 \begin{equation} \label{eq:stateprob} \mathcal{P}_i(j) =
-\frac{\binom{T}{j}\binom{60 - T}{i - j}}{\binom{60}{i}}, \ \
-j = 0,\ldots, i, \end{equation} onde $t$ é o número de terrenos no deck
+\frac{\binom{J}{j}\binom{60 - J}{i - j}}{\binom{60}{i}}, \ \
+j = 0,\ldots, i, \end{equation} onde $J$ é o número de terrenos no deck
 e $j$ o
 número de terrenos
-na mão. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
+na mão. Note que $\sum_{j=0}^{i}P_i(j) = 1, \forall i$. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
 agente deve decidir entre realizar um \textit{mulligan}
 (denotado por $M$), que resultará em uma mão com $i-1$ cartas, sendo $i$
 terrenos com probabilidade
- \[ \mathcal{P}_{i - 1}(j) = \frac{\binom{T}{j}\binom{60 - T}{i - 1 -
+ \[ \mathcal{P}_{i - 1}(j) = \frac{\binom{J}{j}\binom{60 - J}{i - 1 -
 j}}{\binom{60}{i - 1}}, \ \  j = 0,\ldots, i - 1\]
  ou manter a mão (denotado por $K$), o que termina o problema, seguido
 (para $i < 7$) de uma ação \textit{scry}, que permite uma pequena
@@ -300,22 +300,22 @@ Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza qu
 
 O conjunto de estados $S$ é composto por um estado inicial $S_I$ (que representa o estado antes do jogador comprar a sua primeira mão inicial),
 um estado final absorvente $S_F$ (que representa o jogador após ter decidido manter uma mão) e os estados intermediários, dados por um par
-$(i, j), i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representam os estados onde o jogador tem $i$ cartas na mão, sendo que $j$ são terrenos). Assim, as ações $A(s)$ e as probabilidades $P(s'|s, A(s))$ de cada estado $s$ são definidas da seguinte maneira (com $s \rightarrow s'$ representando a transição de estados):
+$(i, j), i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representam os estados onde o jogador tem $i$ cartas na mão, sendo que $j$ são terrenos). Assim, as ações $A(s)$ e as probabilidades $P(s'|s, A(s))$ de cada estado $s$ são definidas da seguinte maneira:
 
 \begin{itemize}
-  \item $A(S_I) := \left\{ Start : S_I \rightarrow (7, j), j \in \{ 0, 1, \ldots, 7\} \right\} $;
+  \item $A(S_I) := \left\{ Start \right\};\  P((7, j) | S_I, Start) =  \mathcal{P}_7(j)$
   \\ \\
-   A partir de $S_I$ é possível tomar a ação \textit{Start}, que leva para o estado $(7, j)$ com probabilidade \\ $P\left((7, j) |S_I, Start\right) = \mathcal{P}_7(j)$, descrita na equação \ref{eq:stateprob}.
+   A partir de $S_I$ é possível tomar a ação \textit{Start}, que leva para o estado $(7, j)$ com probabilidade $\mathcal{P}_7(j)$, descrita na equação \ref{eq:stateprob}.
 
-  \item $A(i, j) := \begin{lrdcases} Mulligan : &(i, j) \rightarrow (i - 1, j'), \ \ i \in \{ 1, 2, \ldots, 7\}, j'\in \{ 0, 1, \ldots, i - 1\}, \\
-                                     Keep :     &(i, j) \rightarrow S_F, \hspace{1.9cm} i \in \{ 0, 1, \ldots, 7\}, j\in \{ 0, 1, \ldots, i\} \end{lrdcases};$
+  \item $A(i, j) := \begin{lrdcases} Mulligan, &i \in \{ 1, 2, \ldots, 7\}, j\in \{ 0, 1, \ldots, i\},\\
+                                     Keep, &i \in \{ 0, 1, \ldots, 7\}, j\in \{ 0, 1, \ldots, i\} \end{lrdcases}; \\ \vspace{.1cm}\\ P((i - 1, j')| (i, j), Mulligan) = \mathcal{P}_{i-1}(j'),\ \ j' \in \{0,1, \ldots, i-1\}, \\ P(S_F|(i, j), Keep) = 1$
    \\ \\
-   A partir de $(i, j)$, analogamente à ação $Start$, temos a ação $Mulligan$, que leva ao estado $(i -1, j')$ com probabilidade $P((i-1, j') | (i, j), Mulligan) = \mathcal{P}_{i-1}(j')$. Um detalhe importante é a impossibilidade de $Mulligan$ quando $i = 0$. A outra ação, $Keep$, leva ao estado final com probabilidade $P(S_F | (i, j), Keep) = 1.$
+   A partir de $(i, j)$, analogamente à ação $Start$, temos a ação $Mulligan$, que leva a algum estado $(i -1, j')$. Um detalhe importante é a impossibilidade de $Mulligan$ quando $i = 0$. A outra ação, $Keep$, leva ao estado final.
 
    \pagebreak
 
-   \item $A(S_F) := \left\{ Wait : S_F \rightarrow S_F \right\}$
-   \\ \\ No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de épocas de decisão (e constitua um problema de horizonte finito), com probabilidade $P(S_F | S_F, Wait) = 1$.
+   \item $A(S_F) := \left\{ Wait \right\};\ P(S_F | S_F, Wait = 1)$
+   \\ \\ No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de épocas de decisão (e constitua um problema de horizonte finito).
 \end{itemize}
 
 % Dada a estrutura bem conhecida do problema, o Aprendizado por Reforço é
