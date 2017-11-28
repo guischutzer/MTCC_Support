@@ -349,7 +349,7 @@ $(i, j), i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representa
 % \[P(h-1, i' | h, i) = P_{h-1}(i') = \frac{\binom{t}{i'}\binom{60 - t}{h
 % - 1 -
 % i'}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1.\]
-Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$ cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação $Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições tem recompensa nula. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes restrições:
+Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$ cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação $Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições tem recompensa $R_0 = 0, \forall R_0 \in R \backslash R_k$. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes restrições:
 \begin{itemize}
   \item Com $i= i_0$ fixo e $j\in\{0,1,\ldots,i_0\}$, as recompensas $R_k(i_0, j)$(se existem) devem seguir a
 seguinte relação:
@@ -396,7 +396,7 @@ $j$  & $r(j)$ \\ \hline
 \parbox{.45\linewidth}{
 \centering
 \begin{tabular}{l|rrrrrrrr}
- & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
 7 & -979  & 17 & 21 & 22 & 20 & 18 & 16 & 14 \\
 6 & -982  & 14 & 18 & 19 & 17 & 15 & 13 &    \\
 5 & -985  & 11 & 15 & 16 & 14 & 12 &    &    \\
