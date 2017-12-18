@@ -385,7 +385,7 @@ $j$  & $r(j)$ \\ \hline
 2 & 0      \\
 3 & 1      \\
 4 & -1     \\
-5 & -3     \\
+5 & -3    \\
 6 & -5     \\
 7 & -7
 \end{tabular}
@@ -411,5 +411,25 @@ $i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
 }
 \end{table}
 Assim, temos um MDP de horizonte finito (sempre acabará na época 9) e podemos determinar uma política ótima para a determinação da mão inicial.
+
+\pagebreak
+
+\section{O Jogo}
+
+\subsection{\textit{Magic} como um MDP}
+
+Um jogo de \textit{Magic: the Gathering} é um problema obviamente mais complexo do que o \textit{Mulligan}, mas podemos modelá-lo também como um MDP,
+(na maioria dos casos, de horizonte finito) tratando também das jogadas do oponente e da informação incompleta presente em sua mão. A seguir iremos
+falar da representação formal do jogo como um MDP e exemplificar algumas situações, uma vez que a quantidade possível de estados e ações é enorme e seria
+invíavel listá-los.
+
+Cada estado no jogo representa uma diferente configuração entre pontos de vida dos jogadores, quantidade de cartas na mão do oponente e nos dois baralhos, cartas
+na mão do agente, cartas nos cemitérios dos dois jogadores e por fim as cartas presentes no campo de batalha, bem como seus estados (virado, desvirado). É preciso
+que o estado represente também algumas outras informações, como quem é o jogador ativo, em qual fase o turno se encontra, quais criaturas entraram no campo de batalha
+neste turno (pois não poderão atacar) e quais criaturas estão atacando/bloqueando. Todas as possibilidades de estados formam o conjunto $S$ (dependendo das cartas
+que compuserem os baralhos, o conjunto $S$ pode ser infinito.)
+
+
+
 
 \end{document}
