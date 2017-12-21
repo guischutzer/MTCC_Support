@@ -428,11 +428,15 @@ Assim como detalhado em (\ref{ssec:mdp}) e feito com o problema do \textit{Mulli
 o problema como um MDP.
 \begin{itemize}
 \item $S$: Cada estado no jogo representa uma diferente configuração entre pontos de vida dos jogadores ($v_1$ e $v_2$), cartas na mão do agente (lista $H$), quantidade de cartas na mão do agente e do oponente ($h_1$ e $h_2$) e nos dois baralhos ($d_1$ e $d_2$),  cartas nos cemitérios dos dois jogadores (listas $G_1$ e $G_2$) e por fim as cartas presentes no campo de batalha (duas listas, $B_1$ e $B_2$), bem como seus estados (virado, desvirado).
+
+\vskip1ex
+
 É preciso que o estado represente também algumas outras informações, como quem é o jogador ativo (representado por $ac_1$, $ac_2$), em qual fase o turno se encontra, quais criaturas entraram no campo de batalha neste turno (pois não poderão atacar) e quais criaturas estão atacando/bloqueando. Todas as possibilidades de estados formam o conjunto $S$ (dependendo das cartas
 que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, então, temos
 \begin{equation}
   S := \begin{lrdcases} v_1, v_2 \in \mathbb{Z}, \\
                         act_1, act_2 \in \{0, 1\}, \\
+                        fase \in \{Principal, Combate\} \\
                         H \subseteq \Omega, \\
                         h_1, h_2 \in \mathbb{N}, \\
                         d_1, d_2 \in \mathbb{N}, \\
@@ -443,6 +447,31 @@ que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, ent�
 Onde $\Omega$ é o conjunto de todas as cartas e $\Omega^*$ é o conjunto das chamadas \textit{permanentes}, ou seja, cartas na mesa,
 cada uma com uma carta relacionada mais os atributos mencionados (virada ou desvirada, se pode ou não atacar e se está atacando
 ou bloqueando).
+\item $A$ : Para definir as ações possíveis, devemos pensar na estrutura de um turno: \textit{Primeira Fase Principal - Combate - Segunda Fase Principal}. As duas fases principais funcionam do mesmo jeito. Assim, examinaremos cada fase separadamente:
+
+\subsubsection{Fase Principal}
+
+Durante a Fase Principal é possível jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira (cada ação depende de uma carta na mão e da condição especificada):
+
+\begin{equation}
+  A^P := \begin{lrdcases} Land, \textrm{\hfill se o jogador não jogou terreno neste turno} \\
+                          Creature(c),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa} \\
+                          Sorcery(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos} \\
+                          CreatureWithEff(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
+                          Pass,\ \textrm{termina a fase.}
+         \end{lrdcases}
+\end{equation}
+
+Cada terreno só pode ser jogado se o jogador ainda não jogou um neste turno. Criaturas precisam do número de terrenos desvirados descrito em seu custo para serem jogadas. Feitiços, além do custo, precisam de alvos válidos para serem jogados (por exemplo, o feitiço ``Flame Slash'' lê, em português, ``Golpe Ardente causa 4 pontos de dano à criatura alvo.''. Dessa maneira, este feitiço só pode ser jogado se existe pelo menos uma criatura em jogo). Se uma criatura tem um efeito desencadeado quando entra em campo, por sua vez, esta criatura pode ser jogada mesmo se não existem alvos válidos para seu efeito (neste caso, o efeito simplesmente não acontece). Por fim, a ação $Pass$ termina a fase: se o jogador estiver na primeira fase principal, passa para o combate, se estiver na segunda, termina o turno. Toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$. Os exemplos a seguir demonstram ações válidas em estados diferentes e seus estados resultantes.
+
+\subsubsection{Combate}
+
+O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.
+
+\vskip1ex
+
+O conjunto $A^C_1$ de ações do jogador ativo no combate, portanto, é o conjunto da escolha de todas as combinações de criaturas atacantes (incluindo nenhuma). Dado que o jogador deve escolher alguma combinação, \begin{equation}|A^C_1| = \sum\limits_{i = 0}^{N}\binom{N}{i},\end{equation} onde $N$ é o número de criaturas que podem atacar na mesa do jogador ativo. 
+
 
 \end{itemize}
 
