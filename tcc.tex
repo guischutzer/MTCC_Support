@@ -6,6 +6,7 @@
 \usepackage{wrapfig}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{diagbox, eqparbox, hhline}
 \usepackage{mathtools}
@@ -24,6 +25,9 @@
   {\lbrace}
   {\rbrace}
 \makeatother
+
+\renewcommand{\le}{\leqslant}
+\renewcommand{\ge}{\geqslant}
 
 % \usepackage[executivepaper,margin=1in]{geometry}
 % \usepackage[charter]{mathdesign}
@@ -444,39 +448,56 @@ que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, ent�
                         B_1, B_2 \subseteq \Omega^*
                       \end{lrdcases},
 \end{equation}
-Onde $\Omega$ é o conjunto de todas as cartas e $\Omega^*$ é o conjunto das chamadas \textit{permanentes}, ou seja, cartas na mesa,
+onde $\Omega$ é o conjunto de todas as cartas e $\Omega^*$ é o conjunto das chamadas \textit{permanentes}, ou seja, cartas na mesa,
 cada uma com uma carta relacionada mais os atributos mencionados (virada ou desvirada, se pode ou não atacar e se está atacando
 ou bloqueando).
 \item $A$ : Para definir as ações possíveis, devemos pensar na estrutura de um turno: \textit{Primeira Fase Principal - Combate - Segunda Fase Principal}. As duas fases principais funcionam do mesmo jeito. Assim, examinaremos cada fase separadamente:
 
 \subsubsection{Fase Principal}
 
-Durante a Fase Principal é possível jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira (cada ação depende de uma carta na mão e da condição especificada):
+Durante a Fase Principal o jogador ativo pode jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira, onde cada ação significa jogar uma carta (fora a ação de passe) e pode ser atribuída aos seguintes subconjuntos, cada um com condições próprias:
 
-\begin{equation}
-  A^P := \begin{lrdcases} Land, \textrm{\hfill se o jogador não jogou terreno neste turno} \\
-                          Creature(c),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa} \\
-                          Sorcery(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos} \\
-                          CreatureWithEff(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
-                          Pass,\ \textrm{termina a fase.}
+\begin{equation*}
+  A^P := \begin{lrdcases} Land, \hspace{2.58cm}  \textrm{\hfill se o jogador não jogou terreno neste turno}, \\
+                          Creature(c),\hspace{1.53cm} \textrm{se o jogador possui $c$ terrenos desvirados na mesa}, \\
+                          Sorcery(c, T),\hspace{1.33cm} \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
+                          CreatWithEff(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
+                          Pass,\hspace{2.6cm} \textrm{termina a fase (sempre possível).}
          \end{lrdcases}
-\end{equation}
+\end{equation*}
 
 Cada terreno só pode ser jogado se o jogador ainda não jogou um neste turno. Criaturas precisam do número de terrenos desvirados descrito em seu custo para serem jogadas. Feitiços, além do custo, precisam de alvos válidos para serem jogados (por exemplo, o feitiço ``Flame Slash'' lê, em português, ``Golpe Ardente causa 4 pontos de dano à criatura alvo.''. Dessa maneira, este feitiço só pode ser jogado se existe pelo menos uma criatura em jogo). Se uma criatura tem um efeito desencadeado quando entra em campo, por sua vez, esta criatura pode ser jogada mesmo se não existem alvos válidos para seu efeito (neste caso, o efeito simplesmente não acontece). Por fim, a ação $Pass$ termina a fase: se o jogador estiver na primeira fase principal, passa para o combate, se estiver na segunda, termina o turno. Toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$. Os exemplos a seguir demonstram ações válidas em estados diferentes e seus estados resultantes.
 
+\vskip1ex
+
 \subsubsection{Combate}
 
-O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.
+O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.\footnote{Nesta seção não trataremos das \textit{habilidades de criatura} relevantes para o combate, de maneira a simplificar as explicações. Trataremos melhor disso mais a frente.}
 
 \vskip1ex
 
-O conjunto $A^C_1$ de ações do jogador ativo no combate, portanto, é o conjunto da escolha de todas as combinações de criaturas atacantes (incluindo nenhuma). Dado que o jogador deve escolher alguma combinação, \begin{equation}|A^C_1| = \sum\limits_{i = 0}^{N}\binom{N}{i},\end{equation} onde $N$ é o número de criaturas que podem atacar na mesa do jogador ativo. 
+O conjunto $A^C_1$ de ações do jogador ativo no combate, portanto, é o conjunto de escolhas de todas as combinações de criaturas atacantes (incluindo nenhuma). Dado que o jogador deve escolher alguma combinação, \begin{equation}|A^C_1| = \sum\limits_{i = 0}^{N}\binom{N}{i} = 2^N,\end{equation} onde $N$ é o número de criaturas que podem atacar na mesa do jogador ativo.
 
+\vskip1ex
+
+O conjunto $A^C_2$ de ações do jogador não-ativo durante o combate, por sua vez, é o conjunto de escolhas de todas as combinações de criaturas bloqueadoras e aquelas que estas bloqueiam. Como cada criatura desvirada pode bloquear até uma criatura atacante, temos que \begin{equation} |A^C_2| = (N' + 1)^M \le (N + 1)^M, \end{equation} onde $N'$ é o número de criaturas atacantes e $M$ o número de criaturas aptas a bloquearem.
+
+\vskip1ex
+
+Assim como na fase principal, cada ação $a \in \left\{A^C_1, A^C_2\right\}$ no estado $s$ tomada tem probabilidade $P(s'| s, a) = 1$ para o estado $s'$ sucessor previsto pelas regras.
+
+\item $R$ : Por fim, precisamos definir as recompensas por sair de cada estado. Uma boa definição inicial leva em conta os pontos de vida do agente e do oponente, assim como as ``presenças de campo'', termo vago que dá a ideia de progresso no jogo. Escolhemos medir a ``presença de campo'' de cada jogador com o dano que suas criaturas podem causar, ou seja, a soma do poder de todas as suas criaturas. Assim, dados pontos de vida $v_1, v_2$ respectivos do agente e seu oponente e seus conjuntos de permanentes $B_1, B_2$, temos
+
+\begin{equation}
+  R(s'|s, a) = \begin{cases}
+              -\gamma, &\textrm{ caso $v_1 \le 0$,} \\
+              +\gamma, &\textrm{ caso $v_2 \le 0$,} \\
+              v_1 + v_2 + \sum\limits_{e \in B_1} pow(e) - \sum\limits_{e \in B_2} pow(e), &\textrm{ cc.}
+            \end{cases},
+\end{equation}
+onde $\gamma$ deve ser uma recompensa para o agente suficientemente alta para incentivar a derrota do oponente e evitar a própria. A função $pow(e)$ retorna o poder da permanente $e$.
 
 \end{itemize}
-
-\vskip1ex
-
 
 
 
