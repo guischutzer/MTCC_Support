@@ -10,6 +10,7 @@
 \usepackage{amsfonts}
 \usepackage{diagbox, eqparbox, hhline}
 \usepackage{mathtools}
+% \usepackage{caption}
 
 \makeatletter
 \newcases{lrdcases}
@@ -101,8 +102,9 @@ na mão, que podem representar feitiços, criaturas ou terrenos (existem
 outros tipos de \textit{cards}, mas para nossa implementação vamos focar
 nesses três). Feitiços são \textit{cards} que têm um efeito que acontece
 no momento em que são jogados e então são colocados no cemitério (como é
-chamada a pilha de descarte no jogo).\\
+chamada a pilha de descarte no jogo).
 
+\vskip1ex
 
 Por exemplo, o feitiço Divinação tem um efeito simples: "Compre dois
 cards". O jogador que joga este card pega os dois cards do topo de seu
@@ -137,27 +139,32 @@ causado em combate), resistência (quantidade de dano necessária para ser
 destruída) e muitas vezes habilidades que afetam o andamento do combate
 ou que fazem algum efeito no momento em que são jogadas.
 
+\vskip1ex
+
 Por exemplo, Anjo da Misericórdia tem a habilidade de Voar (que limita
 as interações do oponente durante o combate) e concede a seu controlador
 3 pontos de vida ao entrar no campo de batalha. Além disso, seu poder e
 resistência são 3 e 3, respectivamente, conforme indicado na caixa no
 canto inferior direito.
 
+\vskip1ex
+
 \textbf{Terrenos} são a fonte de \textit{mana}, que é o recurso
 utilizado para pagar por criaturas e feitiços. O custo de \textit{mana}
 dos \textit{cards} que não são terreno está indicado no canto superior
 direito do card (por exemplo, para jogar Divinação é necessário usar
-terrenos, sendo que um deles deve ser necessariamente uma Ilha, como na
+terrenos, sendo que um deles deve ser necessariamente uma Ilha, como na figura
 \ref{ilha}). Terrenos são, portanto, um dos tipos de \textit{cards}
 mais importantes, pois sem eles não há maneira (normalmente) de jogar
 seus outros \textit{cards}. A mecânica associada ao uso de recursos é
-\textbf{virar} (em inglês, \textit{tap}): para conjurar
+\textbf{virar} (em inglês, \textit{tap}): para jogar uma carta com custo,
+é necessário virar o número de terrenos equivalente ao seu custo.
 
 \begin{wrapfigure}{R}{5cm}
     \centering
     \includegraphics[width=0.25\textwidth]{picstcc/island.jpg}
-    \label{ilha}
     \caption{Ilha (Terreno)}
+    \label{ilha}
 \end{wrapfigure}
 
 Cada ``cor'' de \textit{mana} tem um tipo de terreno associado: assim
@@ -173,10 +180,15 @@ aspectos de cada cor são refletidos mecanicamente nas cartas e,
 consequentemente, acabam muitas vezes refletindo, em nível mais
 abstrato, nas estratégias associadas à montagem e uso dos
 \textit{decks}.
+
+\vskip1ex
+
 Por exemplo: comprar \textit{cards} representa acumular conhecimento,
 portanto Divinação é um feitiço que representa bem sua cor.
 Entraremos mais a fundo no assunto nas seções futuras, na
 apresentação dos decks usados para teste e jogo.
+
+\vskip1ex
 
 No começo do jogo é decidido aleatoriamente quem será o jogador inicial,
 e então os dois jogadores compram uma mão inicial de sete cartas.
@@ -188,6 +200,8 @@ até que decida manter a mão. Uma vez que os dois jogadores tiverem
 escolhido uma mão inicial para manter, cada jogador que realizou pelo
 menos um mulligan
 olha a carta do topo de seu deck e decide se quer colocá-la no fundo.
+
+\vskip1ex
 
 O jogo então começa, com os jogadores alternando entre turnos, onde o
 jogador que ``controla o turno'' é chamado de \textit{jogador ativo},
@@ -232,6 +246,9 @@ nenhuma influência
 direta sobre as ações do agente, que deve se concentrar em obter uma
 \textbf{mão inicial} que possibilite jogadas nos primeiros turnos do
 jogo.
+
+\vskip1ex
+
 A figura \ref{mulligan} representa as escolhas que o jogador poderá
 fazer para determiná-la, com cada conjunto de cartas representando um
 conjunto
@@ -323,37 +340,6 @@ $(i, j), i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representa
    \\ \\ No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de épocas de decisão (e constitua um problema de horizonte finito).
 \end{itemize}
 
-% Dada a estrutura bem conhecida do problema, o Aprendizado por Reforço é
-% uma técnica que pode ser aplicada
-% para que o agente determine um comportamento (política) para alcançar
-% uma mão ``jogável'' para uma partida de \textit{Magic}.
-%
-% O problema pode ser representado como uma série de estados, cada um
-% representando uma configuração de quantidade de cartas na mão
-% e quantidade de terrenos presentes entre essas cartas. Em cada mão, o
-% agente pode decidir ou manter a mão e ``resgatar''
-% os pontos que aquela configuração representa, ou realizar um
-% \textit{mulligan}, que resultará em uma mão com uma carta a menos e
-% distribuição de terrenos descrita na subseção anterior. Assim, depois de
-% várias iterações, o agente irá encontrar uma política $\pi$
-% que maximize a utilidade total $U(\pi) = \sum U^\pi(s)$, onde $U^\pi(s)$
-% é a função-utilidade do estado $s$. Usando a equação de
-% Bellman, temos \[ U^\pi(s) = R(s) + \gamma\sum\limits_{s'}P(s' | s,
-% \pi(s))U^\pi(s'),\] ou seja, a utilidade de cada estado é a recompensa
-% $R(s)$
-% do estado somada à soma da utilidade de cada estado sucessor $s'$ vezes
-% a probabilidade de chegar em $s'$ a partir de $s$ e da política adotada
-% em $s$ (esta soma é multiplicada por um fator de desconto $\gamma$).
-% Assim, temos que cada estado pode ser representado pelo par $(h, i)$ e a
-% função de Bellman, reescrita:
-% \begin{equation} \label{eq:mullbellman}U^\pi(h, i) = R(h, i) + \gamma
-% \sum\limits_{i' = 0}^{h - 1}P(h-1, i' | h , i )U^\pi(h - 1,
-% i').\end{equation}
-% A probabilidade de cada estado sucessor $(h- 1, i')$ é dada pela equação
-% \ref{eq:stateprob}:
-% \[P(h-1, i' | h, i) = P_{h-1}(i') = \frac{\binom{t}{i'}\binom{60 - t}{h
-% - 1 -
-% i'}}{\binom{60}{h - 1}}, \ \  i = 0,\ldots, h - 1.\]
 Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$ cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação $Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições tem recompensa $R_0 = 0, \forall R_0 \in R \backslash R_k$. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes restrições:
 \begin{itemize}
   \item Com $i= i_0$ fixo e $j\in\{0,1,\ldots,i_0\}$, as recompensas $R_k(i_0, j)$(se existem) devem seguir a
@@ -422,7 +408,7 @@ Assim, temos um MDP de horizonte finito (sempre acabará na época 9) e podemos 
 \section{O Jogo}
 
 Um jogo de \textit{Magic: the Gathering} é um problema obviamente mais complexo do que o \textit{Mulligan}, mas podemos modelá-lo também como um MDP,
-(na maioria dos casos\footnote{Um jogo normal de \textit{Magic}, de forma alguma, tem um horizonte finito, pois há
+(na maioria dos casos\footnote{Um jogo normal de \textit{Magic} não tem um horizonte finito, pois há
 inúmeras maneiras de retardar indefinidamente o fim do baralho (como voltar cartas da pilha de descarte para o baralho). Neste trabalho, a versão
 simplificada do jogo com certeza terminará, no máximo, em 60 turnos, quando algum baralho acabar.}, de horizonte finito) tratando também das jogadas do oponente e da informação incompleta presente em sua mão.
 
@@ -470,6 +456,23 @@ Cada terreno só pode ser jogado se o jogador ainda não jogou um neste turno. C
 
 \vskip1ex
 
+\subsubsection{Exemplo - Fase Principal}
+
+\begin{figure}[h!]
+  \centering
+  \caption{O estado $s_1 = \left\{ v_1 = v_2 = 10, h_1 = 4, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}.$ $B_1$ e $H$ são os seguintes:}
+  \includegraphics[width=0.2\textwidth]{picstcc/bf1.png}
+  \vskip1ex
+  O campo de batalha $B_1$ consiste apenas em 4 terrenos (Montanhas).
+
+  \vspace{.1cm}
+
+  \includegraphics[width=0.7\textwidth]{picstcc/hand1.png}
+  \vskip1ex
+  A mão $H$ do agente consiste em um terreno (Montanha), um feitiço ``Volcanic Hammer'', um feitiço ``Flame Slash'' e uma criatura ``Pensive Minotaur''.
+
+\end{figure}
+
 \subsubsection{Combate}
 
 O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.\footnote{Nesta seção não trataremos das \textit{habilidades de criatura} relevantes para o combate, de maneira a simplificar as explicações. Trataremos melhor disso mais a frente.}
@@ -498,9 +501,6 @@ Assim como na fase principal, cada ação $a \in \left\{A^C_1, A^C_2\right\}$ no
 onde $\gamma$ deve ser uma recompensa para o agente suficientemente alta para incentivar a derrota do oponente e evitar a própria. A função $pow(e)$ retorna o poder da permanente $e$.
 
 \end{itemize}
-
-
-
 
 
 \end{document}
