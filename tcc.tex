@@ -96,46 +96,52 @@ jogo).
 \chapter{Introdução}
 
 Inteligência artificial é um campo da ciência da computação que estuda
-maneiras de fazer com que uma máquina tome ações maximizando suas chances
-de obter sucesso em alguma tarefa específica, levando em consideração
-elementos relevantes à essa tarefa. Atualmente há muita aplicação de
-inteligência artificial na construção de agentes capazes de jogarem bem
-jogos estratégicos, como Go e Xadrez. Decidimos então estudar inteligência
-artificial para a realização deste trabalho com a ideia de construir um
-agente que jogasse um jogo de estratégia um pouco menos usual, pelo qual
-temos muito carinho: \textbf{Magic: The Gathering}. Já existem versões de
-\textit{Magic} para computadores e videogames, com implementações baseadas
-em inteligência artificial para que a máquina faça o papel do oponente,
-entretanto, devido à complexidade do jogo e quantidade de ações possíveis,
-os agentes são previsíveis e, por se tratar de um jogo com elementos como
-blefe e
+"agentes inteligentes", que de certa forma percebem o ambiente à sua volta
+e tomam ações tendo como objetivo maximizar a chance de sucesso de alguma
+tarefa específica. Uma utilização muito comum nos dias de hoje é a de
+inteligência artificial com o objetivo de criar um agente capaz de competir
+com humanos em jogos com alto nível de estratégia, como Xadrez e Go.
+Decidimos então estudar inteligência artificial para a realização deste
+trabalho com a ideia de modelar um outro jogo de estratégia,
+\textbf{Magic: The Gathering}.
 
-O campo de inteligência artificial tem sido cada vez mais estudado e tem
-diversas aplicações,
+\textit{Magic} foi lançado em 1993, introduzindo o conceito de trading card
+game. Com o sucesso do jogo e popularização dos jogos digitais, eventualmente
+nasceram versões digitais do jogo para computadores e videogames, e com isso
+nasceu a necessidade de agentes que jogassem contra os jogadores. Atualmente
+há várias versões digitais de Magic, mas nenhuma tem uma inteligência artificial
+boa o suficiente para se provar desafiadora contra jogadores experientes, uma vez
+que a cada ação há uma grande quantidade de ações possíveis e elementos como
+blefe envolvidos. Nossa intenção é entender a complexidade da representação do
+jogo e criar uma plataforma para jogar Magic que possibilite a implementação de
+um agente de inteligência artificial.
 
-\section{Regras básicas}
+Na próxima seção iremos introduzir alguns conceitos e regras básicas do jogo,
+de modo a possibilitar a familiarização do leitor com \textbf{Magic}, facilitando
+a compreensão do restante do trabalho.
 
-Um jogo usual de \textit{Magic: the Gathering} conta com dois jogadores
-munidos de um baralho de 60 \textit{cards}, ambos começando com 20
-pontos de vida, com o objetivo de reduzir o total de pontos de vida do
-oponente a 0. Para tanto, é preciso usar os \textit{cards} disponíveis
-na mão, que podem representar feitiços, criaturas ou terrenos (existem
-outros tipos de \textit{cards}, mas para nossa implementação vamos focar
-nesses três). Feitiços são \textit{cards} que têm um efeito que acontece
-no momento em que são jogados e então são colocados no cemitério (como é
-chamada a pilha de descarte no jogo).
+\section{Conceitos básicos}
+
+Um jogo usual de \textit{Magic: the Gathering} conta com dois jogadores munidos
+de um baralho de 60 cartas cada, ambos começando com 20 pontos de vida, sendo
+que o objetivo é reduzir o total de pontos de vida do oponente a 0. Para tanto,
+é preciso usar as cartas disponíveis na mão, que podem representar feitiços,
+criaturas ou terrenos (existem outros tipos de cartas, mas para nossa implementação
+iremos focar nesses três). Feitiços são cartas que têm um efeito que acontece
+no momento em que são jogadas e então são colocadas no cemitério (como é chamada
+a pilha de descarte no jogo).
 
 \vskip1ex
 
 Por exemplo, o feitiço Divinação tem um efeito simples: "Compre dois
-cards". O jogador que joga este card pega os dois cards do topo de seu
-baralho e os coloca em sua mão, aumentando o leque de possibilidades.
-Assim, \textbf{feitiços} podem alterar o estado do jogo de diversas
-maneiras (como fazer com que os jogadores comprem ou descartem cards,
-alterar o total de pontos de vida de um jogador ou destruir uma
-criatura) e são a principal forma de interagir com o oponente ou
-desenvolver o seu lado do campo de batalha (como é chamada a zona em que
-ficam as criaturas e terrenos).
+cards" (na versão em português do jogo, as cartas são referenciadas pela palavra
+em inglês \textit{cards}). O jogador que joga esta carta pega as duas cartas do
+topo de seu baralho e as coloca em sua mão, aumentando o leque de possibilidades.
+Assim, \textbf{feitiços} podem alterar o estado do jogo de diversas maneiras
+(como fazer com que os jogadores comprem ou descartem cartas, alterar o total de
+pontos de vida de um jogador ou destruir uma criatura) e são a principal forma
+de interagir com o oponente ou desenvolver o seu lado do campo de batalha (como
+é chamada a zona do jogo em que ficam as criaturas e terrenos).
 
 \begin{figure}[!h]
     \centering
@@ -153,8 +159,8 @@ ficam as criaturas e terrenos).
     \end{minipage}
 \end{figure}
 
-\textbf{Criaturas} são cards permanentes (uma vez jogados eles
-permanecem no campo de batalha até que sejam destruídos por algum
+\textbf{Criaturas} são cartas permanentes (uma vez jogadas elas
+permanecem no campo de batalha até que sejam destruídas por algum
 feitiço ou durante o combate) que possuem poder (quantidade de dano
 causado em combate), resistência (quantidade de dano necessária para ser
 destruída) e muitas vezes habilidades que afetam o andamento do combate
@@ -170,16 +176,18 @@ canto inferior direito.
 
 \vskip1ex
 
-\textbf{Terrenos} são a fonte de \textit{mana}, que é o recurso
-utilizado para pagar por criaturas e feitiços. O custo de \textit{mana}
-dos \textit{cards} que não são terreno está indicado no canto superior
-direito do card (por exemplo, para jogar Divinação é necessário usar
-terrenos, sendo que um deles deve ser necessariamente uma Ilha, como na figura
-\ref{ilha}). Terrenos são, portanto, um dos tipos de \textit{cards}
-mais importantes, pois sem eles não há maneira (normalmente) de jogar
-seus outros \textit{cards}. A mecânica associada ao uso de recursos é
-\textbf{virar} (em inglês, \textit{tap}): para jogar uma carta com custo,
-é necessário virar o número de terrenos equivalente ao seu custo.
+\textbf{Terrenos} são a fonte de \textit{mana}, que é o recurso utilizado para
+pagar por criaturas e feitiços. O custo de \textit{mana} das cartas que não são
+terreno está indicado no canto superior direito da carta (por exemplo, para
+jogar Divinação é necessário usar três terrenos, sendo que um deles deve ser
+necessariamente uma Ilha, como na figura \ref{ilha}). Terrenos são, portanto, um
+dos tipos de cartas mais importantes, pois sem eles não há maneira (normalmente)
+de jogar suas outras cartas. Uma vez utilizado, um terreno se torna \textbf{virado}
+(em inglês, \textit{tapped}): para jogar uma carta que não seja terreno, é
+necessário virar o número de terrenos equivalente ao seu custo. Uma vez virado,
+o terreno permanece virado até o começo do próximo turno de seu controlador,
+quando poderão ser utilizados novamente. Desta maneira, são necessários quatro
+terrenos para se jogar duas cartas custando duas manas cada durante o mesmo turno.
 
 \begin{wrapfigure}{R}{5cm}
     \centering
@@ -188,46 +196,38 @@ seus outros \textit{cards}. A mecânica associada ao uso de recursos é
     \label{ilha}
 \end{wrapfigure}
 
-Cada ``cor'' de \textit{mana} tem um tipo de terreno associado: assim
-como azul (Ilha), temos o branco (Planície), verde (Floresta),
-vermelho (Montanha) e preto (Pântano). O jogo inclusive conta com uma
-espécie de ``diagrama filosófico'' chamado \textit{Color Pie}
-(do inglês, ``torta das cores'', pois se trata de um gráfico circular)
-associando cada cor a valores e traços de personalidade.
-A título de curiosidade, alguns dos principais aspectos de cada cor são:
-conhecimento, para o azul; ordem, em branco; instinto, no verde;
-impulso, para o vermelho e amoralidade, característica do preto. Os
-aspectos de cada cor são refletidos mecanicamente nas cartas e,
-consequentemente, acabam muitas vezes refletindo, em nível mais
-abstrato, nas estratégias associadas à montagem e uso dos
-\textit{decks}.
+Uma parte importante do jogo é o sistema de \textit{cores}. As cartas do jogo
+são divididas entre cinco cores de mana, com um terreno associado que produz
+mana desta cor: Branco (Planície), Azul (Ilha), Preto (Pântano), Vermelho
+(Montanha) e Verde (Floresta). Cada cor tem mecânicas de jogo únicas, fazendo
+com que jogadores usem mais de uma cor de mana em seus baralhos para ter acesso
+a tipos de efeitos diferentes, ao custo de utilizar terrenos variados, criando
+a possibilidade de não ter o terreno certo para jogar a carta desejada.
+
+Para este trabalho utilizaremos apenas baralhos de uma única cor.
 
 \vskip1ex
 
-Por exemplo: comprar \textit{cards} representa acumular conhecimento,
-portanto Divinação é um feitiço que representa bem sua cor.
-Entraremos mais a fundo no assunto nas seções futuras, na
-apresentação dos decks usados para teste e jogo.
-
-\vskip1ex
+\section{O jogo}
 
 No começo do jogo é decidido aleatoriamente quem será o jogador inicial,
 e então os dois jogadores compram uma mão inicial de sete cartas.
-Antes do jogo propriamente dito começar, os jogadores tomam as decisões
-de \textit{mulligan}, um processo onde cada jogador pode decidir
-se aceita a sua mão inicial ou se quer embaralhar de volta suas cartas
-no deck e comprar uma nova mão com uma carta a menos, repetir o processo
-até que decida manter a mão. Uma vez que os dois jogadores tiverem
-escolhido uma mão inicial para manter, cada jogador que realizou pelo
-menos um mulligan
-olha a carta do topo de seu deck e decide se quer colocá-la no fundo.
+Antes do jogo propriamente dito começar, os jogadores podem optar por tomar uma
+ação chamada \textit{mulligan}, que consiste em rejeitar a mão inicial, embaralhá-la
+de volta com o restante dos cards e comprar uma nova mão inicial, com uma carta
+a menos. Pode-se então repetir o processo até que cada jogador esteja satisfeito
+com a mão inicial ou até o jogador realizar um mulligan com apenas uma carta na
+mão (resultando em uma mão de zero cartas, onde não há mais a possibilidade de
+realizar mulligan). Uma vez que os dois jogadores tiverem escolhido manter uma
+mão inicial, cada jogador que realizou pelo menos um mulligan olha a carta do
+topo de seu \textit{deck} (como é chamado o baralho) e decide se quer colocá-la
+no fundo.
 
 \vskip1ex
 
 O jogo então começa, com os jogadores alternando entre turnos, onde o
 jogador que ``controla o turno'' é chamado de \textit{jogador ativo},
-com a seguinte estrutura, simplificada (iremos entrar em maiores
-detalhes nas próximas seções):
+com a seguinte estrutura, simplificada:
 
 \begin{itemize}
     \item\textbf{Início do turno}: Permanentes do jogador ativo são
@@ -249,15 +249,17 @@ geralmente quando algum jogador chega a 0 pontos de vida,
 mas também pode acontecer de outras maneiras como, por exemplo, se o
 baralho de um jogador acabar.
 
+\chapter{Implementação da Plataforma}
+
 \chapter{Modelagem}
 
 Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de
-Inteligência Artificial. A estrutura de um turno, como descrita
- no capítulo anterior, será repetida algumas vezes até o jogo acabar,
-porém é necessário determinar a mão inicial de cada jogador e, por isso,
- trataremos este problema em separado.
+Inteligência Artificial.
 
 \section{\textit{Mulligan}}
+A estrutura de um turno, como descrita no primeiro capítulo, será repetida
+algumas vezes até o jogo acabar, porém é necessário determinar a mão inicial de
+cada jogador e, por isso, trataremos este problema em separado.
 Baseando-se na experiência própria, a estrutura do problema do
 \textbf{\textit{mulligan}} é notavelmente diferente do resto de um jogo
 de \textit{Magic}.
@@ -541,6 +543,8 @@ Vamos examinar agora as recompensas no exemplo de combate tomando como agente o 
 Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável para o jogador defensor do que os outros.
 
 \end{itemize}
+
+\chapter{Resultados}
 
 
 \end{document}
