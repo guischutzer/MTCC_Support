@@ -249,8 +249,6 @@ geralmente quando algum jogador chega a 0 pontos de vida,
 mas também pode acontecer de outras maneiras como, por exemplo, se o
 baralho de um jogador acabar.
 
-\chapter{Implementação da Plataforma}
-
 \chapter{Modelagem}
 
 Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de
@@ -319,25 +317,60 @@ carta.
 \subsection{Processo De decisão de Markov}
 \label{ssec:mdp}
 
-Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP}) são uma forma de representar alguns problemas de decisão sequenciais. Um problema representado por um MDP consiste em
-uma tupla $(S, A, P, R)$ onde
-\begin{itemize}
-  \item $S$ é o conjunto de estados;
-  \item $A$ é o conjunto de ações que podem ser tomadas a cada ``época de decisão'' (sendo que nem toda ação pode ser realizada a partir de qualquer estado);
-  \item $P: S \times A \times S \mapsto [0,1]$ é uma função que dá a probabilidade do sistema passar do estado $s \in S$ para o estado $s' \in S$
-  realizando a ação $a \in A$ ($P(s'|s, a)$);
-  \item $R: S \times A \mapsto \mathbb{R}$ é uma função que dá a recompensa por tomar uma decisão $a \in A$ quando o processo está no estado $s \in S$.
-\end{itemize}
+Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP})
+são uma forma de representar alguns problemas de decisão sequenciais.
 
-Além disso, há a definição de \textbf{horizonte}, que é o número de épocas de decisão disponíveis para a tomada de decisão. Um horizonte pode ser finito (caso haja
-um número fixo de decisões a serem tomadas), infinito (quando a tomada de decisão nunca acaba) ou indefinido (semelhante ao infinito mas com a possibilidade de parada).
-O caso que iremos ver é será representado por um \textbf{MDP de horizonte finito}.
+Para descrever um MDP, usaremos um exemplo com o intuito de tornar a explicação mais didática.
+Imagine que um gerente de um galpão tem como objetivo maximizar o lucro esperado para o próximo
+ano. A cada mês, o gerente observa quanto há em estoque de cada produto e decide quanto irá pedir
+ao distribuir daquele produto para o próximo mês. A demanda mensal de cada produto é desconhecida,
+mas segue uma distribuição de probabilidade conhecida. Se o gerente pedir produto demais, terá
+custos para manter o estoque, e se pedir de menos, estará perdendo vendas por falta de inventário.
+Suponha que o galpão tem capacidade para armazenar $M$ unidades de produto e que os custos e a
+distribuição da demanda não muda de mês para mês.
 
-Uma \textbf{política} para um MDP é o conjunto de todas as regras de decisão $d: S \mapsto A$ que determinam, a partir de cada dado estado, qual decisão deve ser tomada
-(é possível considerar também a época do sistema, mas para o caso que será analisado essa informação não faz diferença). Desejamos encontrar uma política para o
-nosso MDP que seja ótima, ou seja, que nos leve à maior recompensa esperada possível.
+O primeiro conceito de MDP que iremos introduzir é o de \textbf{época de decisão}. Uma época de
+decisão é um momento onde uma decisão é tomada. No nosso exemplo, cada época de decisão ocorre
+no começo de um mês, quando o gerente deve decidir quanto pedir de cada produto. Chamamos a
+quantidade de épocas de decisão de um MDP de \textbf{horizonte}, que pode ser finito ou infinito.
+No exemplo, o horizonte é finito de tamanho $12$, um para cada mês do ano no qual o gerente deseja
+maximizar seus lucros.
 
-Na próxima subseção iremos modelar o problema de decidir a mão inicial como um MDP de horizonte finito.
+Um MDP pode ser representado por uma tupla $(S, A, P, R)$. $S$ é o conjunto de \textbf{estados}
+$s_t$ do problema, onde um estado é uma configuração do problema em uma determinada época de
+decisão $t$. No exemplo, cada estado representa o espaço disponível no galpão, que pode variar
+de $0$ a $M$.
+
+$A$ é o conjunto de \textbf{ações} $a_t$, onde $t$ é a época de decisão. No exemplo, uma ação
+pode ser comprar de $0$ a $M-s_t$ unidades no mês.
+
+Para falar sobre os outros elementos da tupla do MDP, precisamos entrar em detalhes sobre os
+custos para pedir o produto ao distribuidor e manter o produto em estoque. Um mês começa com $s_t$
+unidades em estoque, e são encomendadas mais $a_t$ unidades, o que gera um custo $c_pedido$ dado
+pela função $c_p(a_t)$. Vamos assumir que as unidades sejam pedidas no começo do mês e sejam vendidas
+no final do mês. Há, portanto, um custo $c_estoque$ para manter o produto em estoque dado pela função
+$c_e(s_t + a_t)$. A probabilidade de que a demanda $D_t$ no mês seja de $j$ unidades é $p_j, j = 0,1,2\ldots$.
+Quando o final do mês chegar, o número de unidade vendidas será $x_t = min{D_t, s_t + a_j}$, e o lucro
+será dado pela função $l(x_t)$. O número de unidades que começarão o próximo mês em estoque será
+$s_{t+1}= s_t + a_t - x_t$.
+
+$RS: S \times A \mapsto \mathbb{R}$ é a função que dá a \textbf{recompensa} esperada por tomar a ação $a_t$
+quando o processo está no estado estado $s_t$. No exemplo, $r_t(s_t, a_t) = E[l(x_t)] - c_estoque - c_pedido$.
+
+$P: S \times A \times S \mapsto [0,1]$ é uma função que dá a \textbf{probabilidade} do sistema passar de um estado
+para outro, dado uma determinada ação. No nosso exemplo:
+
+\begin{equation*}
+  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j} &j\le s + a \\
+                                                    \sum\limits_{i=s+a}^\infty &j=0 \\
+                                                    0 & j >s+a\end{cases}
+\end{equation*}
+
+Uma vez que temos o nosso MDP definido, queremos chegar em uma \textbf{política}, que é o nome dado
+ao conjunto das \textbf{regras de decisão}. Uma regra de decisão $d_t(s)$ é uma função $d: S \mapsto A$
+que que, dado um estado $s$ na época de decisão $t$, retorna uma ação $a$ que deve ser tomada a partir
+daquele estado de modo a maximizar o ganho final. A seguir veremos uma representação de Magic como MDP,
+e em seguida como extraímos a política para o processo.
 
 \subsection{Mulligan como um MDP}
 
@@ -425,6 +458,13 @@ $i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
 }
 \end{table}
 Assim, temos um MDP de horizonte finito (sempre acabará na época 9) e podemos determinar uma política ótima para a determinação da mão inicial.
+
+EXTRAÇÃO DA POLÍTICA AQUI
+A função valor, representada por $v_t(s_t)$, consiste
+no máximo de recompensas esperadas totais partindo de um estado $s_t$ com $N-t$ épocas de decisão restante.
+\begin{equation*}
+  v_t(s_t) = max_a\{r_t(s_t,a_t) + E[v_{t+1}(s_{t+1})]\}
+\end{equation*}
 
 \pagebreak
 
@@ -546,5 +586,8 @@ Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável 
 
 \chapter{Resultados}
 
+\begin{thebibliography}{1}
+  \bibitem{exemploMDP}Andrew Schaefer {\em Markov Decision Processes} 2006
+\end{thebibliography}
 
 \end{document}
