@@ -1,4 +1,4 @@
-\documentclass{book}
+\documentclass[dvipsnames]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[portuguese]{babel}
 \usepackage{graphicx}
@@ -12,6 +12,21 @@
 \usepackage{mathtools}
 % \usepackage{caption}
 \usepackage{mdframed}
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{textcomp}
+
+\lstdefinestyle{py}{%
+  language=python,
+  keywordstyle=\bfseries\color{pythonkeyword},
+  literate=%
+    {\{}{\textcolor{symb}{\{}}1
+    {\}}{\textcolor{symb}{\}}}1
+    {(}{\textcolor{symb}{(}}1
+    {)}{\textcolor{symb}{)}}1
+    {:}{\textcolor{symb}{:}}1
+}
 
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}
 
@@ -249,10 +264,187 @@ geralmente quando algum jogador chega a 0 pontos de vida,
 mas também pode acontecer de outras maneiras como, por exemplo, se o
 baralho de um jogador acabar.
 
+\chapter{Implementação do Cliente}
+Para que fosse possível que implementássemos um agente de inteligência artificial que
+jogasse uma versão simplificada de Magic, era essencial que conhecêssemos em detalhe a
+plataforma onde o jogo estaria rodando, e para isso implementamos do zero uma versão do
+jogo com as especifidades desejadas usando a linguagem Python.
+
+O programa é composto de quatro classes principais: \texttt{Game}, \texttt{Player}, \texttt{Card}
+e \texttt{Permanent}, representando o Jogo, Jogadores, Cartas e Permanentes (como são tratadas as
+cartas de Terreno e Criatura uma vez que estão em jogo) respectivamente. A seguir vamos falar de
+cada uma destas classes entrando em detalhes nas principais características.
+
+\section{\texttt{class Card:}}
+A classe \texttt{Card} representa as cartas do jogo. Os objetos que estarão presentes nas mãos,
+decks e cemitérios dos jogadores serão classes que herdam desta classe. Seus atributos representam
+características presentes em todas as cartas. Para exemplificar os atributos, usaremos duas cartas:
+Martelo Vulcânico (Volcanic Hammer) e Anjo da Misericórdia (Angel of Mercy).
+
+\begin{figure}[!h]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{picstcc/VolcanicHammer.jpg}
+        \caption{Martelo Vulcânico (Feitiço)}
+        \label{divination}
+    \end{minipage}\hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{picstcc/angelOfMercy.jpg}
+        \caption{Anjo da Misericórdia (Criatura)}
+        \label{anjo}
+    \end{minipage}
+\end{figure}
+
+Os atributos a seguir são comuns a todos os tipos de carta, e por isso estão presentes na
+classe Card:
+
+\begin{itemize}
+  \item\texttt{name}: Uma string representando o nome da carta, por exemplo ``Volcanic Hammer''
+  ou ``Angel of Mercy''.
+  \item\texttt{cost}: Uma string representando o custo de mana da carta, usando a mesma notação
+  presente nas cartas, com W, U, B, R e G representando os símbolos de mana das cores Branco,
+  Azul, Preto, Vermelho e Verde, respectivamente. No caso de Volcanic Hammer, o custo é ``1R''
+  e no de Angel of Mercy é ``4W''.
+  \item\texttt{supertype}: Uma string representando o supertipo da carta. No nosso programa,
+  o único supertipo que irá aparecer é ``Basic'', que identifica os terrenos básicos, mas essa
+  informação não é relevante para o programa (um terreno ser básico significa que um deck pode
+  conter qualquer quantidade deste terreno, ao invés do limite normal de quatro cópias por carta).
+  Estamos representando essa informação principalmente por formalidade para que o programa siga a
+  mesma estrutura de tipos descrita nas regras do jogo. Nem Volcanic Hammer nem Angel of Mercy
+  possuem supertipos, portanto este atributo é representado pela string vazia.
+  \item\texttt{ctype}: Uma string que representa o tipo da carta. Angel of Mercy é do tipo
+  ``Creature'' e Volcanic Hammer é do tipo ``Sorcery''. Diferentemente de supertipo ou subtipo,
+  este é um atributo que nunca estará vazio em uma carta.
+  \item\texttt{subtype}: Uma string que representa o subtipo da carta. O subtipo serve para que
+  algumas cartas tenham uma informação adicional que possa ser usada para ações dentro do jogo.
+  Volcanic Hammer não tem subtipo, enquanto o subtipo de Angel of Mercy é ``Angel''.
+  \item\texttt{text}: Uma string representando o texto da carta. Essa string serve somente para
+  interface com o jogador. O texto de Volcanic Hammer é ``Volcanic Hammer deals 3 damage to target
+  creature or player.'' enquanto o de Angel of Mercy é ``Flying. When Angel of Mercy enters the
+  battlefield, you gain 3 life. 3/3''.
+  \item\texttt{targets}: Uma lista contendo tuplas com as possibilidades de alvo que a carta
+  pode ter. Angel of Mercy não tem alvos, e portanto sua lista de alvos é vazia. Volcanic Hammer
+  pode dar alvo em criaturas ou jogadores, então sua lista de alvos é
+  \texttt{[(``OwnCreature'', ``OpponentCreature'', ``Player'')]}. Separamos criaturas  entre
+  criaturas do mesmo dono da carta ou criaturas dos oponentes pois há cartas que só podem ter
+  um destes conjuntos como alvo, facilitando a implementação.
+  \item\texttt{owner}: O jogador dono da carta. Este atributo é do tipo \texttt{Player}.
+\end{itemize}
+Para cada carta com nome diferente, há uma classe que herda da classe \texttt{Card} e implementa
+as especificidades da carta. Vejamos o código da classe \texttt{VolcanicHammer}, que implementa
+a carta Volcanic Hammer:
+\begin{Verbatim}[commandchars=\\\{\}]
+ \textbf{class} \textcolor{OliveGreen}{\textbf{VolcanicHammer}}(\textcolor{Maroon}{Card}):
+     \textbf{def \textcolor{BlueViolet}{__init__}}(\textcolor{Maroon}{self, owner}):
+         \textcolor{Maroon}{self}.name = "Volcanic Hammer"
+         \textcolor{Maroon}{self}.cost = "1R"
+         \textcolor{Maroon}{self}.supertype = ""
+         \textcolor{Maroon}{self}.ctype = "Sorcery"
+         \textcolor{Maroon}{self}.subtype = ""
+         \textcolor{Maroon}{self}.text = "Volcanic Hammer deals 3 damage to target creature or player."
+         \textcolor{Maroon}{self}.targets = [("OwnCreature", "OpponentCreature", "Player")]
+         \textcolor{Maroon}{self}.owner = owner
+     \textbf{def \textcolor{BlueViolet}{effect}}(\textcolor{Maroon}{self, targets}):
+         targets[\textcolor{Maroon}{0}].takeDamage(\textcolor{Maroon}{3})
+\end{Verbatim}
+Podemos ver que a classe tem o método \texttt{effect}, que implementa o efeito da carta,
+fazendo com que o alvo escolhido sofra três pontos de dano. Vejamos agora a implementação
+da carta Angel of Mercy:
+\begin{Verbatim}[commandchars=\\\{\}]
+ \textbf{class} \textcolor{OliveGreen}{\textbf{AngelofMercy}}(\textcolor{Maroon}{Card}):
+     \textbf{def \textcolor{BlueViolet}{__init__}}(\textcolor{Maroon}{self, owner}):
+         \textcolor{Maroon}{self}.name = "Angel of Mercy"
+         \textcolor{Maroon}{self}.cost = "4W"
+         \textcolor{Maroon}{self}.supertype = ""
+         \textcolor{Maroon}{self}.ctype = "Creature"
+         \textcolor{Maroon}{self}.subtype = "Angel"
+         \textcolor{Maroon}{self}.text = "Flying. When Angel of Mercy enters the battlefield, you gain 3 life. 3/3"
+         \textcolor{Maroon}{self}.abilities = ["Flying"]
+         \textcolor{Maroon}{self}.targets = []
+         \textcolor{Maroon}{self}.owner = owner
+         \textcolor{Maroon}{self}.power = 3
+         \textcolor{Maroon}{self}.tou = 3
+     \textbf{def \textcolor{BlueViolet}{effect}}(\textcolor{Maroon}{self, targets}):
+         \textcolor{Maroon}{self}.owner.\textcolor{BlueViolet}{gainLife}(\textcolor{Maroon}{3})
+\end{Verbatim}
+Além dos atributos que citamos anteriormente, Angel of Mercy tem três atributos a mais por
+ser do tipo Criatura: \texttt{abilities}, uma lista com as habilidades da criatura;
+\texttt{power}, o poder da criatura; e \texttt{tou}, a resistência (toughness) da criatura.
+Podemos também ver o efeito da carta, que concede três pontos de vida a seu controlador.
+
+\section{\texttt{class Permanent:}}
+
+
+\section{\texttt{class Player:}}
+
+\section{\texttt{class Game:}}
+
+\pagebreak
 \chapter{Modelagem}
 
-Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de
-Inteligência Artificial.
+Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de Inteligência Artificial,
+mas para explicarmos a modelagem do problema, é necessária a introdução do conceito de Processos
+de Decisão de Markov, que é o que usaremos para modelar os problemas do jogo.
+
+\section{Processo De decisão de Markov}
+\label{ssec:mdp}
+
+Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP})
+são uma forma de representar alguns problemas de decisão sequenciais.
+
+Para descrever um MDP, usaremos um exemplo com o intuito de tornar a explicação mais didática.
+Imagine que um gerente de um galpão de um produto tem como objetivo maximizar o lucro esperado
+para o próximo ano. A cada mês, o gerente observa quanto há em estoque do produto e decide
+quanto irá pedir ao distribuir para o próximo mês. A demanda mensal do produto é desconhecida,
+mas segue uma distribuição de probabilidade conhecida. Se o gerente pedir produto demais, terá
+custos para manter o estoque, e se pedir de menos, estará perdendo vendas por falta de inventário.
+Suponha que o galpão tem capacidade para armazenar $M$ unidades de produto e que os custos e a
+distribuição da demanda não muda de mês para mês.
+
+O primeiro conceito de MDP que iremos introduzir é o de \textbf{época de decisão}. Uma época de
+decisão é um momento onde uma decisão é tomada. No nosso exemplo, cada época de decisão ocorre
+no começo de um mês, quando o gerente deve decidir quanto produto irá pedir ao distribuidor. Chamamos
+a quantidade de épocas de decisão de um MDP de \textbf{horizonte}, que pode ser finito ou infinito.
+No exemplo, o horizonte é finito de tamanho $12$, sendo uma época para cada mês do ano no qual o
+gerente deseja maximizar seus lucros.
+
+Um MDP pode ser representado por uma tupla $(S, A, P, R)$. $S$ é o conjunto de \textbf{estados}
+$s_t$ do problema, onde um estado é uma configuração do problema em uma determinada época de
+decisão $t$. No exemplo, cada estado representa o espaço disponível no galpão, que pode variar
+de $0$ a $M$.
+
+$A$ é o conjunto de \textbf{ações} $a_t$, onde $t$ é a época de decisão. No exemplo, uma ação
+pode ser comprar de $0$ a $M-s_t$ unidades no mês.
+
+Para falar sobre os outros elementos da tupla do MDP, precisamos entrar em detalhes sobre os
+custos para pedir o produto ao distribuidor e manter o produto em estoque. Um mês começa com $s_t$
+unidades em estoque, e são encomendadas mais $a_t$ unidades, o que gera um custo $c_{pedido}$ dado
+pela função $c_p(a_t)$. Vamos assumir que as unidades sejam pedidas no começo do mês e sejam vendidas
+no final do mês. Há, portanto, um custo $c_{estoque}$ para manter o produto em estoque dado pela função
+$c_e(s_t + a_t)$. A probabilidade de que a demanda $D_t$ no mês seja de $j$ unidades é $p_j, j = 0,1,2\ldots$.
+Quando o final do mês chegar, o número de unidade vendidas será $x_t = min{D_t, s_t + a_j}$, e o lucro
+será dado pela função $l(x_t)$. O número de unidades que começarão o próximo mês em estoque será
+$s_{t+1}= s_t + a_t - x_t$.
+
+$R: S \times A \mapsto \mathbb{R}$ é a função que dá a \textbf{recompensa} esperada por tomar a ação $a_t$
+quando o processo está no estado estado $s_t$. No exemplo, $r_t(s_t, a_t) = E[l(x_t)] - c_{estoque} - c_{pedido}$.
+
+$P: S \times A \times S \mapsto [0,1]$ é uma função que dá a \textbf{probabilidade} do sistema passar de um estado
+para outro, dado uma determinada ação. No nosso exemplo:
+
+\begin{equation*}
+  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j} &j\le s + a \\
+                                                    \sum\limits_{i=s+a}^\infty &j=0 \\
+                                                    0 & j >s+a\end{cases}
+\end{equation*}
+
+Uma vez que temos o nosso MDP definido, queremos chegar em uma \textbf{política}, que é o nome dado
+ao conjunto das \textbf{regras de decisão}. Uma regra de decisão $d_t(s)$ é uma função $d: S \mapsto A$
+que que, dado um estado $s$ na época de decisão $t$, retorna uma ação $a$ que deve ser tomada a partir
+daquele estado de modo a maximizar o ganho final. A seguir veremos uma representação de Magic como MDP,
+e em seguida como extraímos a política para o processo.
 
 \section{\textit{Mulligan}}
 A estrutura de um turno, como descrita no primeiro capítulo, será repetida
@@ -291,18 +483,18 @@ Outro fator importante é o tamanho da mão, pois cada carta perdida
 representa um turno de atraso em relação a uma mão com sete cartas (uma
 vez que cada jogador compra
 uma carta por turno). Dessa maneira, em uma mão com $i$ cartas, temos
-$h+1$ possibilidades, cada uma com probabilidade
+$i+1$ possibilidades, cada uma com probabilidade
 \begin{equation} \label{eq:stateprob} \mathcal{P}_i(j) =
 \frac{\binom{J}{j}\binom{60 - J}{i - j}}{\binom{60}{i}}, \ \
-j = 0,\ldots, i, \end{equation} onde $J$ é o número de terrenos no deck
+j = 0,\ldots, i \end{equation} onde $J$ é o número de terrenos no deck
 e $j$ o
 número de terrenos
 na mão. Note que $\sum_{j=0}^{i}P_i(j) = 1, \forall i$. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
 agente deve decidir entre realizar um \textit{mulligan}
-(denotado por $M$), que resultará em uma mão com $i-1$ cartas, sendo $i$
+(denotado por $M$), que resultará em uma mão com $i-1$ cartas, sendo $j'$
 terrenos com probabilidade
- \[ \mathcal{P}_{i - 1}(j) = \frac{\binom{J}{j}\binom{60 - J}{i - 1 -
-j}}{\binom{60}{i - 1}}, \ \  j = 0,\ldots, i - 1\]
+ \[ \mathcal{P}_{i - 1}(j') = \frac{\binom{J}{j'}\binom{60 - J}{i - 1 -
+j'}}{\binom{60}{i - 1}}, \ \  j' = 0,\ldots, i - 1\]
  ou manter a mão (denotado por $K$), o que termina o problema, seguido
 (para $i < 7$) de uma ação \textit{scry}, que permite uma pequena
 ``filtragrem''
@@ -314,92 +506,54 @@ uma carta a menos, dado que no primeiro turno do jogo não se compra uma
 carta.
 
 \pagebreak
-\subsection{Processo De decisão de Markov}
-\label{ssec:mdp}
-
-Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP})
-são uma forma de representar alguns problemas de decisão sequenciais.
-
-Para descrever um MDP, usaremos um exemplo com o intuito de tornar a explicação mais didática.
-Imagine que um gerente de um galpão tem como objetivo maximizar o lucro esperado para o próximo
-ano. A cada mês, o gerente observa quanto há em estoque de cada produto e decide quanto irá pedir
-ao distribuir daquele produto para o próximo mês. A demanda mensal de cada produto é desconhecida,
-mas segue uma distribuição de probabilidade conhecida. Se o gerente pedir produto demais, terá
-custos para manter o estoque, e se pedir de menos, estará perdendo vendas por falta de inventário.
-Suponha que o galpão tem capacidade para armazenar $M$ unidades de produto e que os custos e a
-distribuição da demanda não muda de mês para mês.
-
-O primeiro conceito de MDP que iremos introduzir é o de \textbf{época de decisão}. Uma época de
-decisão é um momento onde uma decisão é tomada. No nosso exemplo, cada época de decisão ocorre
-no começo de um mês, quando o gerente deve decidir quanto pedir de cada produto. Chamamos a
-quantidade de épocas de decisão de um MDP de \textbf{horizonte}, que pode ser finito ou infinito.
-No exemplo, o horizonte é finito de tamanho $12$, um para cada mês do ano no qual o gerente deseja
-maximizar seus lucros.
-
-Um MDP pode ser representado por uma tupla $(S, A, P, R)$. $S$ é o conjunto de \textbf{estados}
-$s_t$ do problema, onde um estado é uma configuração do problema em uma determinada época de
-decisão $t$. No exemplo, cada estado representa o espaço disponível no galpão, que pode variar
-de $0$ a $M$.
-
-$A$ é o conjunto de \textbf{ações} $a_t$, onde $t$ é a época de decisão. No exemplo, uma ação
-pode ser comprar de $0$ a $M-s_t$ unidades no mês.
-
-Para falar sobre os outros elementos da tupla do MDP, precisamos entrar em detalhes sobre os
-custos para pedir o produto ao distribuidor e manter o produto em estoque. Um mês começa com $s_t$
-unidades em estoque, e são encomendadas mais $a_t$ unidades, o que gera um custo $c_pedido$ dado
-pela função $c_p(a_t)$. Vamos assumir que as unidades sejam pedidas no começo do mês e sejam vendidas
-no final do mês. Há, portanto, um custo $c_estoque$ para manter o produto em estoque dado pela função
-$c_e(s_t + a_t)$. A probabilidade de que a demanda $D_t$ no mês seja de $j$ unidades é $p_j, j = 0,1,2\ldots$.
-Quando o final do mês chegar, o número de unidade vendidas será $x_t = min{D_t, s_t + a_j}$, e o lucro
-será dado pela função $l(x_t)$. O número de unidades que começarão o próximo mês em estoque será
-$s_{t+1}= s_t + a_t - x_t$.
-
-$RS: S \times A \mapsto \mathbb{R}$ é a função que dá a \textbf{recompensa} esperada por tomar a ação $a_t$
-quando o processo está no estado estado $s_t$. No exemplo, $r_t(s_t, a_t) = E[l(x_t)] - c_estoque - c_pedido$.
-
-$P: S \times A \times S \mapsto [0,1]$ é uma função que dá a \textbf{probabilidade} do sistema passar de um estado
-para outro, dado uma determinada ação. No nosso exemplo:
-
-\begin{equation*}
-  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j} &j\le s + a \\
-                                                    \sum\limits_{i=s+a}^\infty &j=0 \\
-                                                    0 & j >s+a\end{cases}
-\end{equation*}
-
-Uma vez que temos o nosso MDP definido, queremos chegar em uma \textbf{política}, que é o nome dado
-ao conjunto das \textbf{regras de decisão}. Uma regra de decisão $d_t(s)$ é uma função $d: S \mapsto A$
-que que, dado um estado $s$ na época de decisão $t$, retorna uma ação $a$ que deve ser tomada a partir
-daquele estado de modo a maximizar o ganho final. A seguir veremos uma representação de Magic como MDP,
-e em seguida como extraímos a política para o processo.
-
 \subsection{Mulligan como um MDP}
 
-Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um determinado horizonte), podemos determinar todos os parâmetros de um MDP de horizonte finito para que o agente siga uma política com a inteção de alcançar uma mão ``jogável'' para uma partida de \textit{Magic}.
+Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um
+determinado horizonte), podemos determinar todos os parâmetros de um MDP de horizonte finito para
+que o agente siga uma política com a inteção de alcançar uma mão ``jogável'' para uma partida de
+\textit{Magic}.
 
-O conjunto de estados $S$ é composto por um estado inicial $S_I$ (que representa o estado antes do jogador comprar a sua primeira mão inicial),
-um estado final absorvente $S_F$ (que representa o jogador após ter decidido manter uma mão) e os estados intermediários, dados por um par
-$(i, j), i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representam os estados onde o jogador tem $i$ cartas na mão, sendo que $j$ são terrenos). Assim, as ações $A(s)$ e as probabilidades $P(s'|s, A(s))$ de cada estado $s$ são definidas da seguinte maneira:
+O conjunto de estados $S$ é composto por um estado inicial $S_I$ (que representa o estado antes
+do jogador comprar a sua primeira mão inicial), um estado final absorvente $S_F$ (que representa
+o jogador após ter decidido manter uma mão) e os estados intermediários, dados por um par $(i, j),
+i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representam os estados onde o jogador
+tem $i$ cartas na mão, sendo que $j$ são terrenos). Assim, as ações $A(s)$ e as probabilidades
+$P(s'|s, A(s))$ de cada estado $s$ são definidas da seguinte maneira:
 
 \begin{itemize}
-  \item $A(S_I) := \left\{ Start \right\};\  P((7, j) | S_I, Start) =  \mathcal{P}_7(j)$
-  \\ \\
-   A partir de $S_I$ é possível tomar a ação \textit{Start}, que leva para o estado $(7, j)$ com probabilidade $\mathcal{P}_7(j)$, descrita na equação \ref{eq:stateprob}.
-
-  \item $A(i, j) := \begin{lrdcases} Mulligan, &i \in \{ 1, 2, \ldots, 7\}, j\in \{ 0, 1, \ldots, i\},\\
-                                     Keep, &i \in \{ 0, 1, \ldots, 7\}, j\in \{ 0, 1, \ldots, i\} \end{lrdcases}; \\ \vspace{.1cm}\\ P((i - 1, j')| (i, j), Mulligan) = \mathcal{P}_{i-1}(j'),\ \ j' \in \{0,1, \ldots, i-1\}, \\ P(S_F|(i, j), Keep) = 1$
-   \\ \\
-   A partir de $(i, j)$, analogamente à ação $Start$, temos a ação $Mulligan$, que leva a algum estado $(i -1, j')$. Um detalhe importante é a impossibilidade de $Mulligan$ quando $i = 0$. A outra ação, $Keep$, leva ao estado final.
-
-   \pagebreak
-
-   \item $A(S_F) := \left\{ Wait \right\};\ P(S_F | S_F, Wait = 1)$
-   \\ \\ No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de épocas de decisão (e constitua um problema de horizonte finito).
+  \item $A(S_I) := \left\{ Start \right\};$
+  \begin{equation*}
+    P((7, j) | S_I, Start) =  \mathcal{P}_7(j);
+  \end{equation*}
+   A partir de $S_I$ é possível tomar a ação \textit{Start}, que leva para o estado $(7, j)$ com
+   probabilidade $\mathcal{P}_7(j)$, descrita na equação \ref{eq:stateprob}.
+  \item $A(i, j):= \begin{lrdcases} Mulligan, Keep\end{lrdcases}, i\in\begin{lrdcases}1, \ldots ,7 \end{lrdcases}, j \in \begin{lrdcases}0, \ldots, i\end{lrdcases};$
+  \item $A(0, 0):=\begin{lrdcases}Keep\end{lrdcases};$
+  \begin{gather*}
+    P((i - 1, j')| (i, j), Mulligan) = \mathcal{P}_{i-1}(j'),\ \ j' \in \{0,1, \ldots, i-1\},\\
+    P(S_F|(i, j), Keep) = 1
+  \end{gather*}
+   A partir de $(i, j), i \neq 0$, analogamente à ação $Start$, temos a ação $Mulligan$, que leva a um estado
+   $(i -1, j')$. Um detalhe importante é a impossibilidade de $Mulligan$ quando $i = 0$. A outra ação,
+   $Keep$, leva ao estado final.
+   \item $A(S_F) := \left\{ Wait \right\}$
+   \begin{equation*}
+     P(S_F | S_F, Wait = 1)
+   \end{equation*}
+   No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de
+   épocas de decisão (e constitua um problema de horizonte finito).
 \end{itemize}
 
-Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$ cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação $Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições tem recompensa $R_0 = 0, \forall R_0 \in R \backslash R_k$. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes restrições:
+Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada
+transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa
+associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$
+cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação
+$Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições
+tem recompensa $R_0 = 0$. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes
+restrições:
 \begin{itemize}
   \item Com $i= i_0$ fixo e $j\in\{0,1,\ldots,i_0\}$, as recompensas $R_k(i_0, j)$(se existem) devem seguir a
-seguinte relação:
+  seguinte relação:
   \begin{equation} \label{eq:idealhand}R_k (i_0, 3) > R_k(i_0, 2) > R_k(i_0, 4)
 > R_k(i_0, 5) > R_k(i_0, 1) > R_k(i_0, 6) > R_k(i_0, 7) \gg R_k(i_0,
 0),\end{equation}
@@ -459,13 +613,60 @@ $i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
 \end{table}
 Assim, temos um MDP de horizonte finito (sempre acabará na época 9) e podemos determinar uma política ótima para a determinação da mão inicial.
 
-EXTRAÇÃO DA POLÍTICA AQUI
-A função valor, representada por $v_t(s_t)$, consiste
-no máximo de recompensas esperadas totais partindo de um estado $s_t$ com $N-t$ épocas de decisão restante.
-\begin{equation*}
-  v_t(s_t) = max_a\{r_t(s_t,a_t) + E[v_{t+1}(s_{t+1})]\}
-\end{equation*}
+\subsection{Extração da Política}
+Com o MDP definido, desejamos agora extrair uma política, ou seja, um conjunto de regras
+de decisão, que digam ao agente qual ação tomar a partir de um dado estado, mas para isso
+precisamos da definição da \textbf{função de valor}. Uma função de valor para uma política
+$\pi$, denotada por $V^\pi: S \mapsto \mathbb{R}$, é tal que $V^\pi(s)$ dá o valor esperado
+da recompensa para esta política.
 
+Para o problema do Mulligan com uma política $\pi$ com regra de decisão $d$, temos que a
+função de valor é:
+\begin{equation*}
+  V^\pi_k = R(s, d(s)) + \sum \limits_{s' \in S}P(s'|s, d(s))V^\pi_{k+1}(s')
+\end{equation*}
+onde $k$ é a época de decisão, e $V^\pi_z(s) = 0$, onde $z$ é a última época de decisão, pois
+não há mais ações possíveis.
+
+Para extrair a política para o mulligan, utilizamos o algoritmo de \textbf{iteração de valor},
+modificado para atender as especifidades do nosso problema. O algoritmo utiliza programação
+dinâmica para determinar o valor $V^*(s)$ para cada $s \in S$ (o valor da função de valor para
+a melhor política a partir do estado $s$), e assim construir ``de trás para frente'' a melhor
+política para o problema.
+
+Começamos com a mão de $0$ cartas, onde só há uma ação possível (manter a mão), então
+\begin{equation*}
+  V^*(0,0)=R_k(0,0)
+\end{equation*}
+e a melhor ação a partir de uma mão com $0$ é $Keep$ (uma vez que não há
+outra ação possível). Então, calculamos $V^*$ para mãos com $1$ carta e $j$ terrenos:
+\begin{equation*}
+  V^*(1,j) = \max\begin{lrdcases}R_k(1,j),V^*(0,0)\end{lrdcases}
+\end{equation*}
+Como a recompensa por manter uma mão com $1$ carta é maior do que a de manter uma mão com
+$0$ cartas independente da configuração, neste caso $V^*(1,j)=R_k(1,j)$ e a melhor ação para
+esta mão será $Keep$. Para mãos com duas cartas, o valor de $V^*$ leva em consideração as duas
+possibilidades de mãos com $1$ carta, então a fórmula é um pouco mais complexa:
+\begin{equation*}
+  V^*(2,j) =  \max\begin{lrdcases}R_k(2,j),
+              \sum\limits_{j' = 0}^{1}V^*(1,j')\times\mathcal{P}_1(j')\end{lrdcases}
+\end{equation*}
+Se o valor de $R_k(2,j)$ for maior que $\sum\limits_{j' = 0}^{1}V^*(1,j')\times\mathcal{P}_1(j')$,
+a ação ótima para uma mão com $2$ cartas na mão, sendo que $j$ são terrenos, será $Keep$, caso
+contrário, será $Mulligan$. Para mãos com $i>2$ cartas e $j$ terrenos, a fórmula e a lógica para
+decidir a ação ótima são as mesmas:
+\begin{equation*}
+  V^*(i,j) =  \max\begin{lrdcases}R_k(i,j),
+              \sum\limits_{j' = 0}^{i-1}V^*(i-1,j')\times\mathcal{P}_{i-1}(j')\end{lrdcases}
+\end{equation*}
+Uma vez que $V^*$ estiver calculado para todo estado $s$ com uma ação ótima $a_s$ associada,
+podemos construir a nossa política com a regra de decisão $d$ tal que $d(s) = a_s$ (como cada
+estado só pode ocorrer em uma época de decisão específica, não há a necessidade de ter mais
+de uma regra de decisão em nossa política).
+
+\subsection{Detalhes da Implementação}
+
+\subsection{Resultados da Implementação}
 \pagebreak
 
 \section{O Jogo}
@@ -584,10 +785,18 @@ Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável 
 
 \end{itemize}
 
-\chapter{Resultados}
+\subsection{Algoritmos para Busca Local}
+
+\subsection{Detalhes da Implementação}
+
+\chapter{Conclusão}
+
 
 \begin{thebibliography}{1}
-  \bibitem{exemploMDP}Andrew Schaefer {\em Markov Decision Processes} 2006
+  \bibitem{exemploMDP}Andrew Schaefer - {\em Markov Decision Processes} - 2006 - http://egon.cheme.cmu.edu/ewo/docs/SchaeferMDP.pdf
+  \bibitem{fonteMDP}Jerônimo Pellegrini, Jacques Wainer - {\em Processos de Decisão de Markov: um tutorial} - 2007 - https://pdfs.semanticscholar.org/294f/694ae723a787f25043265fb3e660f62c573f.pdf
+  \bibitem{livro}Stuart Russel, Peter Norvig - {\em Artificial Intelligence: A Modern Approach (3rd Edition)} - 2009
+  \bibitem{compRules}Wizards of the Coast - {\em Magic: The Gathering Comprehensive Rules} - 2018 - http://media.wizards.com/2018/downloads/MagicCompRules%2020180119.pdf
 \end{thebibliography}
 
 \end{document}
