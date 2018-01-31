@@ -16,6 +16,7 @@
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{textcomp}
+\usepackage{algorithmic}
 
 \lstdefinestyle{py}{%
   language=python,
@@ -27,8 +28,6 @@
     {)}{\textcolor{symb}{)}}1
     {:}{\textcolor{symb}{:}}1
 }
-
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}
 
 \makeatletter
 \newcases{lrdcases}
@@ -48,18 +47,7 @@
 \renewcommand{\le}{\leqslant}
 \renewcommand{\ge}{\geqslant}
 
-% \usepackage[executivepaper,margin=1in]{geometry}
-% \usepackage[charter]{mathdesign}
-
-% \title{\textbf{Inteligência Artificial em \textit{Magic: The Gathering}}}
-% \author{Guilherme Souto Schützer - 8658544 \\
-%         Tomás Bezerra Marcondes Paim - 7157602 \\
-        % \begin{figure}[]
-        % \centering
-        %     \includegraphics[width=0.25\textwidth]{picstcc/ime.png}
-        % \end{figure}}
-% \date{2017}
-
+\input{codeformatting.tex}
 
 \begin{document}
 
@@ -111,7 +99,7 @@ jogo).
 \chapter{Introdução}
 
 Inteligência artificial é um campo da ciência da computação que estuda
-"agentes inteligentes", que de certa forma percebem o ambiente à sua volta
+``agentes inteligentes", que de certa forma percebem o ambiente à sua volta
 e tomam ações tendo como objetivo maximizar a chance de sucesso de alguma
 tarefa específica. Uma utilização muito comum nos dias de hoje é a de
 inteligência artificial com o objetivo de criar um agente capaz de competir
@@ -287,13 +275,11 @@ Martelo Vulcânico (Volcanic Hammer) e Anjo da Misericórdia (Angel of Mercy).
         \centering
         \includegraphics[width=0.5\textwidth]{picstcc/VolcanicHammer.jpg}
         \caption{Martelo Vulcânico (Feitiço)}
-        \label{divination}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=0.5\textwidth]{picstcc/angelOfMercy.jpg}
         \caption{Anjo da Misericórdia (Criatura)}
-        \label{anjo}
     \end{minipage}
 \end{figure}
 
@@ -335,47 +321,21 @@ classe Card:
 Para cada carta com nome diferente, há uma classe que herda da classe \texttt{Card} e implementa
 as especificidades da carta. Vejamos o código da classe \texttt{VolcanicHammer}, que implementa
 a carta Volcanic Hammer:
-\begin{Verbatim}[commandchars=\\\{\}]
- \textbf{class} \textcolor{OliveGreen}{\textbf{VolcanicHammer}}(\textcolor{Maroon}{Card}):
-     \textbf{def \textcolor{BlueViolet}{__init__}}(\textcolor{Maroon}{self, owner}):
-         \textcolor{Maroon}{self}.name = "Volcanic Hammer"
-         \textcolor{Maroon}{self}.cost = "1R"
-         \textcolor{Maroon}{self}.supertype = ""
-         \textcolor{Maroon}{self}.ctype = "Sorcery"
-         \textcolor{Maroon}{self}.subtype = ""
-         \textcolor{Maroon}{self}.text = "Volcanic Hammer deals 3 damage to target creature or player."
-         \textcolor{Maroon}{self}.targets = [("OwnCreature", "OpponentCreature", "Player")]
-         \textcolor{Maroon}{self}.owner = owner
-     \textbf{def \textcolor{BlueViolet}{effect}}(\textcolor{Maroon}{self, targets}):
-         targets[\textcolor{Maroon}{0}].takeDamage(\textcolor{Maroon}{3})
-\end{Verbatim}
+\begin{figure}
+  \input{code-examples/volcanicclass}
+\end{figure}
 Podemos ver que a classe tem o método \texttt{effect}, que implementa o efeito da carta,
 fazendo com que o alvo escolhido sofra três pontos de dano. Vejamos agora a implementação
 da carta Angel of Mercy:
-\begin{Verbatim}[commandchars=\\\{\}]
- \textbf{class} \textcolor{OliveGreen}{\textbf{AngelofMercy}}(\textcolor{Maroon}{Card}):
-     \textbf{def \textcolor{BlueViolet}{__init__}}(\textcolor{Maroon}{self, owner}):
-         \textcolor{Maroon}{self}.name = "Angel of Mercy"
-         \textcolor{Maroon}{self}.cost = "4W"
-         \textcolor{Maroon}{self}.supertype = ""
-         \textcolor{Maroon}{self}.ctype = "Creature"
-         \textcolor{Maroon}{self}.subtype = "Angel"
-         \textcolor{Maroon}{self}.text = "Flying. When Angel of Mercy enters the battlefield, you gain 3 life. 3/3"
-         \textcolor{Maroon}{self}.abilities = ["Flying"]
-         \textcolor{Maroon}{self}.targets = []
-         \textcolor{Maroon}{self}.owner = owner
-         \textcolor{Maroon}{self}.power = 3
-         \textcolor{Maroon}{self}.tou = 3
-     \textbf{def \textcolor{BlueViolet}{effect}}(\textcolor{Maroon}{self, targets}):
-         \textcolor{Maroon}{self}.owner.\textcolor{BlueViolet}{gainLife}(\textcolor{Maroon}{3})
-\end{Verbatim}
+\begin{figure}
+  \input{code-examples/angelclass.tex}
+\end{figure}
 Além dos atributos que citamos anteriormente, Angel of Mercy tem três atributos a mais por
 ser do tipo Criatura: \texttt{abilities}, uma lista com as habilidades da criatura;
 \texttt{power}, o poder da criatura; e \texttt{tou}, a resistência (toughness) da criatura.
 Podemos também ver o efeito da carta, que concede três pontos de vida a seu controlador.
 
 \section{\texttt{class Permanent:}}
-
 
 \section{\texttt{class Player:}}
 
@@ -666,8 +626,19 @@ de uma regra de decisão em nossa política).
 
 \subsection{Detalhes da Implementação}
 
-\subsection{Resultados da Implementação}
-\pagebreak
+O primeiro agente inteligente do projeto é \texttt{MulliganAgent}, derivado da classe \texttt{Player}. A intenção desta classe é providenciar a qualquer agente uma possibilidade maior de obter uma ``mão jogável''.
+
+\begin{figure}[h!]
+  \input{code-examples/mulliganclass.tex}
+\end{figure}
+
+O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de valor de horizonte finito em \texttt{mulliganValueIteration()} para decidir se vale a pena ou não manter a mão atual. Apesar da decisão ser feita várias vezes, o algoritmo é executado apenas uma vez, para preencher as tabelas inicializadas em \texttt{initMulliganTables()}. A tabela-base de recompensa pode assumir dois conjuntos de valores, relacionados à diferença de ``pontuação'' caso o jogador comece ou não o jogo (fato indicado pela \textit{flag} \texttt{onThePlay}\footnote{O termo ``on the play'' é uma expressão em \textit{Magic} que significa que o jogador começa o jogo, ou seja, joga (``plays'') o primeiro turno. Sobre o segundo jogador, diz-se que está ``on the draw'', pois este compra uma carta no seu primeiro turno enquanto seu antecessor, não. Estas diferenças representam um esforço de equilíbrio nas regras.}).
+\begin{figure}[h!]
+  \input{code-examples/valueiteration.tex}
+  \label{code:valueit}
+  \caption{Método de iteração de valor na classe \texttt{MulliganAgent}}
+\end{figure}
+Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O horizonte é fixo em 8 épocas de decisão (correspondentes de 7 a 0 cartas na mão do agente), portanto há 8 iterações do trecho 6-12, que na $k$-ésima iteração calcula a soma $\sum_{j' = 0}^{i-1}V^*_{k-1}(i-1,j')\times\mathcal{P}_{i-1}(j')$. Se a soma calculada - relacionada à ação $Mulligan$ - é maior do que a recompensa $R_k(i, j)$, atualizamos a entrada $i, j$ na tabela de valores com o valor da soma. Dessa maneira, é possível determinar a política ótima $\pi^*(i,j)$  em qualquer estado $(i,j)$ no método \texttt{mulligan()} ao verificar se $V^*(i, j)$ é igual à recompensa $R_k(i,j)$ (caso não seja, $\pi^*(i,j) \gets Mulligan$). O método \texttt{getKeepReward(i, j)} retorna a recompensa de acordo com os valores em \texttt{landRewards}, inicializada na criação do agente com os valores-base de recompensa determinados na tabela \ref{tab:rj}.
 
 \section{O Jogo}
 

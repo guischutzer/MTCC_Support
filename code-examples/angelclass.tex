@@ -1,0 +1,19 @@
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{class} \PY{n+nc}{AngelofMercy}\PY{p}{(}\PY{n}{Card}\PY{p}{)}\PY{p}{:}
+    \PY{k}{def} \PY{n+nf+fm}{\PYZus{}\PYZus{}init\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,}\PY{n}{owner}\PY{p}{)}\PY{p}{:}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{name} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Angel of Mercy}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{cost} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{4W}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{supertype} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{ctype} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Creature}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{subtype} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Angel}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{text} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Flying. When Angel of Mercy enters the battlefield, you gain 3 life. 3/3}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{abilities} \PY{o}{=} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Flying}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{targets} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{owner} \PY{o}{=} \PY{n}{owner}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{power} \PY{o}{=} \PY{l+m+mi}{3}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{tou} \PY{o}{=} \PY{l+m+mi}{3}
+
+    \PY{k}{def} \PY{n+nf}{effect}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{game}\PY{p}{,} \PY{n}{targets}\PY{p}{)}\PY{p}{:}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{owner}\PY{o}{.}\PY{n}{gainLife}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}
+\end{Verbatim}

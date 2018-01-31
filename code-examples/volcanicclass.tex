@@ -1,0 +1,15 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{class} \PY{n+nc}{VolcanicHammer}\PY{p}{(}\PY{n}{Card}\PY{p}{)}\PY{p}{:}
+    \PY{k}{def} \PY{n+nf+fm}{\PYZus{}\PYZus{}init\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{owner}\PY{p}{)}\PY{p}{:}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{name} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Volcanic Hammer}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{cost} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{1R}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{supertype} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{ctype} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Sorcery}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{subtype} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{text} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Volcanic Hammer deals 3 damage to target creature or player.}\PY{l+s+s2}{\PYZdq{}}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{targets} \PY{o}{=} \PY{p}{[}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{OwnCreature}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{OpponentCreature}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Player}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{]}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{owner} \PY{o}{=} \PY{n}{owner}
+
+    \PY{k}{def} \PY{n+nf}{effect}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{game}\PY{p}{,} \PY{n}{targets}\PY{p}{)}\PY{p}{:}
+        \PY{n}{targets}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{takeDamage}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}
+\end{Verbatim}
