@@ -198,9 +198,10 @@ da recompensa para esta política.
 
 Para o problema do Mulligan com uma política $\pi$ com regra de decisão $d$, temos que a
 função de valor é:
-\begin{equation*}
+\begin{equation}
+  \label{eq:valuefunc}
   V^\pi_k = R(s, d(s)) + \sum \limits_{s' \in S}P(s'|s, d(s))V^\pi_{k+1}(s')
-\end{equation*}
+\end{equation}
 onde $k$ é a época de decisão, e $V^\pi_z(s) = 0$, onde $z$ é a última época de decisão, pois
 não há mais ações possíveis.
 
@@ -333,7 +334,7 @@ O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de v
   \caption{Método de iteração de valor na classe \texttt{MulliganAgent}}
 \end{figure}
 
-Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O laço nas linhas 5-13 contém a comparação entre a soma $\Sigma(i)$ (definida na seção anterior para cada quantidade de cartas na mão), calculada em 7-10 de acordo com a equação COLOCAR REFERENCIA, e o valor da recompensa $R_k(i, j)$ para cada estado $(i, j)$. A atribuição (ou não) na linha 13 definirá a extração da política posteriormente.
+Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O laço nas linhas 5-13 contém a comparação entre a soma $\Sigma(i)$ (definida na seção anterior para cada quantidade de cartas na mão), calculada em 7-10 de acordo com a equação \ref{eq:valuefunc}, e o valor da recompensa $R_k(i, j)$ para cada estado $(i, j)$. A atribuição (ou não) na linha 13 definirá a extração da política posteriormente.
 
 \newpage
 
@@ -495,7 +496,7 @@ recompensa em um turno.
 
 \subsubsection{Minimax - Combate}
 
-Suponhamos que 
+Suponhamos que
 
 A etapa de combate consiste em três decisões, como explicado na seção \ref{gamestructure}:
 
