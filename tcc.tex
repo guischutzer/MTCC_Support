@@ -99,11 +99,12 @@ jogo).
 \chapter{Introdução}
 
 Inteligência artificial é um campo da ciência da computação que estuda
-``agentes inteligentes", que de certa forma percebem o ambiente à sua volta
+``agentes inteligentes'', que de certa forma percebem o ambiente à sua volta
 e tomam ações tendo como objetivo maximizar a chance de sucesso de alguma
 tarefa específica. Uma utilização muito comum nos dias de hoje é a de
 inteligência artificial com o objetivo de criar um agente capaz de competir
-com humanos em jogos com alto nível de estratégia, como Xadrez e Go.
+com humanos em jogos com alto nível de estratégia, como Xadrez\footnote{inserir referência
+na bibliografia} e Go\footnote{disso também}.
 Decidimos então estudar inteligência artificial para a realização deste
 trabalho com a ideia de modelar um outro jogo de estratégia,
 \textbf{Magic: The Gathering}.
@@ -336,10 +337,99 @@ ser do tipo Criatura: \texttt{abilities}, uma lista com as habilidades da criatu
 Podemos também ver o efeito da carta, que concede três pontos de vida a seu controlador.
 
 \section{\texttt{class Permanent:}}
+A classe \texttt{Permanent} serve para representar as cartas uma vez que foram jogadas
+e estão no campo de batalha. Seus atributos são os seguintes:
+\begin{itemize}
+  \item\texttt{card}: A carta que criou a permanente. Ela contém informações relevantes
+  para a construção do objeto e é ela, e não a permanente, que será colocada no cemitério
+  caso deixe o campo de batalha.
+  \item\texttt{abilities}: Uma cópia do atributo \texttt{abilities} da carta. É necessário
+  que esse atributo seja armazenado separadamente ao da carta, pois uma vez em jogo, a
+  permanente pode ganhar ou perder habilidades.
+  \item\texttt{ctype}: O tipo da permanente, conforme descrito na carta que a criou.
+  \item\texttt{owner}: O jogador dono da permanente, que será o mesmo que possúi a carta.
+  \item\texttt{controller}: O jogador controlador da permanente. Normalmente ele será o dono,
+  mas há efeitos que mudam o jogador que controla uma permanente.
+  \item\texttt{tapped}: Um atributo booleano que indica se a permanente está virada ou
+  desvirada.
+  \item\texttt{sick}: Um atributo booleano que indica se a permanente está
+  \textit{enjoada}\footnote{Permanentes entram em jogo com \textit{enjoo de invocação}, o que
+  indica que caso ela seja uma criatura, não poderá atacar. O enjoo de uma permanente acaba no
+  começo do turno de seu controlador.} ou não.
+  \item\texttt{destroyed}: Um atributo booleano que indica se a permanente foi destruída ou não.
+  Permanentes destruídas são colocadas no cemitério de seu controlador durante as checagens do jogo.
+  \item\texttt{ID}: Um inteiro que serve como identificador único entre permanentes. Ele serve,
+  por exemplo, para diferenciar permanentes que tenham sido criadas a partir de cartas iguais.
+\end{itemize}
+Estes atributos são alterados a partir dos métodos da classe, que não entraremos em detalhes.
+
+Há duas classes que herdam da classe \texttt{Permanent}: \texttt{Land} e \texttt{Creature}.
+\texttt{Land} é a classe que representa terrenos. A única diferença desta classe para a classe
+mãe é que os métodos de virar e desvirar manipulam um atributo do jogador controlador: a quantidade
+de terrenos desvirados controlados por aquele jogador. A classe \texttt{Creature} tem alguns
+atributos a mais:
+\begin{itemize}
+  \item\texttt{power}: Um inteiro que representa o poder da criatura.
+  \item\texttt{tou}: Um inteiro que representa a resistência da criatura.
+  \item\texttt{curPower}: Um inteiro que representa o poder atual da criatura. Existem efeitos
+  que modificam o poder com duração limitada a um turno. Nestes casos, o poder volta a ser o
+  poder armazenado no atributo \texttt{power} quando o próximo turno começar.
+  \item\texttt{curTou}: Um inteiro que representa a resistência atual da criatura. Análogo ao
+  atributo \texttt{curPower} relativo à resistência da criatura.
+  \item\texttt{attacking}: Um atributo booleano que representa se a criatura está atacando
+  ou não.
+  \item\texttt{blocking}: Um atributo booleano que representa se a criatura está bloqueando
+  ou não.
+  \item\texttt{damage}: Um inteiro que armazena a quantidade de dano sofrida pela criatura até
+  o presente momento. No início de cada turno, este atributo volta a ter o valor $0$.
+  \item\texttt{currentAbilities}: Análogo ao atributo \texttt{curPower} para as habilidades.
+\end{itemize}
+Criaturas têm alguns métodos especiais que possibilitam com que elas realizem ações dentro
+do jogo, como atacar ou causar dano, mas não entraremos em detalhes.
 
 \section{\texttt{class Player:}}
+A classe \texttt{Player} representa um jogador na partida. Seus atributos são:
+\begin{itemize}
+  \item\texttt{name}: Uma string representando o nome do jogador. Não tem nenhuma função
+  dentro do jogo. Serve para identificar os jogadores na saída.
+  \item\texttt{life}: Um inteiro representando o valor atual do total de pontos de vida
+  do jogador.
+  \item\texttt{hand}: Uma lista de objetos do tipo \texttt{Card}, representando as cartas
+  na mão do jogador.
+  \item\texttt{library}: Uma lista de objetos do tipo \texttt{Card}, representando as cartas
+  no deck\footnote{Dentro do jogo, o deck recebe o nome de \textit{Grimório}, ou \textit{Library},
+  em inglês.} do jogador.
+  \item\texttt{lose}: Um atributo booleano para identificar se o jogador perdeu o jogo. Este
+  atributo é utilizado pela classe \texttt{Game} para decidir se o jogo acabou ou não.
+  \item\texttt{ID}: Um inteiro representando um identificador único para o jogador, de maneira
+  similar à que acontece com as permanentes.
+  \item\texttt{creatures}: Uma lista de objetos da classe \texttt{Creature} com todas as
+  criaturas controladas pelo jogador.
+  \item\texttt{lands}: Uma lista de objetos da classe \texttt{Land} com todos os terrenos
+  controlados pelo jogador.
+  \item\texttt{active}: Um atributo booleano que indica se o jogador é o jogador ativo.
+  \item\texttt{graveyard}: Uma lista de objetos da classe \texttt{Card} com todas as cartas
+  no cemitério do jogador.
+  \item\texttt{untappedLands}: Um inteiro representando a quantidade de terrenos desvirados que
+  o jogador controla.
+  \item\texttt{landDrop}: Um atributo booleano indicando se o jogador já jogou um terreno no
+  turno atual.
+\end{itemize}
 
 \section{\texttt{class Game:}}
+A classe \texttt{Game} representa um jogo em andamento. Devido à complexidade da classe, entrar
+em detalhes iria mudar o foco do trabalho, então não iremos descrever todos os métodos e atributos
+da classe. Há um método chamado \texttt{turnRoutine} que é chamado repetidamente até que o jogo
+termine. Ele executa as ações iniciais e finais do turno (como fazer com que o jogador ativo compre
+uma carta no começo do turno e limpar o dano das criaturas no final do turno) e chama os métodos de
+fase principal e de combate, que permitem que os jogadores joguem as cartas da mão, ataquem e
+bloqueiem.
+
+Além disso há alguns métodos para definir quais são as ações legais para um jogador e para realizar
+as chamades \texttt{ações baseadas no estado}, que são ações performadas pelo jogo sempre que uma
+certa condição baseada no estado do jogo se torna verdade (por exemplo, destruir criaturas com dano
+igual ou superior à resistência, fazer com que jogadores com $0$ ou menos pontos de vida percam o
+o jogo, e assim por diante).
 
 \pagebreak
 \chapter{Modelagem}
@@ -760,8 +850,23 @@ Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável 
 
 \subsection{Detalhes da Implementação}
 
-\chapter{Conclusão}
+\chapter{Resultados}
+Neste capítulo gostaríamos de analisar os resultados obtidos aplicando os algoritmos descritos no
+capítulo anterior.
 
+\section{Mulligan}
+Aplicando o algoritmo de iteração de valor descrito na seção $3.2.2$, chegamos à seguinte política:
+
+***POLÍTICA AQUI***
+
+Esta política faz bastante sentido se levarmos em consideração a simplificação de limitar a informação
+das cartas na mão ao fato dela ser terreno ou não. Uma maneira de deixar a modelagem mais real seria
+levar em consideração o custo de mana dos cards não-terreno. Isso aumentaria enormemente a quantidade
+de estados possíveis (supondo que as cartas não-terreno do deck tenham custo de mana entre $1$ e $5$,
+uma mão com duas cartas teria $\sum\limits_{i=1}^{6}i = 21$ representações possíveis de estados ao
+invés de $3$, como acontece com a modelagem que escolhemos).
+
+\chapter{Considerações Finais}
 
 \begin{thebibliography}{1}
   \bibitem{exemploMDP}Andrew Schaefer - {\em Markov Decision Processes} - 2006 - http://egon.cheme.cmu.edu/ewo/docs/SchaeferMDP.pdf
