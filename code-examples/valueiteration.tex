@@ -1,19 +1,19 @@
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k}{def} \PY{n+nf}{mulliganValueIteration}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+1 \PY{k}{def} \PY{n+nf}{mulliganValueIteration}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
 
-    \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{7}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
-        \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
-            \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{mulliganValue}\PY{p}{[}\PY{l+m+mi}{7} \PY{o}{\PYZhy{}} \PY{n}{i}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getKeepReward}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+2     \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{7}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
+3         \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
+4             \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{mulliganValue}\PY{p}{[}\PY{l+m+mi}{7} \PY{o}{\PYZhy{}} \PY{n}{i}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getKeepReward}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
 
-    \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{)}\PY{p}{:}
-        
-        \PY{n}{mullSum} \PY{o}{=} \PY{l+m+mi}{0}
-        \PY{k}{for} \PY{n}{jLine} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{:}
-            \PY{n}{prob} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getMulliganProb}\PY{p}{(}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{jLine}\PY{p}{)}
-            \PY{n}{value} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{mulliganValue}\PY{p}{[}\PY{l+m+mi}{7} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}\PY{p}{[}\PY{n}{jLine}\PY{p}{]}
-            \PY{n}{mullSum} \PY{o}{+}\PY{o}{=} \PY{n}{prob} \PY{o}{*} \PY{n}{value}
+5     \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{)}\PY{p}{:}
 
-        \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
-            \PY{k}{if} \PY{n}{mullSum} \PY{o}{\PYZgt{}}\PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getKeepReward}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{:}
-                \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{mulliganValue}\PY{p}{[}\PY{l+m+mi}{7} \PY{o}{\PYZhy{}} \PY{n}{i}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{=} \PY{n}{mullSum}
+6         \PY{n}{mullSum} \PY{o}{=} \PY{l+m+mi}{0}
+7         \PY{k}{for} \PY{n}{jLine} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{:}
+8             \PY{n}{prob} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getMulliganProb}\PY{p}{(}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{jLine}\PY{p}{)}
+9             \PY{n}{value} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{mulliganValue}\PY{p}{[}\PY{l+m+mi}{7} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}\PY{p}{[}\PY{n}{jLine}\PY{p}{]}
+10            \PY{n}{mullSum} \PY{o}{+}\PY{o}{=} \PY{n}{prob} \PY{o}{*} \PY{n}{value}
+
+11        \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
+12            \PY{k}{if} \PY{n}{mullSum} \PY{o}{\PYZgt{}}\PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getKeepReward}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{:}
+13                \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{mulliganValue}\PY{p}{[}\PY{l+m+mi}{7} \PY{o}{\PYZhy{}} \PY{n}{i}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{=} \PY{n}{mullSum}
 \end{Verbatim}

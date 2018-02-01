@@ -1,0 +1,512 @@
+\chapter{Modelagem}
+
+Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de Inteligência Artificial,
+mas para explicarmos a modelagem do problema, é necessária a introdução do conceito de Processos
+de Decisão de Markov, que é o que usaremos para modelar os problemas do jogo.
+
+\section{Processo De decisão de Markov}
+\label{ssec:mdp}
+
+Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP})
+são uma forma de representar alguns problemas de decisão sequenciais.
+
+Para descrever um MDP, usaremos um exemplo com o intuito de tornar a explicação mais didática.
+Imagine que um gerente de um galpão de um produto tem como objetivo maximizar o lucro esperado
+para o próximo ano. A cada mês, o gerente observa quanto há em estoque do produto e decide
+quanto irá pedir ao distribuir para o próximo mês. A demanda mensal do produto é desconhecida,
+mas segue uma distribuição de probabilidade conhecida. Se o gerente pedir produto demais, terá
+custos para manter o estoque, e se pedir de menos, estará perdendo vendas por falta de inventário.
+Suponha que o galpão tem capacidade para armazenar $M$ unidades de produto e que os custos e a
+distribuição da demanda não muda de mês para mês.
+
+O primeiro conceito de MDP que iremos introduzir é o de \textbf{época de decisão}. Uma época de
+decisão é um momento onde uma decisão é tomada. No nosso exemplo, cada época de decisão ocorre
+no começo de um mês, quando o gerente deve decidir quanto produto irá pedir ao distribuidor. Chamamos
+a quantidade de épocas de decisão de um MDP de \textbf{horizonte}, que pode ser finito ou infinito.
+No exemplo, o horizonte é finito de tamanho $12$, sendo uma época para cada mês do ano no qual o
+gerente deseja maximizar seus lucros.
+
+Um MDP pode ser representado por uma tupla $(S, A, P, R)$. $S$ é o conjunto de \textbf{estados}
+$s_t$ do problema, onde um estado é uma configuração do problema em uma determinada época de
+decisão $t$. No exemplo, cada estado representa o espaço disponível no galpão, que pode variar
+de $0$ a $M$.
+
+$A$ é o conjunto de \textbf{ações} $a_t$, onde $t$ é a época de decisão. No exemplo, uma ação
+pode ser comprar de $0$ a $M-s_t$ unidades no mês.
+
+Para falar sobre os outros elementos da tupla do MDP, precisamos entrar em detalhes sobre os
+custos para pedir o produto ao distribuidor e manter o produto em estoque. Um mês começa com $s_t$
+unidades em estoque, e são encomendadas mais $a_t$ unidades, o que gera um custo $c_{pedido}$ dado
+pela função $c_p(a_t)$. Vamos assumir que as unidades sejam pedidas no começo do mês e sejam vendidas
+no final do mês. Há, portanto, um custo $c_{estoque}$ para manter o produto em estoque dado pela função
+$c_e(s_t + a_t)$. A probabilidade de que a demanda $D_t$ no mês seja de $j$ unidades é $p_j, j = 0,1,2\ldots$.
+Quando o final do mês chegar, o número de unidade vendidas será $x_t = min{D_t, s_t + a_j}$, e o lucro
+será dado pela função $l(x_t)$. O número de unidades que começarão o próximo mês em estoque será
+$s_{t+1}= s_t + a_t - x_t$.
+
+$R: S \times A \mapsto \mathbb{R}$ é a função que dá a \textbf{recompensa} esperada por tomar a ação $a_t$
+quando o processo está no estado estado $s_t$. No exemplo, $r_t(s_t, a_t) = E[l(x_t)] - c_{estoque} - c_{pedido}$.
+
+$P: S \times A \times S \mapsto [0,1]$ é uma função que dá a \textbf{probabilidade} do sistema passar de um estado
+para outro, dado uma determinada ação. No nosso exemplo:
+
+\begin{equation*}
+  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j} &j\le s + a \\
+                                                    \sum\limits_{i=s+a}^\infty &j=0 \\
+                                                    0 & j >s+a\end{cases}
+\end{equation*}
+
+Uma vez que temos o nosso MDP definido, queremos chegar em uma \textbf{política}, que é o nome dado
+ao conjunto das \textbf{regras de decisão}. Uma regra de decisão $d_t(s)$ é uma função $d: S \mapsto A$
+que que, dado um estado $s$ na época de decisão $t$, retorna uma ação $a$ que deve ser tomada a partir
+daquele estado de modo a maximizar o ganho final. A seguir veremos uma representação de Magic como MDP,
+e em seguida como extraímos a política para o processo.
+
+\section{\textit{Mulligan}}
+A estrutura de um turno, como descrita no primeiro capítulo, será repetida
+algumas vezes até o jogo acabar, porém é necessário determinar a mão inicial de
+cada jogador e, por isso, trataremos este problema em separado.
+Baseando-se na experiência própria, a estrutura do problema do
+\textbf{\textit{mulligan}} é notavelmente diferente do resto de um jogo
+de \textit{Magic}.
+A principal diferença é que apesar de ambos os jogadores tomarem
+decisões alternadamente nessa etapa, as ações do oponente não têm
+nenhuma influência
+direta sobre as ações do agente, que deve se concentrar em obter uma
+\textbf{mão inicial} que possibilite jogadas nos primeiros turnos do
+jogo.
+
+\vskip1ex
+
+A figura \ref{mulligan} representa as escolhas que o jogador poderá
+fazer para determiná-la, com cada conjunto de cartas representando um
+conjunto
+de estados.
+
+\begin{figure}
+  \centering
+  \label{mulligan}
+  \input{mulligan.tex}
+  \caption{Representação visual de um problema de \textit{mulligan}. Cada
+nível $i$ representa o número de cartas na mão inicial do jogador. $K$ significa a decisão de manter a mão, $M$ realizar um \textit{mulligan}, $T$ deixar a carta no topo em um \textit{scry} e $B$ colocá-la no fundo.}
+\end{figure}
+
+Definimos vagamente uma mão jogável se esta contém tanto cartas que
+impactam o estado de jogo e recursos necessários para jogá-las.
+Para este efeito, separaremos as cartas do deck em duas categorias:
+terrenos (recursos) e não-terrenos (impactam o jogo).
+Outro fator importante é o tamanho da mão, pois cada carta perdida
+representa um turno de atraso em relação a uma mão com sete cartas (uma
+vez que cada jogador compra
+uma carta por turno). Dessa maneira, em uma mão com $i$ cartas, temos
+$i+1$ possibilidades, cada uma com probabilidade
+\begin{equation} \label{eq:stateprob} \mathcal{P}_i(j) =
+\frac{\binom{J}{j}\binom{60 - J}{i - j}}{\binom{60}{i}}, \ \
+j = 0,\ldots, i \end{equation} onde $J$ é o número de terrenos no deck
+e $j$ o
+número de terrenos
+na mão. Note que $\sum_{j=0}^{i}P_i(j) = 1, \forall i$. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
+agente deve decidir entre realizar um \textit{mulligan}
+(denotado por $M$), que resultará em uma mão com $i-1$ cartas, sendo $j'$
+terrenos com probabilidade
+ \[ \mathcal{P}_{i - 1}(j') = \frac{\binom{J}{j'}\binom{60 - J}{i - 1 -
+j'}}{\binom{60}{i - 1}}, \ \  j' = 0,\ldots, i - 1\]
+ ou manter a mão (denotado por $K$), o que termina o problema, seguido
+(para $i < 7$) de uma ação \textit{scry}, que permite uma pequena
+``filtragrem''
+ do deck para os jogadores que já acumularam alguma desvantagem (em
+relação ao número de cartas na mão) no processo. Por fim, a decisão
+também é influenciada
+ pela informação de quem é o jogador inicial, pois ele tem virtualmente
+uma carta a menos, dado que no primeiro turno do jogo não se compra uma
+carta.
+
+\newpage
+\subsection{Mulligan como um MDP}
+
+Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um
+determinado horizonte), podemos determinar todos os parâmetros de um MDP de horizonte finito para
+que o agente siga uma política com a inteção de alcançar uma mão ``jogável'' para uma partida de
+\textit{Magic}.
+
+O conjunto de estados $S$ é composto por um estado inicial $S_I$ (que representa o estado antes
+do jogador comprar a sua primeira mão inicial), um estado final absorvente $S_F$ (que representa
+o jogador após ter decidido manter uma mão) e os estados intermediários, dados por um par $(i, j),
+i \in \{ 0, 1, \ldots 7\}, j \in \{ 0, 1, \ldots, i \}$ (que representam os estados onde o jogador
+tem $i$ cartas na mão, sendo que $j$ são terrenos). Assim, as ações $A(s)$ e as probabilidades
+$P(s'|s, A(s))$ de cada estado $s$ são definidas da seguinte maneira:
+
+\begin{itemize}
+  \item $A(S_I) := \left\{ Start \right\};$
+  \begin{equation*}
+    P((7, j) | S_I, Start) =  \mathcal{P}_7(j);
+  \end{equation*}
+   A partir de $S_I$ é possível tomar a ação \textit{Start}, que leva para o estado $(7, j)$ com
+   probabilidade $\mathcal{P}_7(j)$, descrita na equação \ref{eq:stateprob}.
+  \item $A(i, j):= \begin{lrdcases} Mulligan, Keep\end{lrdcases}, i\in\begin{lrdcases}1, \ldots ,7 \end{lrdcases}, j \in \begin{lrdcases}0, \ldots, i\end{lrdcases};$
+  \item $A(0, 0):=\begin{lrdcases}Keep\end{lrdcases};$
+  \begin{gather*}
+    P((i - 1, j')| (i, j), Mulligan) = \mathcal{P}_{i-1}(j'),\ \ j' \in \{0,1, \ldots, i-1\},\\
+    P(S_F|(i, j), Keep) = 1
+  \end{gather*}
+   A partir de $(i, j), i \neq 0$, analogamente à ação $Start$, temos a ação $Mulligan$, que leva a um estado
+   $(i -1, j')$. Um detalhe importante é a impossibilidade de $Mulligan$ quando $i = 0$. A outra ação,
+   $Keep$, leva ao estado final.
+   \item $A(S_F) := \left\{ Wait \right\}$
+   \begin{equation*}
+     P(S_F | S_F, Wait = 1)
+   \end{equation*}
+   No estado final só há a ação $Wait$, um artifício para que o MDP sempre tenha o mesmo número de
+   épocas de decisão (e constitua um problema de horizonte finito).
+\end{itemize}
+
+Por fim, ainda precisamos determinar as recompensas $R\left(s' | s, a \in A(s) \right)$ associadas a cada
+transição. A notação adotada é $R_k(i, j) = R(S_F | (i, j), Keep)$, ou seja, $R_k(i, j)$ é a recompensa
+associada à ação $Keep$ a partir estado $(i, j)$ (em alto nível, é a decisão de manter uma mão com $i$
+cartas, sendo $j$ delas terrenos). Como a única decisão que realmente importa para a pontuação é a ação
+$Keep$ (pois esta garante que a mão atual será a mão inicial), determinamos que todas as outras transições
+tem recompensa $R_0 = 0$. A partir de experiências pessoais, podemos determinar $R_k$ a partir das seguintes
+restrições:
+\begin{itemize}
+  \item Com $i= i_0$ fixo e $j\in\{0,1,\ldots,i_0\}$, as recompensas $R_k(i_0, j)$(se existem) devem seguir a
+  seguinte relação:
+  \begin{equation} \label{eq:idealhand}R_k (i_0, 3) > R_k(i_0, 2) > R_k(i_0, 4)
+> R_k(i_0, 5) > R_k(i_0, 1) > R_k(i_0, 6) > R_k(i_0, 7) > R_k(i_0,
+0),\end{equation}
+  pois na média, uma mão ideal tem 3 terrenos, em segundo lugar 2
+terrenos, etc. Uma mão sem terrenos é considerada muito ruim.
+  \item $R_k(i, j) > R_k(i - 1, j), \forall (i, j):$ uma mão com o mesmo
+número de terrenos e uma carta a menos deve sempre ser considerada pior
+do que a alternativa.
+  \item $R_k(i, j) > R_k(i - 1, j - 1), \forall (i, j):$ uma mão com o mesmo
+número de não-terrenos e uma carta a menos deve sempre ser considerada
+pior do que a alternativa.
+\end{itemize}
+
+
+
+Dessa maneira, chegamos a uma fórmula geral, $R_k(i, j) = r(j) + \alpha
+i$, onde $r(j)$ assume valores pré-determinados de acordo com
+as desigualdades \ref{eq:idealhand}.
+
+\subsection{Extração da Política}
+Com o MDP definido, desejamos agora extrair uma política, ou seja, um conjunto de regras
+de decisão, que digam ao agente qual ação tomar a partir de um dado estado, mas para isso
+precisamos da definição da \textbf{função de valor}. Uma função de valor para uma política
+$\pi$, denotada por $V^\pi: S \mapsto \mathbb{R}$, é tal que $V^\pi(s)$ dá o valor esperado
+da recompensa para esta política.
+
+Para o problema do Mulligan com uma política $\pi$ com regra de decisão $d$, temos que a
+função de valor é:
+\begin{equation*}
+  V^\pi_k = R(s, d(s)) + \sum \limits_{s' \in S}P(s'|s, d(s))V^\pi_{k+1}(s')
+\end{equation*}
+onde $k$ é a época de decisão, e $V^\pi_z(s) = 0$, onde $z$ é a última época de decisão, pois
+não há mais ações possíveis.
+
+Para extrair a política para o mulligan, utilizamos o algoritmo de \textbf{iteração de valor},
+modificado para atender as especifidades do nosso problema. O algoritmo utiliza programação
+dinâmica para determinar o valor $V^*(s)$ para cada $s \in S$ (o valor da função de valor para
+a melhor política a partir do estado $s$), e assim construir ``de trás para frente'' a melhor
+política para o problema.
+
+Começamos com a mão de $0$ cartas, onde só há uma ação possível (manter a mão), então
+\begin{equation*}
+  V^*(0,0)=R_k(0,0)
+\end{equation*}
+e a melhor ação a partir de uma mão com $0$ é $Keep$ (uma vez que não há
+outra ação possível). Então, calculamos $V^*$ para mãos com $1$ carta e $j$ terrenos:
+\begin{equation*}
+  V^*(1,j) = \max\begin{lrdcases}R_k(1,j),V^*(0,0)\end{lrdcases}
+\end{equation*}
+Como a recompensa por manter uma mão com $1$ carta é maior do que a de manter uma mão com
+$0$ cartas independente da configuração, neste caso $V^*(1,j)=R_k(1,j)$ e a melhor ação para
+esta mão será $Keep$. Para mãos com duas cartas, o valor de $V^*$ leva em consideração as duas
+possibilidades de mãos com $1$ carta, então a fórmula é um pouco mais complexa:
+\begin{equation*}
+  V^*(2,j) =  \max\begin{lrdcases}R_k(2,j),
+              \sum\limits_{j' = 0}^{1}V^*(1,j')\times\mathcal{P}_1(j')\end{lrdcases}
+\end{equation*}
+Se o valor de $R_k(2,j)$ for maior que $\sum\limits_{j' = 0}^{1}V^*(1,j')\times\mathcal{P}_1(j')$,
+a ação ótima para uma mão com $2$ cartas na mão, sendo que $j$ são terrenos, será $Keep$, caso
+contrário, será $Mulligan$. Para mãos com $i>2$ cartas e $j$ terrenos, a fórmula e a lógica para
+decidir a ação ótima são as mesmas:
+\begin{equation*}
+  V^*(i,j) =  \max\begin{lrdcases}R_k(i,j),
+              \sum\limits_{j' = 0}^{i-1}V^*(i-1,j')\times\mathcal{P}_{i-1}(j')\end{lrdcases}
+\end{equation*}
+Uma vez que $V^*$ estiver calculado para todo estado $s$ com uma ação ótima $a_s$ associada,
+podemos construir a nossa política com a regra de decisão $d$ tal que $d(s) = a_s$ (como cada
+estado só pode ocorrer em uma época de decisão específica, não há a necessidade de ter mais
+de uma regra de decisão em nossa política).
+
+\begin{table}[!h]
+\parbox{.25\linewidth}{
+\centering
+\vspace{0.2cm}
+\begin{tabular}{l|r}
+$j$  & $r(j)$ \\ \hline
+0 & -7  \\
+1 & -3     \\
+2 & 3      \\
+3 & 4      \\
+4 & 2     \\
+5 & -1    \\
+6 & -4     \\
+7 & -6
+\end{tabular}
+\caption{recompensas-base para $j = 0, \ldots, 7$ ``on the play''}
+\label{tab:rjplay}
+}
+\hfill
+\parbox{.70\linewidth}{
+\centering
+\begin{tabular}{l|rrrrrrrr|r}
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & $\Sigma$ \\ \hline
+7 & \textcolor{red}{17,5} & \textcolor{red}{21,5} & 27,5 & 28,5 & 26,5 & 23,5 & \textcolor{red}{20,5} & \textcolor{red}{18,5}  & 22,8395\\
+6 & \textcolor{red}{14,0} & \textcolor{red}{18,0} & 24,0 & 25,0 & 23,0 & 20,0 & \textcolor{red}{17,0} &       & 18,6328\\
+5 & \textcolor{red}{10,5} & 14,5 & 20,5 & 21,5 & 19,5 & 16,5 && & 14,0315 \\
+4 & \textcolor{red}{7,0} & 11,0 & 17,0 & 18,0 & 16,0 &&&& 8,8240 \\
+3 & \textcolor{red}{3,5} & 7,5 & 13,5 & 14,5 &&&& & 3,5119\\
+2 & 0,0 & 4,0 & 10,0 &&&&&& -1,9 \\
+1 & -3,5 & 0,5 &&&&& && -7,0\\
+0 & -7,0 &&&& &&&& --
+\end{tabular}
+\caption{recompensas ``on the play'' de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
+\label{tab:Rijplay}
+}
+\end{table}
+
+\begin{table}[!h]
+\parbox{.25\linewidth}{
+\centering
+\vspace{0.2cm}
+\begin{tabular}{l|r}
+$j$  & $r(j)$ \\ \hline
+0 & -4  \\
+1 & 0     \\
+2 & 5      \\
+3 & 6      \\
+4 & 3     \\
+5 & 0    \\
+6 & -3     \\
+7 & -5
+\end{tabular}
+\caption{recompensas-base para $j = 0, \ldots, 7$ }
+\label{tab:rjdraw}
+}
+\hfill
+\parbox{.70\linewidth}{
+\centering
+\begin{tabular}{l|rrrrrrrr|r}
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & $\Sigma$ \\ \hline
+7 & \textcolor{red}{20,5} & \textcolor{red}{24,5} & 29,5 & 30,5 & 27,5 & \textcolor{red}{24,5} & \textcolor{red}{21,5} & \textcolor{red}{19,5} & 24,7502 \\
+6 & \textcolor{red}{17,0} & 21,0 & 26,0 & 27,0 & 24,0 & 21,0 & \textcolor{red}{18,0} && 20,8419 \\
+5 & \textcolor{red}{13,5} & 17,5 & 22,5 & 23,5 & 20,5 & 17,5 &&& 16,4394 \\
+4 & \textcolor{red}{10,0} & 14,0 & 19,0 & 20,0 & 17,0 &&&& 11,4721 \\
+3 & 6,5 & 10,5 & 15,5 & 16,5 &&&&& 6,3559 \\
+2 & 3,0 & 7,0 & 12,0 &&&&&& 1,1 \\
+1 & -0,5 & 3,5 &&&&&&& -4,0 \\
+0 & -4,0 &&&&&&&& --
+\end{tabular}
+\caption{recompensas ``on the draw'' de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
+\label{tab:Rijdraw}
+}
+\end{table}
+Para cada estado $(i, j)$, a recompensa associada à ação \textit{Keep}
+nas tabelas \ref{tab:Rijplay} e \ref{tab:Rijdraw} e, à direita, o valor calculado $\Sigma$ da soma de valores
+associada à ação \textit{Mulligan}. As recompensas em vermelho indicam estados que a política extraída
+é \textit{Mulligan}.
+
+\newpage
+
+\subsection{Detalhes da Implementação}
+
+O primeiro agente inteligente do projeto é \texttt{MulliganAgent}, derivado da classe \texttt{Player}. A intenção desta classe é providenciar a qualquer agente uma possibilidade maior de obter uma ``mão jogável''.
+
+\input{code-examples/mulliganclass.tex}
+
+O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de valor de horizonte finito em \texttt{mulliganValueIteration()} para decidir se vale a pena ou não manter a mão atual. Apesar da decisão ser feita várias vezes, o algoritmo é executado apenas uma vez, para preencher as tabelas inicializadas em \texttt{initMulliganTables()}. A tabela-base de recompensa pode assumir dois conjuntos de valores, relacionados à diferença de ``pontuação'' caso o jogador comece ou não o jogo (fato indicado pela \textit{flag} \texttt{onThePlay}\footnote{O termo ``on the play'' é uma expressão em \textit{Magic} que significa que o jogador começa o jogo, ou seja, joga (``plays'') o primeiro turno. Sobre o segundo jogador, diz-se que está ``on the draw'', pois este compra uma carta no seu primeiro turno enquanto seu antecessor, não. Estas diferenças representam um esforço de equilíbrio nas regras.}).
+\begin{figure}[h!]
+  \input{code-examples/valueiteration.tex}
+  \label{code:valueit}
+  \caption{Método de iteração de valor na classe \texttt{MulliganAgent}}
+\end{figure}
+
+Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O laço nas linhas 5-13 contém a comparação entre a soma $\Sigma(i)$ (definida na seção anterior para cada quantidade de cartas na mão), calculada em 7-10 de acordo com a equação COLOCAR REFERENCIA, e o valor da recompensa $R_k(i, j)$ para cada estado $(i, j)$. A atribuição (ou não) na linha 13 definirá a extração da política posteriormente.
+
+\newpage
+
+\section{O Jogo}
+
+Um jogo de \textit{Magic: the Gathering} é um problema obviamente mais complexo do que o \textit{Mulligan}, mas podemos modelá-lo também como um MDP,
+(na maioria dos casos\footnote{Um jogo normal de \textit{Magic} não tem um horizonte finito, pois há
+inúmeras maneiras de retardar indefinidamente o fim do baralho (como voltar cartas da pilha de descarte para o baralho). Neste trabalho, a versão
+simplificada do jogo com certeza terminará, no máximo, em 60 turnos, quando algum baralho acabar.}, de horizonte finito) tratando também das jogadas do oponente e da informação incompleta presente em sua mão.
+
+\subsection{\textit{Magic} como um MDP}
+
+Assim como detalhado em (\ref{ssec:mdp}) e feito com o problema do \textit{Mulligan}, precisamos definir os conjuntos $S, A, P$ e $R$ para caracterizar
+o problema como um MDP.
+\begin{itemize}
+\item $S$: Cada estado no jogo representa uma diferente configuração entre pontos de vida dos jogadores ($v_1$ e $v_2$), cartas na mão do agente (lista $H$), quantidade de cartas na mão do agente e do oponente ($h_1$ e $h_2$) e nos dois baralhos ($d_1$ e $d_2$),  cartas nos cemitérios dos dois jogadores (listas $G_1$ e $G_2$) e por fim as cartas presentes no campo de batalha (duas listas, $B_1$ e $B_2$), bem como seus estados (virado, desvirado).
+
+\vskip1ex
+
+É preciso que o estado represente também algumas outras informações, como quem é o jogador ativo (representado por $ac_1$, $ac_2$), em qual fase o turno se encontra, quais criaturas entraram no campo de batalha neste turno (pois não poderão atacar) e quais criaturas estão atacando/bloqueando. Todas as possibilidades de estados formam o conjunto $S$ (dependendo das cartas
+que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, então, temos
+\begin{equation}
+  S := \begin{lrdcases} v_1, v_2 \in \mathbb{Z}, \\
+                        act_1, act_2 \in \{0, 1\}, \\
+                        fase \in \{Principal, Combate\} \\
+                        H \subseteq \Omega, \\
+                        h_1, h_2 \in \mathbb{N}, \\
+                        d_1, d_2 \in \mathbb{N}, \\
+                        G_1, G_2 \subseteq \Omega, \\
+                        B_1, B_2 \subseteq \Omega^*
+                      \end{lrdcases},
+\end{equation}
+onde $\Omega$ é o conjunto de todas as cartas e $\Omega^*$ é o conjunto das chamadas \textit{permanentes}, ou seja, cartas na mesa,
+cada uma com uma carta relacionada mais os atributos mencionados (virada ou desvirada, se pode ou não atacar e se está atacando
+ou bloqueando).
+\item $A$ : Para definir as ações possíveis, devemos pensar na estrutura de um turno: \textit{Primeira Fase Principal - Combate - Segunda Fase Principal}. As duas fases principais funcionam do mesmo jeito. Assim, examinaremos cada fase separadamente:
+
+\subsubsection{Fase Principal}
+
+Durante a Fase Principal o jogador ativo pode jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira, onde cada ação significa jogar uma carta (fora a ação de passe) e pode ser atribuída aos seguintes subconjuntos, cada um com condições próprias:
+
+\begin{equation*}
+  A^P := \begin{lrdcases} Land, \hspace{2.58cm}  \textrm{\hfill se o jogador não jogou terreno neste turno}, \\
+                          Creature(c),\hspace{1.53cm} \textrm{se o jogador possui $c$ terrenos desvirados na mesa}, \\
+                          Sorcery(c, T),\hspace{1.33cm} \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
+                          CreatWithEff(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
+                          Pass,\hspace{2.6cm} \textrm{termina a fase (sempre possível).}
+         \end{lrdcases}
+\end{equation*}
+\begin{itemize}
+  \item Cada \textbf{terreno} só pode ser jogado se o jogador ainda não jogou um neste turno.
+  \item \textbf{Criaturas} precisam do número de terrenos desvirados descrito em seu custo para serem jogadas.
+  \item \textbf{Feitiços}, além do custo, precisam de alvos válidos para serem jogados (por exemplo, o feitiço ``Flame Slash'' lê, em português, ``Golpe Ardente causa 4 pontos de dano à criatura alvo.''. Dessa maneira, este feitiço só pode ser jogado se existe pelo menos uma criatura em jogo).
+  \item  Se uma criatura tem um efeito desencadeado quando entra em campo, por sua vez, esta criatura pode ser jogada mesmo se não existem alvos válidos para seu efeito (neste caso, o efeito simplesmente não acontece).
+  \item Por fim, a ação $Pass$ termina a fase: se o jogador estiver na primeira fase principal, passa para o combate, se estiver na segunda, termina o turno.
+\end{itemize}
+    Para este projeto, restringimos o conjunto de cartas utilizadasde tal maneira que toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$.\footnote{Efeitos que adicionariam alguma incerteza à modelagem seriam comprar cartas (como o feitiço Divinação, da figura \ref{divination}), efeitos que envolvem escolhas e/ou informações do oponente (como ``o oponente alvo descarta uma carta''), dentre outros. Estes efeitos proporcionariam probabilidades diferentes.}
+
+\vskip1ex
+O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase principal e as ações legais correspondentes.
+
+\newpage
+
+\subsubsection{Exemplo - Fase Principal}
+\input{mainphaseexample.tex}
+
+\newpage
+
+\subsubsection{Combate}
+
+O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.\footnote{Nesta seção não trataremos das \textit{habilidades de criatura} relevantes para o combate, de maneira a simplificar as explicações. Trataremos melhor disso mais a frente.}
+
+\vskip1ex
+
+O conjunto $A^C_1$ de ações do jogador ativo no combate, portanto, é o conjunto de escolhas de todas as combinações de criaturas atacantes (incluindo nenhuma). Dado que o jogador deve escolher alguma combinação, \begin{equation}|A^C_1| = \sum\limits_{i = 0}^{N}\binom{N}{i} = 2^N,\end{equation} onde $N$ é o número de criaturas que podem atacar na mesa do jogador ativo.
+
+\vskip1ex
+
+O conjunto $A^C_2$ de ações do jogador não-ativo durante o combate, por sua vez, é o conjunto de escolhas de todas as combinações de criaturas bloqueadoras e aquelas que estas bloqueiam. Como cada criatura desvirada pode bloquear até uma criatura atacante, temos que \begin{equation} |A^C_2| = (N' + 1)^M \le (N + 1)^M, \end{equation} onde $N'$ é o número de criaturas atacantes e $M$ o número de criaturas aptas a bloquearem.
+
+\vskip1ex
+
+Assim como na fase principal, cada ação $a \in \left\{A^C_1, A^C_2\right\}$ no estado $s$ tomada tem probabilidade $P(s'| s, a) = 1$ para o estado $s'$ sucessor previsto pelas regras.
+
+\vskip1ex
+
+Nas próximas páginas demonstraremos por exemplos os estados e conjuntos de ações (de ambos jogadores) em uma fase de combate.
+
+\newpage
+\subsubsection{Exemplo - Combate}
+\input{combatexample.tex}
+
+
+\item $R$ : Por fim, precisamos definir as recompensas por sair de cada estado. Uma boa definição inicial leva em conta os pontos de vida do agente e do oponente, assim como as ``presenças de campo'', termo vago que dá a ideia de progresso no jogo. Escolhemos medir a ``presença de campo'' de cada jogador com o dano que suas criaturas podem causar, ou seja, a soma do poder de todas as suas criaturas. Assim, dados pontos de vida $v_1, v_2$ respectivos do agente e seu oponente e seus conjuntos de permanentes $B_1, B_2$, temos
+
+\begin{equation}
+  R(s'|s, a) = \begin{cases}
+              -\gamma, &\textrm{ caso $v_1 \le 0$,} \\
+              +\gamma, &\textrm{ caso $v_2 \le 0$,} \\
+              v_1 + v_2 + \sum\limits_{e \in B_1} pow(e) - \sum\limits_{e \in B_2} pow(e), &\textrm{ cc.}
+            \end{cases},
+\end{equation}
+onde $\gamma$ deve ser uma recompensa para o agente suficientemente alta para incentivar a derrota do oponente e evitar a própria. A função $pow(e)$ retorna o poder da permanente $e$.
+
+\vskip1ex
+
+Podemos, então, calcular as recompensas de acordo com $R$ por sair dos estados nos exemplos demonstrados por meio das ações escolhidas:
+
+\begin{itemize}
+  \item $R(s_2 | s_1, Mountain) = v_1 - v_2 = 10 - 10 = 0.$
+  \item $R(s_3 | s_2, PensiveMinotaur(3)) = v_1 - v_2 + pow(PensiveMinotaur) = 0 + 2 = 2.$
+  \item $R(s_4 | s_3, FlameSlash(1, PensiveMinotaur)) = v_1 - v_2 + 0 = 0.$
+\end{itemize}
+
+Vamos examinar agora as recompensas no exemplo de combate tomando como agente o jogador defensor (portanto, as recompensas são contrárias - $v_2$ e $B_2$ são relativos aos agentes):
+
+\begin{itemize}
+  \item $R(t_3 | t_2, \{WalkingCorpse1 : GrizzlyBears2, WalkingCorpse2 : None\}) = v_2 - v_1 + \sum\limits_e(pow(e) : e \in B_2) - \sum\limits_e(pow(e) : e \in B_1) = 7 - 10 + 2 - 5 = -6.$
+  \item $R(t'_3| t_2, \{WalkingCorpse1 : GrizzlyBears2, WalkingCorpse2 : CentaurCourser\}) = 10 - 10 + 0 - 3 = -3.$
+  \item $R(t''_3| t_2, \{WalkingCorpse1 : CentaurCourser, WalkingCorpse2 : CentaurCourser\}) = 8 - 10 + 2 - 2 = -2.$
+\end{itemize}
+Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável para o jogador defensor do que os outros.
+
+\end{itemize}
+
+\newpage
+
+\subsection{Estratégias e algoritmos}
+
+Um turno inteiro de \textit{Magic} tem, como mostrado, muitos estados possíveis. Para determinar
+em primeira instância as ações de um turno, é possível realizar uma busca local exaustiva dentre todas as
+possibilidades. Tomando o turno atual como escopo, podemos definir uma recompensa para qualquer
+estado final (que sempre será após a ação \textit{Pass} na segunda Fase Principal), que assumirá o valor 0
+nos outros casos (como examinaremos todas as possibilidades, faz sentido que a recompensa só seja avaliada
+após a aplicação de toda a sequência). Esta busca, analogamente à divisão do turno, tem três partes:
+
+\subsubsection{Busca Local - Primeira Fase Principal}
+
+Uma busca local em um problema de Inteligência Artificial consiste, resumidamente, em construir uma árvore
+de estados através de uma função $Vizinhos(s, a)$ que retorna os possíveis estados-sucessores de um estado $s$ após
+a aplicação de uma ação $a$ (dadas as restrições já impostas no problema, sabemos que a função $Vizinhos(s, a)$ sempre
+retornará apenas um estado). Assim, o agente pode prever o resultado da aplicação de uma sequência de ações e explorar
+o espaço de estados até encontrar o que deseja. Os dois algoritmos básicos de busca local são a busca em \textbf{profundidade} e busca
+em \textbf{largura}.
+
+\vskip1ex
+Na busca em profundidade, usa-se uma estrutura de pilha:toda vez que uma ação exploratória é tomada, o
+estado sucessor é empilhado, geralmente havendo \textit{backtracking} quando um estado admite estados sucessores diferentes. Por exemplo,
+suponhamos que um agente deve resolver um labirinto. Ao efetuar uma busca em profundidade, empilhará estados explorados até encontrar
+um estado sem sucessores. Caso este estado seja a saída do labirinto, o problema é resolvido; caso contrário, o agente retira estados
+da pilha até encontrar o último estado com sucessores não-explorados do caminho -- e, a partir dele, continua a busca.
+
+\vskip1ex
+Por outro lado, a busca em largura utiliza uma fila: dado um estado examinado $s$, todos os seus sucessores
+não-visitados são inseridos na fila, de modo a serem explorados posteriormente. A busca em largura permite comparar mais naturalmente
+custos (ou, no nosso caso, recompensas) associados a estados finais e/ou caminhos, sendo mais adequada para examinar exaustivamente
+todos os estados -- justamente o que queremos. Sendo assim, é um algoritmo adequado para decidir a sequência de ações com maior
+recompensa em um turno.
+
+\subsubsection{Minimax - Combate}
+
+Suponhamos que 
+
+A etapa de combate consiste em três decisões, como explicado na seção \ref{gamestructure}:
+
+\begin{enumerate}
+  \item \textbf{Jogador ativo} declara criaturas atacantes.
+  \item \textbf{Jogador defensor} declara criaturas bloqueadoras.
+  \item \textbf{Jogador ativo} escolhe a ordem da atribuição do dano (caso haja mais de uma criatura bloqueadora
+  para alguma criatura atacante).
+\end{enumerate}
+
+Dada a natureza alternada das ações, é possível utilizar a regra de decisão \textit{Minimax} (de maximização-minimização,
+também podendo ser escrita como \textit{Maximin}) para submeter uma ação.
+
+\subsection{Detalhes da Implementação}
