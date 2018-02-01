@@ -341,7 +341,7 @@ Podemos também ver o efeito da carta, que concede três pontos de vida a seu co
 
 \section{\texttt{class Game:}}
 
-\pagebreak
+\newpage
 \chapter{Modelagem}
 
 Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de Inteligência Artificial,
@@ -465,7 +465,7 @@ também é influenciada
 uma carta a menos, dado que no primeiro turno do jogo não se compra uma
 carta.
 
-\pagebreak
+\newpage
 \subsection{Mulligan como um MDP}
 
 Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um
@@ -536,39 +536,76 @@ as desigualdades \ref{eq:idealhand}. Para $\alpha = 3$ e $r(i)$ determinado pela
 \ref{tab:Rij}.
 
 \begin{table}[!h]
-\parbox{.45\linewidth}{
+\parbox{.25\linewidth}{
 \centering
 \vspace{0.2cm}
 \begin{tabular}{l|r}
 $j$  & $r(j)$ \\ \hline
-0 & -1000  \\
-1 & -4     \\
-2 & 0      \\
-3 & 1      \\
-4 & -1     \\
-5 & -3    \\
-6 & -5     \\
-7 & -7
+0 & -7  \\
+1 & -3     \\
+2 & 3      \\
+3 & 4      \\
+4 & 2     \\
+5 & -1    \\
+6 & -4     \\
+7 & -6
 \end{tabular}
 \caption{recompensas-base para $j = 0, \ldots, 7$}
-\label{tab:rj}
+\label{tab:rjplay}
 }
 \hfill
-\parbox{.45\linewidth}{
+\parbox{.70\linewidth}{
 \centering
-\begin{tabular}{l|rrrrrrrr}
-$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  \\ \hline
-7 & -979  & 17 & 21 & 22 & 20 & 18 & 16 & 14 \\
-6 & -982  & 14 & 18 & 19 & 17 & 15 & 13 &    \\
-5 & -985  & 11 & 15 & 16 & 14 & 12 &    &    \\
-4 & -988  & 8  & 12 & 13 & 11 &    &    &    \\
-3 & -991  & 5  & 9  & 10 &    &    &    &    \\
-2 & -994  & 2  & 6  &    &    &    &    &    \\
-1 & -997  & -1 &    &    &    &    &    &    \\
-0 & -1000 &    &    &    &    &    &    &
+\begin{tabular}{l|rrrrrrrr|r}
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & \\ \hline
+7 & 17,5 & 21,5 & 27,5 & 28,5 & 26,5 & 23,5 & 20,5 & 18,5  & 22,8395\\
+6 & 14,0 & 18,0 & 24,0 & 25,0 & 23,0 & 20,0 & 17,0 &       & 18,6328\\
+5 & 10,5 & 14,5 & 20,5 & 21,5 & 19,5 & 16,5 && & 14,0315 \\
+4 & 7,0 & 11,0 & 17,0 & 18,0 & 16,0 &&&& 8,8240 \\
+3 & 3,5 & 7,5 & 13,5 & 14,5 &&&& & 3,5119\\
+2 & 0,0 & 4,0 & 10,0 &&&&&& -1,9 \\
+1 & -3,5 & 0,5 &&&&& && -7,0\\
+0 & -7,0 &&&& &&&& --
 \end{tabular}
 \caption{recompensas de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
-\label{tab:Rij}
+\label{tab:Rijplay}
+}
+\end{table}
+
+\begin{table}[!h]
+\parbox{.25\linewidth}{
+\centering
+\vspace{0.2cm}
+\begin{tabular}{l|r}
+$j$  & $r(j)$ \\ \hline
+0 & -4  \\
+1 & 0     \\
+2 & 5      \\
+3 & 6      \\
+4 & 3     \\
+5 & 0    \\
+6 & -3     \\
+7 & -5
+\end{tabular}
+\caption{recompensas-base para $j = 0, \ldots, 7$}
+\label{tab:rjdraw}
+}
+\hfill
+\parbox{.70\linewidth}{
+\centering
+\begin{tabular}{l|rrrrrrrr|r}
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & \\ \hline
+7 & 20,5 & 24,5 & 29,5 & 30,5 & 27,5 & 24,5 & 21,5 & 19,5 & 24,7502 \\
+6 & 17,0 & 21,0 & 26,0 & 27,0 & 24,0 & 21,0 & 18,0 && 20,8419 \\
+5 & 13,5 & 17,5 & 22,5 & 23,5 & 20,5 & 17,5 &&& 16,4394 \\
+4 & 10,0 & 14,0 & 19,0 & 20,0 & 17,0 &&&& 11,4721 \\
+3 & 6,5 & 10,5 & 15,5 & 16,5 &&&&& 6,3559 \\
+2 & 3,0 & 7,0 & 12,0 &&&&&& 1,1 \\
+1 & -0,5 & 3,5 &&&&&&& -4,0 \\
+0 & -4,0 &&&&&&&& --
+\end{tabular}
+\caption{recompensas de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
+\label{tab:Rijdraw}
 }
 \end{table}
 Assim, temos um MDP de horizonte finito (sempre acabará na época 9) e podemos determinar uma política ótima para a determinação da mão inicial.
@@ -638,7 +675,8 @@ O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de v
   \label{code:valueit}
   \caption{Método de iteração de valor na classe \texttt{MulliganAgent}}
 \end{figure}
-Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O horizonte é fixo em 8 épocas de decisão (correspondentes de 7 a 0 cartas na mão do agente), portanto há 8 iterações do trecho 6-12, que na $k$-ésima iteração calcula a soma $\sum_{j' = 0}^{i-1}V^*_{k-1}(i-1,j')\times\mathcal{P}_{i-1}(j')$. Se a soma calculada - relacionada à ação $Mulligan$ - é maior do que a recompensa $R_k(i, j)$, atualizamos a entrada $i, j$ na tabela de valores com o valor da soma. Dessa maneira, é possível determinar a política ótima $\pi^*(i,j)$  em qualquer estado $(i,j)$ no método \texttt{mulligan()} ao verificar se $V^*(i, j)$ é igual à recompensa $R_k(i,j)$ (caso não seja, $\pi^*(i,j) \gets Mulligan$). O método \texttt{getKeepReward(i, j)} retorna a recompensa de acordo com os valores em \texttt{landRewards}, inicializada na criação do agente com os valores-base de recompensa determinados na tabela \ref{tab:rj}.
+Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O horizonte é fixo em 8 épocas de decisão (correspondentes de 7 a 0 cartas na mão do agente), portanto há 8 iterações do trecho 6-12, que na $k$-ésima iteração calcula a soma $\sum_{j' = 0}^{i-1}V^*_{k-1}(i-1,j')\times\mathcal{P}_{i-1}(j')$. Se a soma calculada - relacionada à ação $Mulligan$ - é maior do que a recompensa $R_k(i, j)$, atualizamos a entrada $i, j$ na tabela de valores com o valor da soma. Dessa maneira, é possível determinar a política ótima $\pi^*(i,j)$  em qualquer estado $(i,j)$ no método \texttt{mulligan()} ao verificar se $V^*(i, j)$ é igual à recompensa $R_k(i,j)$ (caso não seja, $\pi^*(i,j) \gets Mulligan$). O método \texttt{getKeepReward(i, j)} retorna a recompensa de acordo com os valores em \texttt{landRewards}, inicializada na criação do agente com os valores-base de recompensa determinados na tabela \ref{tab:rj}. Por fim, \texttt{getMullProb(i, j)} retorna a probabilidade $\mathcal{P}_{i-1}(j')$.
+\newpage
 
 \section{O Jogo}
 
