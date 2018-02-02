@@ -14,5 +14,5 @@ def getChildren(self):
                 nextPhase = 'End'
             children.append(State(game, nextPhase, self.actionPath + [action]))
     else:
-        children = self.combatMaxMin()
+        children = self.combatMinimax()
     return children

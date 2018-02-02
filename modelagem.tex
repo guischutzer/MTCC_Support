@@ -530,4 +530,45 @@ A partir de um estado inicial \texttt{startState}, este método inicializa a fil
 
 \input{code-examples/stateclass.tex}
 
-O construtor da classe recebe como parâmetro o jogo, a fase atual de jogo (em uma \textit{string}) e o caminho de ações escolhido para chegar nele. A partir das informações do jogo é possível extrair os atributos do estado relevantes para a determinação da recompensa. O método \texttt{isTerminal()} retorna \texttt{True} ou \texttt{False} dependendo se o estado é terminal ou não. Isso é determinado caso a fase 
+O construtor da classe recebe como parâmetro o jogo, a fase atual de jogo (em uma \textit{string}) e o caminho de ações escolhido para chegar nele. A partir das informações do jogo é possível extrair os atributos do estado relevantes para a determinação da recompensa. O método \texttt{isTerminal()} retorna \texttt{True} ou \texttt{False} dependendo se o estado é terminal ou não. Isso é determinado caso a fase seja \texttt{'End'} (sucessora de um estado na segunda Fase Principal) ou algum dos jogadores tenha perdido o jogo (o que pode acontecer a qualquer fase). O método \texttt{getChildren()} (equivalente à função $Vizinhos(s, a)$ aplicada a todas as ações possíveis de um estado) é chamado pelo método homônimo na classe \texttt{SearchAgent} (que simplesmente chama \texttt{state.getchildren()} quando a fase é alguma das duas fases principais ou o método \texttt{combatMinimax()}, quando a fase do estado atual é \texttt{'Combate'}).
+
+\input{code-examples/getchildren.tex}
+
+O método \texttt{getChildren()} no estado encontra todas as ações legais de uma Fase Principal e, para cada uma, faz uma \textbf{cópia profunda} do jogo. Por fim,  ``dentro da cópia'' (pois não queremos alterar o jogo ``real''), joga a ação. A partir dos resultados da ação, um novo estado é criado (com a cópia do jogo como referência). O método retorna a lista de todos os estados criados desta maneira. Ainda, o método \texttt{combatMinimax()} da classe do agente funciona com a mesma ideia: explorar a árvore \textit{Minimax} criando cópias do jogo. Como o método é mais complexo (e chama 2 métodos parecidos), vamos simplificá-lo em pseudocódigo.
+
+\begin{algorithm}
+\caption*{\textbf{Minimax para Combate} (estado $s$):}
+\begin{algorithmic}
+  \STATE $a_{max} \gets \emptyset$
+  \STATE recompensa máxima $r^1_{max} \gets -\infty$
+  \STATE configurações de ataque $A^C_1 \gets A(s)$
+  \STATE \textbf{para cada} ação de ataque $a \in A^C_1:$
+    \STATE \ind $s' \gets $ cópia($s$)
+    \STATE \ind $s' \gets $ aplica ação($s', a$)
+    \STATE \ind recompensa mínima $r^2_{min} \gets +\infty$
+    \STATE \ind configurações de bloqueio $A^C_2 \gets A(s')$
+    \STATE
+    \STATE \ind \textbf{para cada} ação de bloqueio $b \in A^C_2:$
+      \STATE \ind \ind $s'' \gets $ cópia($s'$)
+      \STATE \ind \ind $s'' \gets $ aplica ação($s'', b$)
+      \STATE \ind \ind recompensa máxima $r^3_{max} \gets -\infty$
+      \STATE \ind \ind ordenações de bloqueio $A^C_3 \gets A(s'')$
+      \STATE
+      \STATE \ind \ind \textbf{para cada} ação de ordenação $c \in A^C_3:$
+        \STATE \ind \ind \ind $s'''\gets $ cópia($s''$)
+        \STATE \ind \ind \ind $s'''\gets $ aplica ação($s''', c$)
+        \STATE \ind \ind \ind $r \gets $ recompensa($s'''$)
+        \STATE \ind \ind \ind \textbf{se } $r > r^3_{max}$ \textbf{então: }
+        \STATE \ind \ind \ind \ind $r^3_{max} \gets r$
+      \STATE
+      \STATE \ind \ind \textbf{se } $r^3_{max} < r^2_{min}$ \textbf{então: }
+      \STATE \ind \ind \ind $r^2_{min} \gets r^3_{max}$
+      \STATE \ind \ind \ind $b_{min} \gets b$
+    \STATE
+    \STATE \ind \textbf{se } $r^2_{min} > r^1_{max}$ \textbf{então: }
+    \STATE \ind \ind $r^1_{max} \gets r^2_{min}$
+    \STATE \ind \ind $a_{max} \gets a$
+    \STATE
+    \STATE \textbf{devolva } $a_{max}$
+\end{algorithmic}
+\end{algorithm}
