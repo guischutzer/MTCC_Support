@@ -97,18 +97,57 @@ Neste capítulo gostaríamos de analisar os resultados obtidos aplicando os algo
 capítulo anterior.
 
 \section{Mulligan}
-Aplicando o algoritmo de iteração de valor descrito na seção $3.2.2$, chegamos à seguinte política:
+A política encontrada com a iteração de valor faz bastante sentido se levarmos em consideração a
+simplificação de limitar a informação das cartas na mão ao fato dela ser terreno ou não. Uma
+maneira de deixar a modelagem mais real seria levar em consideração o custo de mana dos cards
+não-terreno. Isso aumentaria enormemente a quantidade de estados possíveis (supondo que as cartas
+não-terreno do deck tenham custo de mana entre $1$ e $5$, uma mão com duas cartas teria
+$\sum\limits_{i=1}^{6}i = 21$ representações possíveis de estados ao invés de $3$, como acontece
+com a modelagem que escolhemos), mas essa modelagem ainda estaria desconsiderando informações
+relevantes na decisão do mulligan, como por exemplo se as cartas na mão inicial se encaixam na
+estratégia definida pelo jogador para combater o deck adversário. De uma maneira geral, estamos
+satisfeitos com os resultados obtidos, uma vez que o agente consegue mitigar a aleatoriedade
+tomando decisões que aumentam suas chances de ter um jogo justo.
 
-***POLÍTICA AQUI***
+\section{O Jogo}
+Após rodar os experimentos várias vezes e analisar os resultados, conseguimos descrever o
+comportamento do agente dentro do jogo como agressivo. Já que escolhemos uma implementação que
+leva em consideração apenas o turno atual, o agente não leva em consideração o ataque do oponente
+no turno seguinte, e portanto escolhe os atacantes sem pensar em quais de suas criaturas seriam
+boas bloqueadoras para impedir que o oponente estabeleça uma vantagem ou até mesmo ganhe o jogo.
 
-Esta política faz bastante sentido se levarmos em consideração a simplificação de limitar a informação
-das cartas na mão ao fato dela ser terreno ou não. Uma maneira de deixar a modelagem mais real seria
-levar em consideração o custo de mana dos cards não-terreno. Isso aumentaria enormemente a quantidade
-de estados possíveis (supondo que as cartas não-terreno do deck tenham custo de mana entre $1$ e $5$,
-uma mão com duas cartas teria $\sum\limits_{i=1}^{6}i = 21$ representações possíveis de estados ao
-invés de $3$, como acontece com a modelagem que escolhemos).
+Rodamos 70 testes com as configurações possíveis de agente inteligente ou aleatório controlando
+cada um dos decks, e obtivemos os seguintes resultados:
+\begin{itemize}
+  \item \textbf{Aleatório x Aleatório:} Nessa configuração o deck Branco ganhou $71,8\%$ das vezes.
+  Esse comportamento é esperado, pois o deck Vermelho tem uma quantidade maior de cartas que podem
+  ter alvo tanto nas criaturas do controlador quanto nas do oponente, fazendo com que muitas vezes
+  o agente mate suas próprias criaturas ou jogue uma carta que causa dano em si mesmo, enquanto o
+  deck Branco tem menos cartas que possibilitam jogadas ruins.
+
+  \item \textbf{Aleatório x Inteligente:} Jogamos com as duas configurações possíveis, e nas duas
+  o agente com o algoritmo de busca se saiu muito melhor que o oponente: $95,9\%$ quando no
+  controle do deck Branco, e $97,2\%$ quando controlando o deck Vermelho. Novamente um resultado
+  esperado, dado que o agente aleatório demora turnos para jogar seu primeiro terreno enquanto o
+  agente inteligente joga terrenos sempre que possível, o que possibilita que jogue suas cartas
+  muito antes.
+
+  \item \textbf{Inteligente x Inteligente:} Esta configuração é a mais interessante, uma vez que
+  ambos os agentes jogaram tentando maximizar a recompensa. O resultado obtido foi $76,5\%$ de
+  vitórias para o agente com o deck vermelho. Novamente, um resultado esperado, uma vez que o
+  comportamento agressivo beneficia o deck vermelho.
+\end{itemize}
 
 \chapter{Considerações Finais}
+Modelar um problema de inteligência artificial do zero, o que possibilitou com que aprofundássemos
+nossos conhecimentos na área, estudando diferentes métodos de modelagem e algoritmos para extração
+de política.
+
+Implementar o nosso próprio cliente fez com que trabalhássemos com orientação a objetos em um
+projeto grande, o que não havíamos feito muito durante as disciplinas da graduação. O cliente
+facilitou a implementação dos agentes, uma vez que tínhamos conhecimento total da plataforma, mas
+por outro lado impossibilitou que testássemos os agentes corretamente até que o jogo estivesse
+funcionando corretamente, o que acabou se mostrando mais trabalhoso que o esperado.
 
 \begin{thebibliography}{1}
   \bibitem{exemploMDP}Andrew Schaefer - {\em Markov Decision Processes} - 2006 - http://egon.cheme.cmu.edu/ewo/docs/SchaeferMDP.pdf
