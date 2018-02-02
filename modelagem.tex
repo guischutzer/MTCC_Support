@@ -471,13 +471,12 @@ estado final (que sempre será após a ação \textit{Pass} na segunda Fase Prin
 nos outros casos (como examinaremos todas as possibilidades, faz sentido que a recompensa só seja avaliada
 após a aplicação de toda a sequência). Esta busca, analogamente à divisão do turno, tem três partes:
 
-\subsubsection{Busca Local - Primeira Fase Principal}
+\subsubsection{Busca Local - Fase Principal}
 
 Uma busca local em um problema de Inteligência Artificial consiste, resumidamente, em construir uma árvore
 de estados através de uma função $Vizinhos(s, a)$ que retorna os possíveis estados-sucessores de um estado $s$ após
 a aplicação de uma ação $a$ (dadas as restrições já impostas no problema, sabemos que a função $Vizinhos(s, a)$ sempre
-retornará apenas um estado). Assim, o agente pode prever o resultado da aplicação de uma sequência de ações e explorar
-o espaço de estados até encontrar o que deseja. Os dois algoritmos básicos de busca local são a busca em \textbf{profundidade} e busca
+retornará apenas um estado). Assim, o agente pode prever o resultado da aplicação de uma sequência de ações e explorar o espaço de estados até encontrar o que deseja. Os dois algoritmos básicos de busca local são a busca em \textbf{profundidade} e busca
 em \textbf{largura}.
 
 \vskip1ex
@@ -496,8 +495,6 @@ recompensa em um turno.
 
 \subsubsection{Minimax - Combate}
 
-Suponhamos que
-
 A etapa de combate consiste em três decisões, como explicado na seção \ref{gamestructure}:
 
 \begin{enumerate}
@@ -507,7 +504,30 @@ A etapa de combate consiste em três decisões, como explicado na seção \ref{g
   para alguma criatura atacante).
 \end{enumerate}
 
-Dada a natureza alternada das ações, é possível utilizar a regra de decisão \textit{Minimax} (de maximização-minimização,
-também podendo ser escrita como \textit{Maximin}) para submeter uma ação.
+Dada a natureza alternada das ações, escolhemos utilizar a regra de decisão \textit{Minimax} (de minimização-maximização, também podendo ser escrita como \textit{Maximin}) para submeter uma ação. O \textit{Minimax}, intuitivamente, busca minimizar a maior perda futura possível ao realizar uma ação. Para isso, supõe-se que, dada uma ação $a$ escolhida pelo agente em questão, seu adversário escolherá racionalmente uma ação $a'$ que maximize a perda do agente. Assim, o agente consegue realizar uma busca dentre todas as suas ações e determinar a mais ``segura'', ou seja, que minimiza a perda máxima após a escolha da ação $a_1$ por seu adversário. Podemos definir a seguinte função-valor para um estado $s$ e seu sucessor $s'$ lembrando que a ação em $s$ é escolhida pelo agente e, em $s'$, por seu adversário:
+
+\begin{equation*}
+  MM_s = \max\limits_{a \in A(s)}\left(\min\limits_{a' \in A(s')}\left(MM_{s'}\right)\right)
+\end{equation*}
+
+Como a função é definida recursivamente, é necessário definir um critério de parada e seu comportamento neste caso. O usual para o \textit{Minimax} é definir uma profundidade máxima $n$ e, de alguma maneira, avaliar os ganhos (ou perdas) de todos os estados possíveis nesta profundidade (que se propagarão até a ``superfície'' -- a primeira decisão). No caso do combate, como temos 3 decisões, podemos definir sem preocupações a profundidade $n = 2$ e os ganhos com uma função-recompensa igual à da busca em largura da primeira Fase Principal (afinal, os objetivos são os mesmos). Quando o agente é o jogador defensor, sua decisão (ou seja, como declarar as criaturas bloqueadoras) levará em conta apenas a ordem que o jogador ativo escolherá, depois, a atribuição de dano, logo, neste caso, a profundidade da árvore \textit{Minimax} é 1.
+
+\subsubsection{Combinando estratégias}
+
+Para definir a recompensa no final de um turno, então, devemos combinar ambas buscas. Isso é feito naturalmente ao expandirmos a busca em largura em uma fase principal para o turno todo, incorporando o estado pós-combate determinado pela busca \textit{Minimax}. Como o combate é influenciado pelas ações tomadas no primeiro turno, cada sequência de ações terá uma previsão de combate própria. O estado pós-combate é o começo da segunda Fase Principal e, partir dele, podemos continuar a busca em largura até o final do turno, quando avaliaremos a recompensa associada a cada sequência (total) de ações.
+
+\vskip1ex
+
+Como o agente pode prever incorretamente as escolhas de bloqueio de seu oponente (caso este não realize um \textit{Minimax} ou avalie recompensas de um modo diferente, por exemplo), é possível que o estado no início da segunda Fase Principal seja diferente do previsto. Assim, a busca na segunda Fase Principal deve ser refeita para encontrar a ``nova'' melhor recompensa total do turno. Como isso ocorre quando o jogador defensor não escolhe sua ``melhor'' (segundo os critérios do agente) configuração de bloqueio, é de certa forma positivo para o agente, pois lhe dá a chance de encontrar sequência de ações com uma recompensa maior para o turno.
 
 \subsection{Detalhes da Implementação}
+
+A classe \texttt{SearchAgent} é derivada de \texttt{MulliganAgent} para que decida o \textit{mulligan} baseando-se nas políticas encontradas pela iteração de valor. Iremos examinar seus métodos principais a seguir.
+
+\input{code-examples/breadthfirstsearch.tex}
+
+A partir de um estado inicial \texttt{startState}, este método inicializa a fila de estados e, enquanto a fila não está vazia, repete a seguinte rotina: 8-12 checa se o estado é terminal, caso seja compara sua recompensa com a maior recompensa encontrada; caso não seja, nas linhas 13-15 coloca seus sucessores na fila. O método é simples, mas faz uso de outra classe: \texttt{State}, que define os estados.
+
+\input{code-examples/stateclass.tex}
+
+O construtor da classe recebe como parâmetro o jogo, a fase atual de jogo (em uma \textit{string}) e o caminho de ações escolhido para chegar nele. A partir das informações do jogo é possível extrair os atributos do estado relevantes para a determinação da recompensa. O método \texttt{isTerminal()} retorna \texttt{True} ou \texttt{False} dependendo se o estado é terminal ou não. Isso é determinado caso a fase 
