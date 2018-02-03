@@ -1,0 +1,20 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{def} \PY{n+nf}{getChildren}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+    \PY{n}{children} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+    \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{phase} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{First Main}\PY{l+s+s1}{\PYZsq{}} \PY{o+ow}{or} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{phase} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Second Main}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+        \PY{k}{for} \PY{n}{action} \PY{o+ow}{in} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{game}\PY{o}{.}\PY{n}{getMainActions}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+            \PY{n}{game} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{game}
+            \PY{n}{nextPhase} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{phase}
+            \PY{k}{if} \PY{n}{action}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{o}{!=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Pass}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{n}{game} \PY{o}{=} \PY{n}{c}\PY{o}{.}\PY{n}{deepcopy}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{game}\PY{p}{)}
+                \PY{n}{game}\PY{o}{.}\PY{n}{play}\PY{p}{(}\PY{n}{action}\PY{p}{)}
+                \PY{n}{game}\PY{o}{.}\PY{n}{checkSBA}\PY{p}{(}\PY{p}{)}
+            \PY{k}{elif} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{phase} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{First Main}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{n}{nextPhase} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Combat}\PY{l+s+s1}{\PYZsq{}}
+            \PY{k}{elif} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{phase} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Second Main}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
+                \PY{n}{nextPhase} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{End}\PY{l+s+s1}{\PYZsq{}}
+            \PY{n}{children}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{State}\PY{p}{(}\PY{n}{game}\PY{p}{,} \PY{n}{nextPhase}\PY{p}{,} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{actionPath} \PY{o}{+} \PY{p}{[}\PY{n}{action}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+    \PY{k}{else}\PY{p}{:}
+        \PY{n}{children} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{combatMinimax}\PY{p}{(}\PY{p}{)}
+    \PY{k}{return} \PY{n}{children}
+\end{Verbatim}

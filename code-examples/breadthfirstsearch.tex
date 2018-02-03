@@ -1,0 +1,22 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+ \PY{l+m+mi}{1} \PY{k}{def} \PY{n+nf}{breadthFirstSearch}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{startState}\PY{p}{)}\PY{p}{:}
+ \PY{l+m+mi}{2}     \PY{n}{q} \PY{o}{=} \PY{n}{queue}\PY{o}{.}\PY{n}{Queue}\PY{p}{(}\PY{p}{)}
+ \PY{l+m+mi}{3}     \PY{n}{q}\PY{o}{.}\PY{n}{put}\PY{p}{(}\PY{n}{startState}\PY{p}{)}
+ \PY{l+m+mi}{4}     \PY{n}{maxReward} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{l+m+mi}{200}
+ \PY{l+m+mi}{5}     \PY{n}{actionPath} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+
+ \PY{l+m+mi}{6}     \PY{k}{while} \PY{o+ow}{not} \PY{n}{q}\PY{o}{.}\PY{n}{empty}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+ \PY{l+m+mi}{7}         \PY{n}{state} \PY{o}{=} \PY{n}{q}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{p}{)}
+ 
+ \PY{l+m+mi}{8}         \PY{k}{if} \PY{n}{state}\PY{o}{.}\PY{n}{isTerminal}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+ \PY{l+m+mi}{9}             \PY{n}{reward} \PY{o}{=} \PY{n}{state}\PY{o}{.}\PY{n}{getReward}\PY{p}{(}\PY{p}{)}
+\PY{l+m+mi}{10}             \PY{k}{if} \PY{n}{reward} \PY{o}{\PYZgt{}}\PY{o}{=} \PY{n}{maxReward}\PY{p}{:}
+\PY{l+m+mi}{11}                 \PY{n}{maxReward} \PY{o}{=} \PY{n}{reward}
+\PY{l+m+mi}{12}                 \PY{n}{actionPath} \PY{o}{=} \PY{n}{state}\PY{o}{.}\PY{n}{getPath}\PY{p}{(}\PY{p}{)}
+
+\PY{l+m+mi}{13}         \PY{k}{else}\PY{p}{:}
+\PY{l+m+mi}{14}             \PY{k}{for} \PY{n}{s} \PY{o+ow}{in} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getChildren}\PY{p}{(}\PY{n}{state}\PY{p}{)}\PY{p}{:}
+\PY{l+m+mi}{15}             \PY{n}{q}\PY{o}{.}\PY{n}{put}\PY{p}{(}\PY{n}{s}\PY{p}{)}
+
+\PY{l+m+mi}{16}     \PY{k}{return} \PY{n}{actionPath}
+\end{Verbatim}
