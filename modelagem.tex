@@ -1,29 +1,25 @@
 \chapter{Modelagem}
 
-Neste capítulo abordaremos um jogo de \textit{Magic} como um problema de Inteligência Artificial,
-mas para explicarmos a modelagem do problema, é necessária a introdução do conceito de Processos
-de Decisão de Markov, que é o que usaremos para modelar os problemas do jogo.
+Neste capítulo iremos detalhar a modelagem do jogo como um problema de inteligência artificial. O jogo está dividido em três partes, cada uma usando uma implementação diferente para encontrar a melhor jogada: o mulligan, que acontece uma vez no começo do jogo, foi modelado como um MDP; as fases principais foram modeladas como um problema de busca, utilizando a busca em largura para chegar na melhor ação; e o combate foi modelado como um problema adversarial utilizando minimax. A seguir entraremos em detalhes sobre cada uma dessas modelagens.
 
 \section{\textit{Mulligan}}
 A estrutura de um turno, como descrita no primeiro capítulo, será repetida
 algumas vezes até o jogo acabar, porém é necessário determinar a mão inicial de
 cada jogador e, por isso, trataremos este problema em separado.
-Baseando-se na experiência própria, a estrutura do problema do
+Baseando-se em experiências próprias, a estrutura do problema do
 \textbf{\textit{mulligan}} é notavelmente diferente do resto de um jogo
 de \textit{Magic}.
-A principal diferença é que apesar de ambos os jogadores tomarem
+A principal diferença é que, apesar de ambos os jogadores tomarem
 decisões alternadamente nessa etapa, as ações do oponente não têm
-nenhuma influência
-direta sobre as ações do agente, que deve se concentrar em obter uma
-\textbf{mão inicial} que possibilite jogadas nos primeiros turnos do
-jogo.
+nenhuma influência direta sobre as ações do agente, que deve se
+concentrar em obter uma \textbf{mão inicial} que possibilite jogadas
+nos primeiros turnos do jogo.
 
 \vskip1ex
 
 A figura \ref{mulligan} representa as escolhas que o jogador poderá
 fazer para determiná-la, com cada conjunto de cartas representando um
-conjunto
-de estados.
+conjunto de estados.
 
 \begin{figure}
   \centering
@@ -33,7 +29,7 @@ de estados.
 nível $i$ representa o número de cartas na mão inicial do jogador. $K$ significa a decisão de manter a mão, $M$ realizar um \textit{mulligan}, $T$ deixar a carta no topo em um \textit{scry} e $B$ colocá-la no fundo.}
 \end{figure}
 
-Definimos vagamente uma mão jogável se esta contém tanto cartas que
+Definimos vagamente uma mão como jogável se esta contém tanto cartas que
 impactam o estado de jogo e recursos necessários para jogá-las.
 Para este efeito, separaremos as cartas do deck em duas categorias:
 terrenos (recursos) e não-terrenos (impactam o jogo).
@@ -63,7 +59,6 @@ também é influenciada
 uma carta a menos, dado que no primeiro turno do jogo não se compra uma
 carta.
 
-\newpage
 \subsection{Mulligan como um MDP}
 
 Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um

@@ -1,0 +1,87 @@
+\chapter{Fundamentos}
+\label{chap:fund}
+Neste capítulo introduzimos alguns conceitos sobre inteligência artificial com o objetivo de apresentar ao leitor conceitos que serão utilizados em seções futuras.
+
+\section{Processo de Decisão de Markov}
+\label{ssec:mdp}
+
+Processos de Decisão de Markov (em inglês, \textit{Markov Decision Process}, ou \textbf{MDP})
+são uma forma de representar alguns problemas de decisão sequenciais.
+
+Para descrever um MDP, usaremos um exemplo com o intuito de tornar a explicação mais didática.
+Imagine que um gerente de um galpão de um produto tem como objetivo maximizar o lucro esperado
+para o próximo ano. A cada mês, o gerente observa quanto há em estoque do produto e decide
+quanto irá pedir ao distribuir para o próximo mês. A demanda mensal do produto é desconhecida,
+mas segue uma distribuição de probabilidade conhecida. Se o gerente pedir produto demais, terá
+custos para manter o estoque, e se pedir de menos, estará perdendo vendas por falta de inventário.
+Suponha que o galpão tem capacidade para armazenar $M$ unidades de produto e que os custos e a
+distribuição da demanda não muda de mês para mês.
+
+O primeiro conceito de MDP que iremos introduzir é o de \textbf{época de decisão}. Uma época de
+decisão é um momento onde uma decisão é tomada. No nosso exemplo, cada época de decisão ocorre
+no começo de um mês, quando o gerente deve decidir quanto produto irá pedir ao distribuidor. Chamamos
+a quantidade de épocas de decisão de um MDP de \textbf{horizonte}, que pode ser finito ou infinito.
+No exemplo, o horizonte é finito de tamanho $12$, sendo uma época para cada mês do ano no qual o
+gerente deseja maximizar seus lucros.
+
+Um MDP pode ser representado por uma tupla $(S, A, P, R)$. $S$ é o conjunto de \textbf{estados}
+$s_t$ do problema, onde um estado é uma configuração do problema em uma determinada época de
+decisão $t$. No exemplo, cada estado representa o espaço disponível no galpão, que pode variar
+de $0$ a $M$.
+
+$A$ é o conjunto de \textbf{ações} $a_t$, onde $t$ é a época de decisão. No exemplo, uma ação
+pode ser comprar de $0$ a $M-s_t$ unidades no mês.
+
+Para falar sobre os outros elementos da tupla do MDP, precisamos entrar em detalhes sobre os
+custos para pedir o produto ao distribuidor e manter o produto em estoque. Um mês começa com $s_t$
+unidades em estoque, e são encomendadas mais $a_t$ unidades, o que gera um custo $c_{pedido}$ dado
+pela função $c_p(a_t)$. Vamos assumir que as unidades sejam pedidas no começo do mês e sejam vendidas
+no final do mês. Há, portanto, um custo $c_{estoque}$ para manter o produto em estoque dado pela função
+$c_e(s_t + a_t)$. A probabilidade de que a demanda $D_t$ no mês seja de $j$ unidades é $p_j, j = 0,1,2\ldots$.
+Quando o final do mês chegar, o número de unidade vendidas será $x_t = min{D_t, s_t + a_j}$, e o lucro
+será dado pela função $l(x_t)$. O número de unidades que começarão o próximo mês em estoque será
+$s_{t+1}= s_t + a_t - x_t$.
+
+$R: S \times A \mapsto \mathbb{R}$ é a função que dá a \textbf{recompensa} esperada por tomar a ação $a_t$
+quando o processo está no estado estado $s_t$. No exemplo, $r_t(s_t, a_t) = E[l(x_t)] - c_{estoque} - c_{pedido}$.
+
+$P: S \times A \times S \mapsto [0,1]$ é uma função que dá a \textbf{probabilidade} do sistema passar de um estado
+para outro, dado uma determinada ação. No nosso exemplo:
+
+\begin{equation*}
+  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j} &j\le s + a \\
+                                                    \sum\limits_{i=s+a}^\infty p_i &j=0 \\
+                                                    0 & j >s+a\end{cases}
+\end{equation*}
+
+Uma vez que temos o nosso MDP definido, queremos chegar em uma \textbf{política}, que é o nome dado
+ao conjunto das \textbf{regras de decisão}. Uma regra de decisão $d_t(s)$ é uma função $d: S \mapsto A$
+que que, dado um estado $s$ na época de decisão $t$, retorna uma ação $a$ que deve ser tomada a partir
+daquele estado de modo a maximizar o ganho final.
+
+\section{Problemas de Busca}
+Dada uma representação de um problema de inteligência artificial baseada em estados e transições baseadas em ações, se o estado desejado é conhecido (ou, como no caso do nosso problema, quando desejamos encontrar o melhor estado final dado uma função de recompensa)
+
+\section{Minimax}
+Nas modelagens de problemas de busca em jogos individuais, normalmente a solução ótima é obtida a partir de uma sequência de ações levando a um estado desejado (que normalmente representa a vitória do agente). Quando o jogo envolve mais de um jogador, é possível que as ações dos outros jogadores influenciem o estado e quais ações podem ser tomadas. Neste caso, chamamos de MAX o agente que está querendo maximizar a recompensa final, enquanto o adversário de MAX que está tentando fazer com que MAX não atinja seu objetivo é chamado de MIN. O objetivo de MAX é, então, encontrar uma estratégia para conseguir a maior recompensa possível, levando em consideração que MIN irá sempre tomar a ação que minimiza a recompensa final.
+
+Para exemplificar, vamos supor um jogo trivial representado pela árvore da imagem \ref{minimax} onde MAX escolhe uma de três ações alterando o estado inicial, e então MIN escolhe uma de três ações alterando o estado obtido pela ação de MAX, levando a um estado final com uma recompensa associada.
+
+\begin{figure}[!h]
+        \centering
+            \includegraphics[width=0.9\textwidth]{picstcc/minimax.png}
+            \caption{O jogo trivial com as ações possíveis de MAX e MIN. Fonte: \cite[p. 164]{livro}}
+            \label{minimax}
+\end{figure}
+
+Dada a árvore de jogo, a estratégia ótima pode ser determinada pelo \textbf{valor minimax} de cada nó, que escreveremos como $Minimax(n)$. O valor minimax de um nó é a utilidade, do ponto de vista de MAX, de estar no estado correspondente, assumindo que ambos os jogadores joguem otimamente. Dada uma escolha, MAX prefere mover para um estado de valor máximo, enquanto MIN prefere mover para um estado de valor mínimo:
+\begin{equation*}
+  Minmax(s) = \\
+  \begin{cases} Utilidade(s) &\textrm{se s é um estado terminal}\\
+                \max\limits_{a\in A(s)}Minimax(T(s,a)) &\textrm{se o jogador é MAX}\\
+                \min\limits_{a\in A(s)}Minimax(T(s,a)) &\textrm{se o jogador é MIN}\\
+  \end{cases}
+\end{equation*}
+onde $A(s)$ é uma função que devolve as ações possíveis a partir de um estado $s$, e $T(s, a)$ é uma função de transição que devolve o estado resultante de se tomar a ação $a$ a partir do estado $s$.
+
+Aplicando as definições acima na figura \ref{minimax}, os nós no nível mais baixo da árvore recebem seu valor a partir da função de $Utilidade$ do jogo. O primeiro nó de MIN, rotulado por $B$, tem três estados sucessores com valores 3, 12 e 8, então seu valor minimax é 3. Podemos também identificar a \textbf{decisão minimax} a partir da raiz: a ação $a_1$ é a escolha ótima para MAX pois leva ao estado com maior valor minimax.
