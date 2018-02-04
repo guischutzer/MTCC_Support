@@ -1,4 +1,5 @@
 \chapter{Modelagem}
+\label{chap:modelagem}
 
 Neste capítulo iremos detalhar a modelagem do jogo como um problema de inteligência artificial. O jogo está dividido em três partes, cada uma usando uma implementação diferente para encontrar a melhor jogada: o mulligan, que acontece uma vez no começo do jogo, foi modelado como um MDP; as fases principais foram modeladas como um problema de busca, utilizando a busca em largura para chegar na melhor ação; e o combate foi modelado como um problema adversarial utilizando minimax. A seguir entraremos em detalhes sobre cada uma dessas modelagens.
 
@@ -328,7 +329,7 @@ Durante a Fase Principal o jogador ativo pode jogar cartas. Para que o conjunto 
   \item  Se uma criatura tem um efeito desencadeado quando entra em campo, por sua vez, esta criatura pode ser jogada mesmo se não existem alvos válidos para seu efeito (neste caso, o efeito simplesmente não acontece).
   \item Por fim, a ação $Pass$ termina a fase: se o jogador estiver na primeira fase principal, passa para o combate, se estiver na segunda, termina o turno.
 \end{itemize}
-    Para este projeto, restringimos o conjunto de cartas utilizadasde tal maneira que toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$.\footnote{Efeitos que adicionariam alguma incerteza à modelagem seriam comprar cartas (como o feitiço Divinação, da figura \ref{divination}), efeitos que envolvem escolhas e/ou informações do oponente (como ``o oponente alvo descarta uma carta''), dentre outros. Estes efeitos proporcionariam probabilidades diferentes.}
+    Para este projeto, restringimos o conjunto de cartas utilizadasde tal maneira que toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$.\footnote{Efeitos que adicionariam alguma incerteza à modelagem seriam comprar cartas, efeitos que envolvem escolhas e/ou informações do oponente (como ``o oponente alvo descarta uma carta''), dentre outros. Estes efeitos proporcionariam probabilidades diferentes.}
 
 \vskip1ex
 O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase principal e as ações legais correspondentes.

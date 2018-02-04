@@ -12,46 +12,26 @@ cada uma destas classes entrando em detalhes nas principais características.
 \section{\texttt{class Card:}}
 A classe \texttt{Card} representa as cartas do jogo. Os objetos que estarão presentes nas mãos,
 decks e cemitérios dos jogadores serão classes que herdam desta classe. Seus atributos representam
-características presentes em todas as cartas. Para exemplificar os atributos, usaremos duas cartas:
-Martelo Vulcânico (Volcanic Hammer) e Anjo da Misericórdia (Angel of Mercy).
-
-\begin{figure}[!h]
-    \centering
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=0.5\textwidth]{picstcc/VolcanicHammer.jpg}
-        \caption{Martelo Vulcânico (Feitiço)}
-    \end{minipage}\hfill
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=0.5\textwidth]{picstcc/angelOfMercy.jpg}
-        \caption{Anjo da Misericórdia (Criatura)}
-    \end{minipage}
-\end{figure}
-
-Os atributos a seguir são comuns a todos os tipos de carta, e por isso estão presentes na
+características presentes em todas as cartas. Para exemplificar os atributos, usaremos as cartas mostradas no capítulo anterior: Volcanic Hammer e Angel of Mercy. Os atributos a seguir são comuns a todos os tipos de carta, e por isso estão presentes na
 classe Card:
 
 \begin{itemize}
   \item\texttt{name}: Uma string representando o nome da carta, por exemplo ``Volcanic Hammer''
   ou ``Angel of Mercy''.
   \item\texttt{cost}: Uma string representando o custo de mana da carta, usando a mesma notação
-  presente nas cartas, com W, U, B, R e G representando os símbolos de mana das cores Branco,
-  Azul, Preto, Vermelho e Verde, respectivamente. No caso de Volcanic Hammer, o custo é ``1R''
-  e no de Angel of Mercy é ``4W''.
+  presente nas cartas, com W, U, B, R e G representando os símbolos de mana $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/W.png}}}$ (Branco), $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/U.png}}}$ (Azul),
+  $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/B.png}}}$ (Preto),
+  $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/R.png}}}$ (Vermelho) e $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/G.png}}}$ (Verde) respectivamente. No caso de Volcanic Hammer, o custo é ``1R'' e no de Angel of Mercy, ``4W''.
   \item\texttt{supertype}: Uma string representando o supertipo da carta. No nosso programa,
-  o único supertipo que irá aparecer é ``Basic'', que identifica os terrenos básicos, mas essa
-  informação não é relevante para o programa (um terreno ser básico significa que um deck pode
-  conter qualquer quantidade deste terreno, ao invés do limite normal de quatro cópias por carta).
-  Estamos representando essa informação principalmente por formalidade para que o programa siga a
-  mesma estrutura de tipos descrita nas regras do jogo. Nem Volcanic Hammer nem Angel of Mercy
+  o único supertipo que irá aparecer é \texttt{'Basic'}``Basic'', que identifica os terrenos básicos, mas essa
+  informação não é relevante para o programa. Estamos representando essa informação principalmente por formalidade para que o programa siga a mesma estrutura de tipos descrita nas regras do jogo. Nem Volcanic Hammer nem Angel of Mercy
   possuem supertipos, portanto este atributo é representado pela string vazia.
-  \item\texttt{ctype}: Uma string que representa o tipo da carta. Angel of Mercy é do tipo
-  ``Creature'' e Volcanic Hammer é do tipo ``Sorcery''. Diferentemente de supertipo ou subtipo,
+  \item\texttt{ctype}: Uma string que representa o tipo da carta. Angel of Mercy recebe o tipo
+  \texttt{'Creature'} e Volcanic Hammer,\texttt{'Sorcery'}. Diferentemente de supertipo ou subtipo,
   este é um atributo que nunca estará vazio em uma carta.
   \item\texttt{subtype}: Uma string que representa o subtipo da carta. O subtipo serve para que
   algumas cartas tenham uma informação adicional que possa ser usada para ações dentro do jogo.
-  Volcanic Hammer não tem subtipo, enquanto o subtipo de Angel of Mercy é ``Angel''.
+  Volcanic Hammer não tem subtipo, enquanto o subtipo de Angel of Mercy recebe \texttt{'Angel'}.
   \item\texttt{text}: Uma string representando o texto da carta. Essa string serve somente para
   interface com o jogador. O texto de Volcanic Hammer é ``Volcanic Hammer deals 3 damage to target
   creature or player.'' enquanto o de Angel of Mercy é ``Flying. When Angel of Mercy enters the
@@ -70,16 +50,16 @@ a carta Volcanic Hammer:
 \begin{figure}
   \input{code-examples/volcanicclass}
 \end{figure}
-Podemos ver que a classe tem o método \texttt{effect}, que implementa o efeito da carta,
+Podemos ver que a classe tem o método \texttt{effect()}, que implementa o efeito da carta,
 fazendo com que o alvo escolhido sofra três pontos de dano. Vejamos agora a implementação
 da carta Angel of Mercy:
 \begin{figure}
   \input{code-examples/angelclass.tex}
 \end{figure}
 Além dos atributos que citamos anteriormente, Angel of Mercy tem três atributos a mais por
-ser do tipo Criatura: \texttt{abilities}, uma lista com as habilidades da criatura;
+ser do tipo Criatura: \texttt{abilities}, uma lista com as habilidades de combate da criatura;
 \texttt{power}, o poder da criatura; e \texttt{tou}, a resistência (toughness) da criatura.
-Podemos também ver o efeito da carta, que concede três pontos de vida a seu controlador.
+Podemos também ver o efeito da carta, que concede três pontos de vida a seu controlador. O método \texttt{effect} de cada carta é chamado quando esta é jogada, tendo consequências distintas para cada caso.
 
 \section{\texttt{class Permanent:}}
 A classe \texttt{Permanent} serve para representar as cartas uma vez que foram jogadas
@@ -132,6 +112,27 @@ atributos a mais:
 Criaturas têm alguns métodos especiais que possibilitam com que elas realizem ações dentro
 do jogo, como atacar ou causar dano, mas não entraremos em detalhes.
 
+\section{\texttt{class Game:}}
+A classe \texttt{Game} representa um jogo em andamento. Devido à complexidade da classe, entrar
+em detalhes iria mudar o foco do trabalho, então não iremos descrever todos os métodos e atributos
+da classe. Há um método chamado \texttt{turnRoutine()} que é chamado repetidamente até que o jogo
+termine. Ele executa as ações iniciais e finais do turno (como fazer com que o jogador ativo compre
+uma carta no começo do turno e limpar o dano das criaturas no final do turno) e chama os métodos de
+fase principal e de combate, que permitem que os jogadores joguem as cartas da mão, ataquem e
+bloqueiem.
+\vskip1ex
+Além disso, há alguns métodos para definir quais são as ações legais para um jogador e para realizar
+as chamades \textit{ações baseadas no estado}, que são ações performadas pelo jogo sempre que uma
+certa condição baseada no estado do jogo se torna verdade (por exemplo, destruir criaturas com dano
+igual ou superior à resistência, fazer com que jogadores com $0$ ou menos pontos de vida percam o
+o jogo, e assim por diante). O método que cuida disso é \texttt{checkSBA()} (de ``state based actions''),
+chamado pela classe \texttt{Game} nos seguintes momentos:
+\begin{itemize}
+  \item No início e fim de cada fase.
+  \item Após toda ação de Fase Principal.
+  \item Durante etapas de atribuição de dano no Combate.
+\end{itemize}
+\texttt{Game} é responsável por chamar métodos que requerem a decisão do jogador.
 \section{\texttt{class Player:}}
 A classe \texttt{Player} representa um jogador na partida. Seus atributos são:
 \begin{itemize}
@@ -161,25 +162,35 @@ A classe \texttt{Player} representa um jogador na partida. Seus atributos são:
   turno atual.
 \end{itemize}
 
-\section{\texttt{class Game:}}
-A classe \texttt{Game} representa um jogo em andamento. Devido à complexidade da classe, entrar
-em detalhes iria mudar o foco do trabalho, então não iremos descrever todos os métodos e atributos
-da classe. Há um método chamado \texttt{turnRoutine()} que é chamado repetidamente até que o jogo
-termine. Ele executa as ações iniciais e finais do turno (como fazer com que o jogador ativo compre
-uma carta no começo do turno e limpar o dano das criaturas no final do turno) e chama os métodos de
-fase principal e de combate, que permitem que os jogadores joguem as cartas da mão, ataquem e
-bloqueiem.
+A classe \texttt{Player} representa um jogador \textbf{humano} e possui, dentre outros, os métodos \texttt{mulligan()} \texttt{mainPhaseAction()}, \texttt{declareAttackers()}, \texttt{declareBlockers()}  e \texttt{assignBlockOrder()}que são chamados nas respectivas fases por uma instância de jogo (classe \texttt{Game}). Tais momentos são impressos na saída padrão e esperam uma decisão em texto do jogador.
+
+\begin{figure}[h!]
+  \begin{center}
+  \begin{Verbatim}
+1) Angel of Mercy
+2) Inspiring Roar
+3) Griffin Sentinel
+4) Plains
+5) Plains
+6) Siege Mastodon
+7) Griffin Sentinel
+Choose a card from your hand (0 will pass priority, 'p' prints the game state):
+  \end{Verbatim}
+\end{center}
+  \caption{\textit{Prompt} perguntando qual a ação desejada em uma fase principal. \textit{Pass priority} significa passar para a próxima fase. Há prompts análogos para as decisões de mulligan e de combate.}
+  \label{mainactionprompt}
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{picstcc/playerdiagram.png}
+  \caption{Diagrama de classes de jogadores e agentes.}
+  \label{classdiagram}
+\end{figure}
+
+Há mais três classes herdadas (diretamente ou não) da classe \texttt{Player}. A primeira delas é \texttt{MulliganAgent}, cuja única diferença funcional em relação a \texttt{Player} é a aplicação de um algoritmo para a decisão automática do mulligan. Um agente \texttt{MulliganAgent} não é 100\% autônomo, pois suas decisões para o resto do jogo ainda são requisitadas ao usuário, e não é chamado pelas opções disponíveis no programa. A existência da classe é justificada pois serve de base para os dois outros agentes (e potencialmente mais): o agente aleatório e o agente inteligente, diferentes entre si. A intenção é que qualquer agente (mesmo aleatório) tenha chance de jogar suas cartas e, para isso, deve definir uma mão inicial suficientemente ``jogável'' (melhor explicado em \ref{sec:mulliganmodel}).
+\vskip1ex
+A classe \texttt{RandomAgent}, herdada de \texttt{MulliganAgent}, sobrescreve todas as decisões humanas de \texttt{Player} (exceto \texttt{mulligan()}) por métodos que sorteiam e submetem uma ação sorteada dentre a gama de possibilidades. Para isso, usam em cada um de seus métodos um conjunto \texttt{legalActions} de ações legais computado pela instância de \texttt{Game} que os chamou. A obtenção de ações legais é explicada no capítulo \ref{chap:modelagem}.
 
 \vskip1ex
-
-Além disso há alguns métodos para definir quais são as ações legais para um jogador e para realizar
-as chamades \textit{ações baseadas no estado}, que são ações performadas pelo jogo sempre que uma
-certa condição baseada no estado do jogo se torna verdade (por exemplo, destruir criaturas com dano
-igual ou superior à resistência, fazer com que jogadores com $0$ ou menos pontos de vida percam o
-o jogo, e assim por diante). O método que cuida disso é \texttt{checkSBA()} (de ``state based actions''),
-chamado pela classe \texttt{Game} nos seguintes momentos:
-\begin{itemize}
-  \item No início e fim de cada fase.
-  \item Após toda ação de Fase Principal.
-  \item Durante etapas de atribuição de dano no Combate.
-\end{itemize}
+Por fim, a classe \texttt{SearchAgent} também é herdada de \texttt{MulliganAgent} e sobrescreve os métodos de decisões humana por ações decididas por algoritmos. Tais decisões serão examinadas no capítulo \ref{chap:modelagem}.
