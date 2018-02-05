@@ -1,4 +1,4 @@
-Para exemplificar estados e ações legais, vamos examinar uma fase principal em que o agente é o jogador ativo a partir do começo do turno. O estado $s_1$ é, no caso, o estado inicial. Os atributos $d_1, d_2$ dos estados estão suprimidos, pois são irrelevantes para o exemplo.
+Para exemplificar estados e ações legais, vamos examinar uma fase principal em que o agente é o jogador ativo a partir do começo do turno. O estado $s_1$ é, no caso, o estado inicial. Os atributos $d_1, d_2$ dos estados estão suprimidos, pois são irrelevantes para o exemplo. Para este exemplo iremos supor que o oponente do agente não tem nenhuma carta em sua mão, campo de batalha ou cemitério, e ambos os jogadores têm 10 pontos de vida.
 
 \vskip1ex
 
@@ -6,7 +6,8 @@ Para exemplificar estados e ações legais, vamos examinar uma fase principal em
 
 \begin{mdframed}
     \begin{center}
-    $s_1 = \left\{ v_1 = v_2 = 10, h_1 = 4, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}$
+    $s_1 = \left\{ v_1 = v_2 = 10, h_1 = 4, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}$\\
+    $R(s_1) = 3,3 + 4 = 7,3$
     \vskip1ex
     \includegraphics[width=0.2\textwidth]{picstcc/bf1.png}
     \vskip1ex
@@ -41,7 +42,8 @@ Suponhamos que o agente jogue a Montanha que tem na mão. Sendo assim, o estado 
 
 \begin{mdframed}
     \begin{center}
-    $s_2 = \left\{ v_1 = v_2 = 10, h_1 = 3, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}$
+    $s_2 = \left\{ v_1 = v_2 = 10, h_1 = 3, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}$\\
+    $R(s_2) = 4,4+3 = 7,4$
     \vskip1ex
     \includegraphics[width=0.2\textwidth]{picstcc/bf2.png}
     \vskip1ex
@@ -74,7 +76,8 @@ Agora, a ação escolhida em $s_2$ é jogar a carta ``Pensive Minotaur'', uma cr
 
 \begin{mdframed}
     \begin{center}
-    $s_3 = \left\{ v_1 = v_2 = 10, h_1 = 2, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}$
+    $s_3 = \left\{ v_1 = v_2 = 10, h_1 = 2, h_2 = 0, B_2 = G_1 = G_2 = \emptyset, B_1, H \right\}$\\
+    $R(s_3) = 2 + 1,5 + 4,4 + 2 = 9,9$
     \vskip1ex
     \includegraphics[width=0.6\textwidth]{picstcc/bf3.png}
     \vskip1ex
@@ -105,7 +108,8 @@ Em $s_3$, como o agente tem apenas um terreno desvirado em jogo, jogar ``Volcani
 
 \begin{mdframed}
     \begin{center}
-    $s_4 = \left\{ v_1 = v_2 = 10, h_1 = 2, h_2 = 0, B_2 = G_2 = \emptyset, B_1, H, G_1 \right\}$
+    $s_4 = \left\{ v_1 = v_2 = 10, h_1 = 2, h_2 = 0, B_2 = G_2 = \emptyset, B_1, H, G_1 \right\}$\\
+    $R(s_4) = 4,4 + 1 = 5,4$
     \vskip1ex
     \includegraphics[width=0.33\textwidth]{picstcc/bf4.png}
     \vskip1ex

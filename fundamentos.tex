@@ -49,9 +49,9 @@ $P: S \times A \times S \mapsto [0,1]$ é uma função que dá a \textbf{probabi
 para outro, dado uma determinada ação. No nosso exemplo:
 
 \begin{equation*}
-  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j} &j\le s + a \\
-                                                    \sum\limits_{i=s+a}^\infty p_i &j=0 \\
-                                                    0 & j >s+a\end{cases}
+  Pr\{s_{t+1} = j|s_t = s, a_t = a\} = \begin{cases}p_{s+a-j}, &j\le s + a \\
+                                                    \sum\limits_{i=s+a}^\infty p_i, &j=0 \\
+                                                    0, & j >s+a\end{cases}
 \end{equation*}
 
 Uma vez que temos o nosso MDP definido, queremos chegar em uma \textbf{política}, que é o nome dado
@@ -77,9 +77,9 @@ Para exemplificar, vamos supor um jogo trivial representado pela árvore da imag
 Dada a árvore de jogo, a estratégia ótima pode ser determinada pelo \textbf{valor minimax} de cada nó, que escreveremos como $Minimax(n)$. O valor minimax de um nó é a utilidade, do ponto de vista de MAX, de estar no estado correspondente, assumindo que ambos os jogadores joguem otimamente. Dada uma escolha, MAX prefere mover para um estado de valor máximo, enquanto MIN prefere mover para um estado de valor mínimo:
 \begin{equation*}
   Minmax(s) = \\
-  \begin{cases} Utilidade(s) &\textrm{se s é um estado terminal}\\
-                \max\limits_{a\in A(s)}Minimax(T(s,a)) &\textrm{se o jogador é MAX}\\
-                \min\limits_{a\in A(s)}Minimax(T(s,a)) &\textrm{se o jogador é MIN}\\
+  \begin{cases} Utilidade(s), &\textrm{se s é um estado terminal}\\
+                \max\limits_{a\in A(s)}Minimax(T(s,a)), &\textrm{se o jogador é MAX}\\
+                \min\limits_{a\in A(s)}Minimax(T(s,a)), &\textrm{se o jogador é MIN}\\
   \end{cases}
 \end{equation*}
 onde $A(s)$ é uma função que devolve as ações possíveis a partir de um estado $s$, e $T(s, a)$ é uma função de transição que devolve o estado resultante de se tomar a ação $a$ a partir do estado $s$.

@@ -277,23 +277,11 @@ Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas à
 \newpage
 
 \section{O Jogo}
+As fases principais estão modeladas como um problema de busca, onde o estado desejado é o estado final com a maior recompensa. O agente parte do estado inicial, que é o jogo no começo de seu turno, após ele comprar a carta do turno, e então testa todas as combinações de ações para descobrir qual será o melhor estado no final do turno, e quais são as ações necessárias para alcançar esse estado. É relevante mencionar que nessa modelagem o agente é ``míope'', ou seja, ele irá procurar ações que levem ao melhor estado próximo, mas isso não necessariamente significa que as ações serão boas a longo prazo. No caso do jogo de \textit{Magic}, isso faz com que o agente tenha uma postura ``agressiva'': ao buscar qual é o melhor estado no final de seu próprio turno, o agente não levará em consideração o turno seguinte, que será controlado pelo oponente. Portanto, não irá considerar quais criaturas devem deixar de atacar para poderem bloquear durante o turno do oponente, que é uma parte tão importante do jogo quanto seu próprio turno. Sendo assim, o agente tende a atacar mais do que um jogador humano.
 
-Um jogo de \textit{Magic: the Gathering} é um problema obviamente mais complexo do que o \textit{Mulligan}, mas podemos modelá-lo também como um MDP,
-(na maioria dos casos\footnote{Um jogo normal de \textit{Magic} não tem um horizonte finito, pois há
-inúmeras maneiras de retardar indefinidamente o fim do baralho (como voltar cartas da pilha de descarte para o baralho). Neste trabalho, a versão
-simplificada do jogo com certeza terminará, no máximo, em 60 turnos, quando algum baralho acabar.}, de horizonte finito) tratando também das jogadas do oponente e da informação incompleta presente em sua mão.
+Para que consigamos executar a busca, é preciso definir algumas coisas: o que é um estado, quais são as ações possíveis do agente a partir de um estado, e como calcular a recompensa para comparar estados.
 
-\subsection{\textit{Magic} como um MDP}
-
-Assim como detalhado em (\ref{ssec:mdp}) e feito com o problema do \textit{Mulligan}, precisamos definir os conjuntos $S, A, P$ e $R$ para caracterizar
-o problema como um MDP.
-\begin{itemize}
-\item $S$: Cada estado no jogo representa uma diferente configuração entre pontos de vida dos jogadores ($v_1$ e $v_2$), cartas na mão do agente (lista $H$), quantidade de cartas na mão do agente e do oponente ($h_1$ e $h_2$) e nos dois baralhos ($d_1$ e $d_2$),  cartas nos cemitérios dos dois jogadores (listas $G_1$ e $G_2$) e por fim as cartas presentes no campo de batalha (duas listas, $B_1$ e $B_2$), bem como seus estados (virado, desvirado).
-
-\vskip1ex
-
-É preciso que o estado represente também algumas outras informações, como quem é o jogador ativo (representado por $ac_1$, $ac_2$), em qual fase o turno se encontra, quais criaturas entraram no campo de batalha neste turno (pois não poderão atacar) e quais criaturas estão atacando/bloqueando. Todas as possibilidades de estados formam o conjunto $S$ (dependendo das cartas
-que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, então, temos
+Cada estado no jogo representa uma diferente configuração entre pontos de vida dos jogadores ($v_1$ e $v_2$), cartas na mão do agente (lista $H$), quantidade de cartas na mão do agente e do oponente ($h_1$ e $h_2$) e nos dois baralhos ($d_1$ e $d_2$),  cartas nos cemitérios dos dois jogadores (listas $G_1$ e $G_2$) e por fim as cartas presentes no campo de batalha (duas listas, $B_1$ e $B_2$), bem como seus estados (virado, desvirado) e quantidade de dano marcado, caso sejam criaturas. É preciso que o estado represente também algumas outras informações, como quem é o jogador ativo (representado por $ac_1$, $ac_2$), em qual fase o turno se encontra, quais criaturas entraram no campo de batalha neste turno (pois não poderão atacar) e quais criaturas estão atacando/bloqueando. Todas as possibilidades de estados formam o conjunto $S$ (dependendo das cartas que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, então, temos
 \begin{equation}
   S := \begin{lrdcases} v_1, v_2 \in \mathbb{Z}, \\
                         act_1, act_2 \in \{0, 1\}, \\
@@ -305,41 +293,40 @@ que compuserem os baralhos, o conjunto $S$ pode ser infinito). Formalmente, ent�
                         B_1, B_2 \subseteq \Omega^*
                       \end{lrdcases},
 \end{equation}
-onde $\Omega$ é o conjunto de todas as cartas e $\Omega^*$ é o conjunto das chamadas \textit{permanentes}, ou seja, cartas na mesa,
-cada uma com uma carta relacionada mais os atributos mencionados (virada ou desvirada, se pode ou não atacar e se está atacando
-ou bloqueando).
-\item $A$ : Para definir as ações possíveis, devemos pensar na estrutura de um turno: \textit{Primeira Fase Principal - Combate - Segunda Fase Principal}. As duas fases principais funcionam do mesmo jeito. Assim, examinaremos cada fase separadamente:
+onde $\Omega$ é o conjunto de todas as cartas e $\Omega^*$ é o conjunto das chamadas \textit{permanentes}, ou seja, cartas que permanecem no campo de batalha, cada uma com uma carta relacionada mais os atributos mencionados (virada ou desvirada, se pode ou não atacar e se está atacando ou bloqueando e quanto dano sofreu neste turno).
+
+O conjunto de ações pode ser pensado como dois conjuntos: o conjunto das ações que podem ser tomadas durante uma fase principal; e o conjunto das ações tomadas durante o combate. Como estes conjuntos são disjuntos, iremos analisá-los separadamente.
 
 \subsubsection{Fase Principal}
+Durante a Fase Principal o jogador ativo pode jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira, onde cada ação significa jogar uma carta (fora a ação de terminar a fase) e pode ser atribuída aos seguintes subconjuntos, cada um com condições próprias:
 
-Durante a Fase Principal o jogador ativo pode jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira, onde cada ação significa jogar uma carta (fora a ação de passe) e pode ser atribuída aos seguintes subconjuntos, cada um com condições próprias:
+
 
 \begin{equation*}
-  A^P := \begin{lrdcases} Land, \hspace{2.58cm}  \textrm{\hfill se o jogador não jogou terreno neste turno}, \\
-                          Creature(c),\hspace{1.53cm} \textrm{se o jogador possui $c$ terrenos desvirados na mesa}, \\
-                          Sorcery(c, T),\hspace{1.33cm} \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
-                          CreatWithEff(c, T),\ \textrm{se o jogador possui $c$ terrenos desvirados na mesa e $T$ são alvos válidos}, \\
-                          Pass,\hspace{2.6cm} \textrm{termina a fase (sempre possível).}
-         \end{lrdcases}
+  A^P := \begin{lrdcases} Land, Creature(c), Sorcery(c, T), CreatWithEff(c, T), Pass\end{lrdcases}
 \end{equation*}
+onde cada subconjunto pode ser descrito da seguinte maneira:
 \begin{itemize}
-  \item Cada \textbf{terreno} só pode ser jogado se o jogador ainda não jogou um neste turno.
-  \item \textbf{Criaturas} precisam do número de terrenos desvirados descrito em seu custo para serem jogadas.
-  \item \textbf{Feitiços}, além do custo, precisam de alvos válidos para serem jogados (por exemplo, o feitiço ``Flame Slash'' lê, em português, ``Golpe Ardente causa 4 pontos de dano à criatura alvo.''. Dessa maneira, este feitiço só pode ser jogado se existe pelo menos uma criatura em jogo).
-  \item  Se uma criatura tem um efeito desencadeado quando entra em campo, por sua vez, esta criatura pode ser jogada mesmo se não existem alvos válidos para seu efeito (neste caso, o efeito simplesmente não acontece).
-  \item Por fim, a ação $Pass$ termina a fase: se o jogador estiver na primeira fase principal, passa para o combate, se estiver na segunda, termina o turno.
+  \item $Land$ é o subconjunto de todas as ações que representam jogar uma carta de terreno. Para cada carta de terreno na mão do agente, haverá uma ação correspondente pertencente a $Land$ caso o agente ainda não tenha jogado um terreno no turno.
+  \item $Creature(c)$ é o subconjunto das ações que representam jogar uma carta de criatura com custo de mana convertido\footnote{Custo de mana convertido é a quantidade de mana total necessária para se jogar uma carta, independente do tipo de mana requisitado. Uma carta com custo de mana $\vcenter{\hbox{\includegraphics[scale=0.012]{picstcc/4.png}}}$$\vcenter{\hbox{\includegraphics[scale=0.012]{picstcc/B.png}}}$$\vcenter{\hbox{\includegraphics[scale=0.012]{picstcc/B.png}}}$ tem custo de mana convertido 6.} $c$ que não tenham uma habilidade que precise de um alvo. Para cada carta de criatura $i$ com custo de mana convertido $c_i$ e sem habilidades com alvo na mão do agente, haverá uma ação pertencente a $Creature(c_i)$ disponível caso o agente tenha pelo menos $c_i$ terrenos desvirados.
+  \item $Sorcery(c, T)$ é o subconjunto das ações que representam jogar uma carta de feitiço com custo de mana convertido $c$ e que tenham o objeto $T$ como alvo. Para cada carta de feitiço $i$ com custo de mana convertido $c_i$ na mão do agente, para cada permanente ou jogador $t$ que possa ser alvo do feitiço $i$, haverá uma ação disponível pertencente a $Sorcery(c_i, t)$ se o agente tiver pelo menos $c_i$ terrenos desvirados e $t$ estiver no campo de batalha ou for um jogador. Por exemplo, o feitiço Flame Slash tem o seguinte texto, em português: ``Golpe Ardente causa 4 pontos de dano à criatura alvo'' e tem custo de mana $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/R.png}}}$. Mesmo que o agente tenha uma montanha desvirada, só será possível jogar Flame Slash se existir pelo menos uma criatura em jogo.
+  \item $CreatWithEff(c,T)$, de maneira análoga ao subconjunto $Sorcery(c, T)$, é o subconjunto das ações que representam jogar uma criatura de custo $c$ com algum efeito que tenha $T$ como alvo. Para cada criatura $i$ de custo convertido $c_i$ na mão do agente, para cada permanente ou jogador $t$ que possa ser alvo da habilidade da criatura $i$, haverá uma ação disponível pertencente a $CreatWithEff(c_i, t)$ se o agente tiver pelo menos $c_i$ terrenos desvirados e $t$ estiver no campo de batalha ou for um jogador. Se o agente tiver pelo menos $c_i$ terrenos desvirados, mas não houver nenhuma permanente que possa ser alvo da habilidade da criatura $i$ no campo de batalha, uma ação do subconjunto $Creature(c_i)$ estará disponível ao invés disso, pois jogar uma criatura é sempre possível, indepentende da existência de alvos legais para sua habilidade. Por exemplo, a criatura Ravenous Chupacabra tem custo de mana convertido 4 e a seguinte habilidade, em português: ``Quando Chupacabra Voraz entra no campo de batalha, destrua a criatura alvo que um oponente controla.'' Se o oponente do agente tiver pelo menos uma criatura no campo de batalha, não haverá uma ação pertencente a $Creature(4)$ associada a jogar Ravenous Chupacabra, pois seu efeito demanda que uma criatura do oponente seja destruída. Entretanto, se o oponente não controlar nenhuma criatura, a única ação associada a jogar Ravenous Chupacabra pertencerá a $Creature(4)$, pois ainda é possível jogar a criatura.
+  \item $Pass$ é um subconjunto com uma única ação, que está sempre disponível: terminar a fase principal. Se o agente escolher essa ação durante a primeira fase principal, começa então a fase de combate. Caso o agente escolha a ação durante a segunda fase principal, seu turno termina e começa o turno do oponente.
 \end{itemize}
-    Para este projeto, restringimos o conjunto de cartas utilizadasde tal maneira que toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$.\footnote{Efeitos que adicionariam alguma incerteza à modelagem seriam comprar cartas, efeitos que envolvem escolhas e/ou informações do oponente (como ``o oponente alvo descarta uma carta''), dentre outros. Estes efeitos proporcionariam probabilidades diferentes.}
+
+Para este projeto, restringimos o conjunto de cartas utilizadas de tal maneira que toda ação $a \in A^P$ leva $s$ a um estado $s'$ com probabilidade $P(s' | s, a) = 1$.\footnote{Efeitos que adicionariam alguma incerteza à modelagem seriam comprar cartas, efeitos que envolvem escolhas e/ou informações do oponente (como ``o oponente alvo descarta uma carta''), dentre outros. Estes efeitos proporcionariam probabilidades diferentes.}
+
+Para definirmos um critério para que o agente pudesse verificar se um estado é melhor que outro, definimos a seguinte recompensa para um estado $s$, baseada nas nossas experiências como jogadores:
+\begin{equation*}
+  R(s) = \frac{v_1 - v_2}{5} + (p_1 - p_2) + \frac{(t_1 - t_2)}{2} + (1,1\times l) + h
+\end{equation*}
+onde $v_i$ é o total de pontos de vida do jogador $i$, $p_i$ é a soma do poder de todas as criaturas controladas por $i$, $t_i$ é a soma da resistência de todas as criaturas controladas por $i$, $l$ é a quantidade de terrenos controladas pelo agente, e $h$ é a quantidade de cartas na mão do agente.
 
 \vskip1ex
-O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase principal e as ações legais correspondentes.
-
-\newpage
+O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase principal e as ações legais correspondentes. Para estes exemplos iremos supor que o oponente do agente não tem nenhuma carta em sua mão, campo de batalha ou cemitério, e tem 10 pontos de vida.
 
 \subsubsection{Exemplo - Fase Principal}
 \input{mainphaseexample.tex}
-
-\newpage
 
 \subsubsection{Combate}
 
