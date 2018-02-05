@@ -162,6 +162,39 @@ A classe \texttt{Player} representa um jogador na partida. Seus atributos são:
   turno atual.
 \end{itemize}
 
+\begin{figure}[h!]
+\begin{Verbatim}
+----------------------------------------------------------
+Turn 24 (Red)
+Active Player: Red - 13 life
+Mountain U
+Mountain U
+Mountain U
+Mountain U
+Mountain U
+Mountain U
+[22] Skyraker Giant U 3/4 (0)
+[26] Lightning Hounds U 3/2 (0)
+[28] Frenzied Raptor U 4/2 (0)
+
+Opponent: White - 11 life
+Plains U
+Plains U
+Plains U
+Plains U
+Plains U
+Plains U
+Plains U
+Plains U
+Plains U
+[16] Fencing Ace U 1/1 (0)
+[21] Griffin Sentinel U 1/3 (0)
+[24] Heavy Infantry U 3/4 (0)
+[27] Guardian of Pilgrims U 2/2 (0)
+\end{Verbatim}
+\caption{Representação em texto do início de um turno. A impressão das criaturas é do formato \texttt{[ID] Nome U/T poder/resistência (dano marcado)}, onde \texttt{U} significa desvirado (\textit{untapped}) e \texttt{T} significa virado (\textit{tapped}).}
+\end{figure}
+
 A classe \texttt{Player} representa um jogador \textbf{humano} e possui, dentre outros, os métodos \texttt{mulligan()} \texttt{mainPhaseAction()}, \texttt{declareAttackers()}, \texttt{declareBlockers()}  e \texttt{assignBlockOrder()}que são chamados nas respectivas fases por uma instância de jogo (classe \texttt{Game}). Tais momentos são impressos na saída padrão e esperam uma decisão em texto do jogador.
 
 \begin{figure}[h!]

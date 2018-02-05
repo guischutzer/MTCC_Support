@@ -2,10 +2,84 @@
 Neste capítulo mostraremos e analisaremos os resultados das implementações e modelagens discutidas anteriormente. Além disso, também traremos nossas conclusões e considerações finais sobre o trabalho.
 
 \section{Mulligan}
-Para cada estado (i, j), a recompensa associada à ação Keep nas tabelas 4.2 e 4.4 e, à direita, o valor
-calculado $\Sigma$ da soma de valores associada à ação \textit{Mulligan}. As recompensas em vermelho indicam estados que a política extraída é \textit{Mulligan}.
+Para cada estado $(i, j)$, a recompensa associada à ação \textit{Keep}
+nas tabelas \ref{tab:Rijplay} e \ref{tab:Rijdraw} e, à direita, o valor calculado $\Sigma$ da soma de valores
+associada à ação \textit{Mulligan}. As recompensas em vermelho indicam estados que a política extraída
+é \textit{Mulligan}.
 
-TABELAS
+\begin{table}[!h]
+\parbox{.25\linewidth}{
+\centering
+\vspace{0.2cm}
+\begin{tabular}{l|r}
+$j$  & $r(j)$ \\ \hline
+0 & -7  \\
+1 & -3     \\
+2 & 3      \\
+3 & 4      \\
+4 & 2     \\
+5 & -1    \\
+6 & -4     \\
+7 & -6
+\end{tabular}
+\caption{recompensas-base para $j = 0, \ldots, 7$ ``on the play''}
+\label{tab:rjplay}
+}
+\hfill
+\parbox{.70\linewidth}{
+\centering
+\begin{tabular}{l|rrrrrrrr|r}
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & $\Sigma$ \\ \hline
+7 & \textcolor{red}{17,5} & \textcolor{red}{21,5} & 27,5 & 28,5 & 26,5 & 23,5 & \textcolor{red}{20,5} & \textcolor{red}{18,5}  & 22,8395\\
+6 & \textcolor{red}{14,0} & \textcolor{red}{18,0} & 24,0 & 25,0 & 23,0 & 20,0 & \textcolor{red}{17,0} &       & 18,6328\\
+5 & \textcolor{red}{10,5} & 14,5 & 20,5 & 21,5 & 19,5 & 16,5 && & 14,0315 \\
+4 & \textcolor{red}{7,0} & 11,0 & 17,0 & 18,0 & 16,0 &&&& 8,8240 \\
+3 & \textcolor{red}{3,5} & 7,5 & 13,5 & 14,5 &&&& & 3,5119\\
+2 & 0,0 & 4,0 & 10,0 &&&&&& -1,9 \\
+1 & -3,5 & 0,5 &&&&& && -7,0\\
+0 & -7,0 &&&& &&&& --
+\end{tabular}
+\caption{recompensas ``on the play'' de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
+\label{tab:Rijplay}
+}
+\end{table}
+
+\begin{table}[!h]
+\parbox{.25\linewidth}{
+\centering
+\vspace{0.2cm}
+\begin{tabular}{l|r}
+$j$  & $r(j)$ \\ \hline
+0 & -4  \\
+1 & 0     \\
+2 & 5      \\
+3 & 6      \\
+4 & 3     \\
+5 & 0    \\
+6 & -3     \\
+7 & -5
+\end{tabular}
+\caption{recompensas-base para $j = 0, \ldots, 7$ }
+\label{tab:rjdraw}
+}
+\hfill
+\parbox{.70\linewidth}{
+\centering
+\begin{tabular}{l|rrrrrrrr|r}
+$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & $\Sigma$ \\ \hline
+7 & \textcolor{red}{20,5} & \textcolor{red}{24,5} & 29,5 & 30,5 & 27,5 & \textcolor{red}{24,5} & \textcolor{red}{21,5} & \textcolor{red}{19,5} & 24,7502 \\
+6 & \textcolor{red}{17,0} & 21,0 & 26,0 & 27,0 & 24,0 & 21,0 & \textcolor{red}{18,0} && 20,8419 \\
+5 & \textcolor{red}{13,5} & 17,5 & 22,5 & 23,5 & 20,5 & 17,5 &&& 16,4394 \\
+4 & \textcolor{red}{10,0} & 14,0 & 19,0 & 20,0 & 17,0 &&&& 11,4721 \\
+3 & 6,5 & 10,5 & 15,5 & 16,5 &&&&& 6,3559 \\
+2 & 3,0 & 7,0 & 12,0 &&&&&& 1,1 \\
+1 & -0,5 & 3,5 &&&&&&& -4,0 \\
+0 & -4,0 &&&&&&&& --
+\end{tabular}
+\caption{recompensas ``on the draw'' de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
+\label{tab:Rijdraw}
+}
+\end{table}
 
 A política encontrada com a iteração de valor faz bastante sentido se levarmos em consideração a simplificação de limitar a informação das cartas na mão ao fato dela ser terreno ou não. Uma maneira de deixar a modelagem mais real seria levar em consideração o custo de mana dos cards não-terreno. Isso aumentaria enormemente a quantidade de estados possíveis (supondo que as cartas não-terreno do deck tenham custo de mana entre 1 e 5, uma mão com duas cartas teria $\sum\limits_{i=1}^{6}i = 21$ representações possíveis de estados ao invés de 3, como acontece com a modelagem que escolhemos), mas essa modelagem ainda estaria desconsiderando informações relevantes na decisão do mulligan, como por exemplo se as cartas na mão inicial se encaixam na estratégia definida pelo jogador para combater o deck adversário. De uma maneira geral, estamos satisfeitos com os resultados obtidos, uma vez que o agente consegue mitigar a aleatoriedade tomando decisões que aumentam suas chances de ter um jogo justo.
 
@@ -17,16 +91,21 @@ Rodamos 70 testes com as configurações possíveis de agente inteligente ou ale
 \begin{itemize}
 \item \textbf{Aleatório x Aleatório}
 
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.3\textwidth]{picstcc/lavaaxe.jpg}
-    \caption{A carta Lava Axe (Machado de Lava) pode ter qualquer jogador, incluindo seu controlador, como alvo}
-    \label{lavaaxe}
-\end{figure}
-
 Para esta configuração, esperávamos que o deck Branco ganhasse mais do que o Vermelho, pois o deck Branco tem poucas cartas que possibilitam que o agente faça uma escolha \textit{muito} ruim, como destruir sua própria criatura. Já o deck Vermelho tem cartas como Lava Axe (\ref{lavaaxe}), que possibilitam que o jogador acerte a si mesmo, ou Volcanic Hammer, que pode ser usado para destruir suas próprias criaturas.
 
-GRAFICO AQUI
+\begin{figure}[!h]
+  \centering
+  \includegraphics[scale=0.4]{picstcc/rara.png}
+  \caption{\texttt{python3 game.py -a1 random -a2 random}}
+  \label{rara}
+\end{figure}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.25\textwidth]{picstcc/lavaaxedois.png}
+    \caption{A carta Lava Axe (Machado de Lava) pode ter qualquer jogador, incluindo seu controlador, como alvo.}
+    \label{lavaaxe}
+\end{figure}
 
 Após as simulações, o deck Branco ganhou $71,8\%$ das vezes, superando um pouco as nossas expectativas, mas num nível aceitável.
 
@@ -34,15 +113,36 @@ Após as simulações, o deck Branco ganhou $71,8\%$ das vezes, superando um pou
 
 Nesta configuração, esperávamos que os agentes inteligentes ganhassem praticamente todas as partidas.
 
-GRAFICO AQUI
+\begin{figure}[!h]
+\centering
+\begin{minipage}{.4\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{picstcc/rase.png}
+  \caption{\texttt{python3 game.py -a1 random -a2 search}}
+  \label{rase}
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}{.4\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{picstcc/sera.png}
+  \caption{\texttt{python3 game.py -a1 search -a2 random}}
+  \label{sera}
+\end{minipage}
+\end{figure}
 
 Jogamos com as duas configurações possíveis, e nas duas o agente com o algoritmo de busca se saiu
 muito melhor que o oponente: $95,9\%$ quando no controle do deck Branco, e $97,2\%$ quando controlando o deck Vermelho. Novamente um resultado esperado, dado que o agente aleatório demora turnos para jogar seu primeiro terreno enquanto o agente inteligente joga terrenos sempre que possível, o que possibilita que jogue suas cartas muito antes.
 
 \item \textbf{Inteligente x Inteligente}
+
 Nesta configuração, esperávamos um desempenho um pouco melhor do deck Vermelho, uma vez que o comportamento do agente é agressivo graças a ele não olhar turnos a frente. Numa situação onde nenhum jogador está tentando preservar seu total de pontos de vida, quem tiver acesso a cartas como Lava Axe irá se beneficiar mais.
 
-GRÁFICO AQUI
+\begin{figure}[!h]
+  \centering
+  \includegraphics[scale=0.4]{picstcc/sese.png}
+  \caption{\texttt{python3 game.py -a1 search -a2 search}}
+  \label{sese}
+\end{figure}
 
 O resultado obtido foi $76,5\%$ de vitórias para o agente com o deck vermelho, próximo do que esperávamos.
 
@@ -64,10 +164,11 @@ Implementar o nosso próprio cliente fez com que trabalhássemos com orientaçã
 
 Dentre as disciplinas cursadas no Bacharelado em Ciência da Computação relevantes para o desenvolvimento do projeto, destacamos:
 \begin{itemize}
-\item MAC0435 - Inteligência Artificial
-\item MAC0211/MAC0242 - Laboratório de Programação I/II
-\item MAC0441 - Programação Orientada a Objetos
-\item MAC0338 - Análise de Algoritmos
+\item MAC0435 -- Inteligência Artificial
+\item MAC0211/MAC0242 -- Laboratório de Programação I/II
+\item MAC0441 -- Programação Orientada a Objetos
+\item MAC0328 -- Algoritmos em Grafos
+\item MAC0338 -- Análise de Algoritmos
 \end{itemize}
 Agradecemos ao Professor Denis Deratani Mauá, que como supervisor ajudou inúmeras vezes a nortear o
 trabalho.

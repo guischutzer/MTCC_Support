@@ -4,11 +4,12 @@
 Neste capítulo iremos detalhar a modelagem do jogo como um problema de inteligência artificial. O jogo está dividido em três partes, cada uma usando uma implementação diferente para encontrar a melhor jogada: o mulligan, que acontece uma vez no começo do jogo, foi modelado como um MDP; as fases principais foram modeladas como um problema de busca, utilizando a busca em largura para chegar na melhor ação; e o combate foi modelado como um problema adversarial utilizando minimax. A seguir entraremos em detalhes sobre cada uma dessas modelagens.
 
 \section{\textit{Mulligan}}
+\label{sec:mulliganmodel}
 A estrutura de um turno, como descrita no primeiro capítulo, será repetida
 algumas vezes até o jogo acabar, porém é necessário determinar a mão inicial de
 cada jogador e, por isso, trataremos este problema em separado.
 Baseando-se em experiências próprias, a estrutura do problema do
-\textbf{\textit{mulligan}} é notavelmente diferente do resto de um jogo
+\textbf{mulligan} é notavelmente diferente do resto de um jogo
 de \textbf{Magic}.
 A principal diferença é que, apesar de ambos os jogadores tomarem
 decisões alternadamente nessa etapa, as ações do oponente não têm
@@ -25,8 +26,8 @@ conjunto de estados.
 \begin{figure}
   \centering
   \input{mulligan.tex}
-  \caption{Representação visual de um problema de \textit{mulligan}. Cada
-nível $i$ representa o número de cartas na mão inicial do jogador. $K$ significa a decisão de manter a mão, $M$ realizar um \textit{mulligan}, $T$ deixar a carta no topo em um \textit{scry} e $B$ colocá-la no fundo.}
+  \caption{Representação visual de um problema de mulligan. Cada
+nível $i$ representa o número de cartas na mão inicial do jogador. $K$ significa a decisão de manter a mão, $M$ realizar um mulligan, $T$ deixar a carta no topo em um \textit{scry} e $B$ colocá-la no fundo.}
   \label{mulligan}
 \end{figure}
 
@@ -45,7 +46,7 @@ j = 0,\ldots, i \end{equation} onde $J$ é o número de terrenos no deck
 e $j$ o
 número de terrenos
 na mão. Note que $\sum_{j=0}^{i}P_i(j) = 1, \forall i$. Assim, a cada nível, como é mostrado na figura \ref{mulligan}, o
-agente deve decidir entre realizar um \textit{mulligan}
+agente deve decidir entre realizar um mulligan
 (denotado por $M$), que resultará em uma mão com $i-1$ cartas, sendo $j'$
 terrenos com probabilidade
  \[ \mathcal{P}_{i - 1}(j') = \frac{\binom{J}{j'}\binom{60 - J}{i - 1 -
@@ -178,84 +179,6 @@ Uma vez que $V^*$ estiver calculado para todo estado $s$ com uma ação ótima $
 podemos construir a nossa política com a regra de decisão $d$ tal que $d(s) = a_s$ (como cada
 estado só pode ocorrer em uma época de decisão específica, não há a necessidade de ter mais
 de uma regra de decisão em nossa política).
-
-\begin{table}[!h]
-\parbox{.25\linewidth}{
-\centering
-\vspace{0.2cm}
-\begin{tabular}{l|r}
-$j$  & $r(j)$ \\ \hline
-0 & -7  \\
-1 & -3     \\
-2 & 3      \\
-3 & 4      \\
-4 & 2     \\
-5 & -1    \\
-6 & -4     \\
-7 & -6
-\end{tabular}
-\caption{recompensas-base para $j = 0, \ldots, 7$ ``on the play''}
-\label{tab:rjplay}
-}
-\hfill
-\parbox{.70\linewidth}{
-\centering
-\begin{tabular}{l|rrrrrrrr|r}
-$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & $\Sigma$ \\ \hline
-7 & \textcolor{red}{17,5} & \textcolor{red}{21,5} & 27,5 & 28,5 & 26,5 & 23,5 & \textcolor{red}{20,5} & \textcolor{red}{18,5}  & 22,8395\\
-6 & \textcolor{red}{14,0} & \textcolor{red}{18,0} & 24,0 & 25,0 & 23,0 & 20,0 & \textcolor{red}{17,0} &       & 18,6328\\
-5 & \textcolor{red}{10,5} & 14,5 & 20,5 & 21,5 & 19,5 & 16,5 && & 14,0315 \\
-4 & \textcolor{red}{7,0} & 11,0 & 17,0 & 18,0 & 16,0 &&&& 8,8240 \\
-3 & \textcolor{red}{3,5} & 7,5 & 13,5 & 14,5 &&&& & 3,5119\\
-2 & 0,0 & 4,0 & 10,0 &&&&&& -1,9 \\
-1 & -3,5 & 0,5 &&&&& && -7,0\\
-0 & -7,0 &&&& &&&& --
-\end{tabular}
-\caption{recompensas ``on the play'' de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
-\label{tab:Rijplay}
-}
-\end{table}
-
-\begin{table}[!h]
-\parbox{.25\linewidth}{
-\centering
-\vspace{0.2cm}
-\begin{tabular}{l|r}
-$j$  & $r(j)$ \\ \hline
-0 & -4  \\
-1 & 0     \\
-2 & 5      \\
-3 & 6      \\
-4 & 3     \\
-5 & 0    \\
-6 & -3     \\
-7 & -5
-\end{tabular}
-\caption{recompensas-base para $j = 0, \ldots, 7$ }
-\label{tab:rjdraw}
-}
-\hfill
-\parbox{.70\linewidth}{
-\centering
-\begin{tabular}{l|rrrrrrrr|r}
-$i \backslash j$ & 0     & 1  & 2  & 3  & 4  & 5  & 6  & 7  & $\Sigma$ \\ \hline
-7 & \textcolor{red}{20,5} & \textcolor{red}{24,5} & 29,5 & 30,5 & 27,5 & \textcolor{red}{24,5} & \textcolor{red}{21,5} & \textcolor{red}{19,5} & 24,7502 \\
-6 & \textcolor{red}{17,0} & 21,0 & 26,0 & 27,0 & 24,0 & 21,0 & \textcolor{red}{18,0} && 20,8419 \\
-5 & \textcolor{red}{13,5} & 17,5 & 22,5 & 23,5 & 20,5 & 17,5 &&& 16,4394 \\
-4 & \textcolor{red}{10,0} & 14,0 & 19,0 & 20,0 & 17,0 &&&& 11,4721 \\
-3 & 6,5 & 10,5 & 15,5 & 16,5 &&&&& 6,3559 \\
-2 & 3,0 & 7,0 & 12,0 &&&&&& 1,1 \\
-1 & -0,5 & 3,5 &&&&&&& -4,0 \\
-0 & -4,0 &&&&&&&& --
-\end{tabular}
-\caption{recompensas ``on the draw'' de cada estado calculadas com $R_k(i,j) = r(j) + 3i$}
-\label{tab:Rijdraw}
-}
-\end{table}
-Para cada estado $(i, j)$, a recompensa associada à ação \textit{Keep}
-nas tabelas \ref{tab:Rijplay} e \ref{tab:Rijdraw} e, à direita, o valor calculado $\Sigma$ da soma de valores
-associada à ação \textit{Mulligan}. As recompensas em vermelho indicam estados que a política extraída
-é \textit{Mulligan}.
 
 \newpage
 
@@ -459,7 +382,7 @@ Como o agente pode prever incorretamente as escolhas de bloqueio de seu oponente
 
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{picstcc/fullsearch.png}
+  \includegraphics[width=0.7\textwidth]{picstcc/fullsearch.png}
   \caption{Diagrama representando espaço total de estados na busca realizada em um turno inteiro. $t^*$ representa o estado terminal com recompensa máxima.}
   \label{searchdiagram}
 \end{figure}
