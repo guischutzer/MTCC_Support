@@ -9,7 +9,7 @@ algumas vezes até o jogo acabar, porém é necessário determinar a mão inicia
 cada jogador e, por isso, trataremos este problema em separado.
 Baseando-se em experiências próprias, a estrutura do problema do
 \textbf{\textit{mulligan}} é notavelmente diferente do resto de um jogo
-de \textit{Magic}.
+de \textbf{Magic}.
 A principal diferença é que, apesar de ambos os jogadores tomarem
 decisões alternadamente nessa etapa, as ações do oponente não têm
 nenhuma influência direta sobre as ações do agente, que deve se
@@ -65,7 +65,7 @@ carta.
 Dada a estrutura bem conhecida do problema e sua natureza fixa (temos certeza que acabará em um
 determinado horizonte), podemos determinar todos os parâmetros de um MDP de horizonte finito para
 que o agente siga uma política com a inteção de alcançar uma mão ``jogável'' para uma partida de
-\textit{Magic}.
+\textbf{Magic}.
 
 O conjunto de estados $S$ é composto por um estado inicial $S_I$ (que representa o estado antes
 do jogador comprar a sua primeira mão inicial), um estado final absorvente $S_F$ (que representa
@@ -265,7 +265,7 @@ O primeiro agente inteligente do projeto é \texttt{MulliganAgent}, derivado da 
 
 \input{code-examples/mulliganclass.tex}
 
-O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de valor de horizonte finito em \texttt{mulliganValueIteration()} para decidir se vale a pena ou não manter a mão atual. Apesar da decisão ser feita várias vezes, o algoritmo é executado apenas uma vez, para preencher as tabelas inicializadas em \texttt{initMulliganTables()}. A tabela-base de recompensa pode assumir dois conjuntos de valores, relacionados à diferença de ``pontuação'' caso o jogador comece ou não o jogo (fato indicado pela \textit{flag} \texttt{onThePlay}\footnote{O termo ``on the play'' é uma expressão em \textit{Magic} que significa que o jogador começa o jogo, ou seja, joga (``plays'') o primeiro turno. Sobre o segundo jogador, diz-se que está ``on the draw'', pois este compra uma carta no seu primeiro turno enquanto seu antecessor, não. Estas diferenças representam um esforço de equilíbrio nas regras.}).
+O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de valor de horizonte finito em \texttt{mulliganValueIteration()} para decidir se vale a pena ou não manter a mão atual. Apesar da decisão ser feita várias vezes, o algoritmo é executado apenas uma vez, para preencher as tabelas inicializadas em \texttt{initMulliganTables()}. A tabela-base de recompensa pode assumir dois conjuntos de valores, relacionados à diferença de ``pontuação'' caso o jogador comece ou não o jogo (fato indicado pela \textit{flag} \texttt{onThePlay}\footnote{O termo ``on the play'' é uma expressão em \textbf{Magic} que significa que o jogador começa o jogo, ou seja, joga (``plays'') o primeiro turno. Sobre o segundo jogador, diz-se que está ``on the draw'', pois este compra uma carta no seu primeiro turno enquanto seu antecessor, não. Estas diferenças representam um esforço de equilíbrio nas regras.}).
 \begin{figure}[h!]
   \input{code-examples/valueiteration.tex}
   \label{code:valueit}
@@ -277,7 +277,7 @@ Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas à
 \newpage
 
 \section{O Jogo}
-As fases principais estão modeladas como um problema de busca, onde o estado desejado é o estado final com a maior recompensa. O agente parte do estado inicial, que é o jogo no começo de seu turno, após ele comprar a carta do turno, e então testa todas as combinações de ações para descobrir qual será o melhor estado no final do turno, e quais são as ações necessárias para alcançar esse estado. É relevante mencionar que nessa modelagem o agente é ``míope'', ou seja, ele irá procurar ações que levem ao melhor estado próximo, mas isso não necessariamente significa que as ações serão boas a longo prazo. No caso do jogo de \textit{Magic}, isso faz com que o agente tenha uma postura ``agressiva'': ao buscar qual é o melhor estado no final de seu próprio turno, o agente não levará em consideração o turno seguinte, que será controlado pelo oponente. Portanto, não irá considerar quais criaturas devem deixar de atacar para poderem bloquear durante o turno do oponente, que é uma parte tão importante do jogo quanto seu próprio turno. Sendo assim, o agente tende a atacar mais do que um jogador humano.
+As fases principais estão modeladas como um problema de busca, onde o estado desejado é o estado final com a maior recompensa. O agente parte do estado inicial, que é o jogo no começo de seu turno, após ele comprar a carta do turno, e então testa todas as combinações de ações para descobrir qual será o melhor estado no final do turno, e quais são as ações necessárias para alcançar esse estado. É relevante mencionar que nessa modelagem o agente é ``míope'', ou seja, ele irá procurar ações que levem ao melhor estado próximo, mas isso não necessariamente significa que as ações serão boas a longo prazo. No caso do jogo de \textbf{Magic}, isso faz com que o agente tenha uma postura ``agressiva'': ao buscar qual é o melhor estado no final de seu próprio turno, o agente não levará em consideração o turno seguinte, que será controlado pelo oponente. Portanto, não irá considerar quais criaturas devem deixar de atacar para poderem bloquear durante o turno do oponente, que é uma parte tão importante do jogo quanto seu próprio turno. Sendo assim, o agente tende a atacar mais do que um jogador humano.
 
 Para que consigamos executar a busca, é preciso definir algumas coisas: o que é um estado, quais são as ações possíveis do agente a partir de um estado, e como calcular a recompensa para comparar estados.
 
@@ -310,7 +310,15 @@ onde cada subconjunto pode ser descrito da seguinte maneira:
   \item $Land$ é o subconjunto de todas as ações que representam jogar uma carta de terreno. Para cada carta de terreno na mão do agente, haverá uma ação correspondente pertencente a $Land$ caso o agente ainda não tenha jogado um terreno no turno.
   \item $Creature(c)$ é o subconjunto das ações que representam jogar uma carta de criatura com custo de mana convertido\footnote{Custo de mana convertido é a quantidade de mana total necessária para se jogar uma carta, independente do tipo de mana requisitado. Uma carta com custo de mana $\vcenter{\hbox{\includegraphics[scale=0.012]{picstcc/4.png}}}$$\vcenter{\hbox{\includegraphics[scale=0.012]{picstcc/B.png}}}$$\vcenter{\hbox{\includegraphics[scale=0.012]{picstcc/B.png}}}$ tem custo de mana convertido 6.} $c$ que não tenham uma habilidade que precise de um alvo. Para cada carta de criatura $i$ com custo de mana convertido $c_i$ e sem habilidades com alvo na mão do agente, haverá uma ação pertencente a $Creature(c_i)$ disponível caso o agente tenha pelo menos $c_i$ terrenos desvirados.
   \item $Sorcery(c, T)$ é o subconjunto das ações que representam jogar uma carta de feitiço com custo de mana convertido $c$ e que tenham o objeto $T$ como alvo. Para cada carta de feitiço $i$ com custo de mana convertido $c_i$ na mão do agente, para cada permanente ou jogador $t$ que possa ser alvo do feitiço $i$, haverá uma ação disponível pertencente a $Sorcery(c_i, t)$ se o agente tiver pelo menos $c_i$ terrenos desvirados e $t$ estiver no campo de batalha ou for um jogador. Por exemplo, o feitiço Flame Slash tem o seguinte texto, em português: ``Golpe Ardente causa 4 pontos de dano à criatura alvo'' e tem custo de mana $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/R.png}}}$. Mesmo que o agente tenha uma montanha desvirada, só será possível jogar Flame Slash se existir pelo menos uma criatura em jogo.
-  \item $CreatWithEff(c,T)$, de maneira análoga ao subconjunto $Sorcery(c, T)$, é o subconjunto das ações que representam jogar uma criatura de custo $c$ com algum efeito que tenha $T$ como alvo. Para cada criatura $i$ de custo convertido $c_i$ na mão do agente, para cada permanente ou jogador $t$ que possa ser alvo da habilidade da criatura $i$, haverá uma ação disponível pertencente a $CreatWithEff(c_i, t)$ se o agente tiver pelo menos $c_i$ terrenos desvirados e $t$ estiver no campo de batalha ou for um jogador. Se o agente tiver pelo menos $c_i$ terrenos desvirados, mas não houver nenhuma permanente que possa ser alvo da habilidade da criatura $i$ no campo de batalha, uma ação do subconjunto $Creature(c_i)$ estará disponível ao invés disso, pois jogar uma criatura é sempre possível, indepentende da existência de alvos legais para sua habilidade. Por exemplo, a criatura Ravenous Chupacabra tem custo de mana convertido 4 e a seguinte habilidade, em português: ``Quando Chupacabra Voraz entra no campo de batalha, destrua a criatura alvo que um oponente controla.'' Se o oponente do agente tiver pelo menos uma criatura no campo de batalha, não haverá uma ação pertencente a $Creature(4)$ associada a jogar Ravenous Chupacabra, pois seu efeito demanda que uma criatura do oponente seja destruída. Entretanto, se o oponente não controlar nenhuma criatura, a única ação associada a jogar Ravenous Chupacabra pertencerá a $Creature(4)$, pois ainda é possível jogar a criatura.
+
+  \begin{figure}[!ht]
+      \centering
+      \includegraphics[width=0.3\textwidth]{picstcc/chupacabra.jpg}
+      \caption{Ravenous Chupacabra (Chupacabra Voraz) tem uma habilidade que requer uma criatura de um oponente como alvo}
+      \label{chupacabra}
+  \end{figure}
+
+  \item $CreatWithEff(c,T)$, de maneira análoga ao subconjunto $Sorcery(c, T)$, é o subconjunto das ações que representam jogar uma criatura de custo $c$ com algum efeito que tenha $T$ como alvo. Para cada criatura $i$ de custo convertido $c_i$ na mão do agente, para cada permanente ou jogador $t$ que possa ser alvo da habilidade da criatura $i$, haverá uma ação disponível pertencente a $CreatWithEff(c_i, t)$ se o agente tiver pelo menos $c_i$ terrenos desvirados e $t$ estiver no campo de batalha ou for um jogador. Se o agente tiver pelo menos $c_i$ terrenos desvirados, mas não houver nenhuma permanente que possa ser alvo da habilidade da criatura $i$ no campo de batalha, uma ação do subconjunto $Creature(c_i)$ estará disponível ao invés disso, pois jogar uma criatura é sempre possível, indepentende da existência de alvos legais para sua habilidade. Por exemplo, a criatura Ravenous Chupacabra (\ref{chupacabra}) tem custo de mana convertido 4 e a seguinte habilidade, em português: ``Quando Chupacabra Voraz entra no campo de batalha, destrua a criatura alvo que um oponente controla.'' Se o oponente do agente tiver pelo menos uma criatura no campo de batalha, não haverá uma ação pertencente a $Creature(4)$ associada a jogar Ravenous Chupacabra, pois seu efeito demanda que uma criatura do oponente seja destruída. Entretanto, se o oponente não controlar nenhuma criatura, a única ação associada a jogar Ravenous Chupacabra pertencerá a $Creature(4)$, pois ainda é possível jogar a criatura.
   \item $Pass$ é um subconjunto com uma única ação, que está sempre disponível: terminar a fase principal. Se o agente escolher essa ação durante a primeira fase principal, começa então a fase de combate. Caso o agente escolha a ação durante a segunda fase principal, seu turno termina e começa o turno do oponente.
 \end{itemize}
 
@@ -428,7 +436,7 @@ O Combate se resume em 3 decisões alternadas entre os dois jogadores, começand
 
 \subsection{Estratégias e algoritmos}
 
-Um turno inteiro de \textit{Magic} tem, como mostrado, muitos estados possíveis. Para determinar
+Um turno inteiro de \textbf{Magic} tem, como mostrado, muitos estados possíveis. Para determinar
 em primeira instância as ações de um turno, é possível realizar uma busca local exaustiva dentre todas as
 possibilidades. Tomando o turno atual como escopo, podemos definir uma recompensa para qualquer
 estado final (que sempre será após a ação \textit{Pass} na segunda Fase Principal), que assumirá o valor 0

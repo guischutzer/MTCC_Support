@@ -1,7 +1,7 @@
 \chapter{Implementação do Cliente}
 \label{chap:impl}
 Para que fosse possível que implementássemos um agente de inteligência artificial que
-jogasse uma versão simplificada de Magic, era essencial que conhecêssemos em detalhe a
+jogasse uma versão simplificada de \textbf{Magic}, era essencial que conhecêssemos em detalhe a
 plataforma onde o jogo estaria rodando, e para isso implementamos do zero uma versão do
 jogo com as especifidades desejadas usando a linguagem Python.
 
@@ -24,7 +24,7 @@ classe Card:
   $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/B.png}}}$ (Preto),
   $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/R.png}}}$ (Vermelho) e $\vcenter{\hbox{\includegraphics[scale=0.015]{picstcc/G.png}}}$ (Verde) respectivamente. No caso de Volcanic Hammer, o custo é ``1R'' e no de Angel of Mercy, ``4W''.
   \item\texttt{supertype}: Uma string representando o supertipo da carta. No nosso programa,
-  o único supertipo que irá aparecer é \texttt{'Basic'}``Basic'', que identifica os terrenos básicos, mas essa
+  o único supertipo que irá aparecer é ``Basic'', que identifica os terrenos básicos, mas essa
   informação não é relevante para o programa. Estamos representando essa informação principalmente por formalidade para que o programa siga a mesma estrutura de tipos descrita nas regras do jogo. Nem Volcanic Hammer nem Angel of Mercy
   possuem supertipos, portanto este atributo é representado pela string vazia.
   \item\texttt{ctype}: Uma string que representa o tipo da carta. Angel of Mercy recebe o tipo
@@ -144,8 +144,7 @@ A classe \texttt{Player} representa um jogador na partida. Seus atributos são:
   \item\texttt{hand}: Uma lista de objetos do tipo \texttt{Card}, representando as cartas
   na mão do jogador.
   \item\texttt{library}: Uma lista de objetos do tipo \texttt{Card}, representando as cartas
-  no deck\footnote{Dentro do jogo, o deck recebe o nome de \textit{Grimório}, ou \textit{Library},
-  em inglês.} do jogador.
+  no deck do jogador.
   \item\texttt{lose}: Um atributo booleano para identificar se o jogador perdeu o jogo. Este
   atributo é utilizado pela classe \texttt{Game} para decidir se o jogo acabou ou não.
   \item\texttt{ID}: Um inteiro representando um identificador único para o jogador, de maneira
