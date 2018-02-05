@@ -329,7 +329,6 @@ O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase
 \input{mainphaseexample.tex}
 
 \subsubsection{Combate}
-
 O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.\footnote{Nesta seção não trataremos das \textit{habilidades de criatura} relevantes para o combate, de maneira a simplificar as explicações. Trataremos melhor disso mais a frente.}
 
 \vskip1ex
@@ -352,38 +351,7 @@ Nas próximas páginas demonstraremos por exemplos os estados e conjuntos de aç
 \subsubsection{Exemplo - Combate}
 \input{combatexample.tex}
 
-
-\item $R$ : Por fim, precisamos definir as recompensas por sair de cada estado. Uma boa definição inicial leva em conta os pontos de vida do agente e do oponente, assim como as ``presenças de campo'', termo vago que dá a ideia de progresso no jogo. Escolhemos medir a ``presença de campo'' de cada jogador com o dano que suas criaturas podem causar, ou seja, a soma do poder de todas as suas criaturas. Assim, dados pontos de vida $v_1, v_2$ respectivos do agente e seu oponente e seus conjuntos de permanentes $B_1, B_2$, temos
-
-\begin{equation}
-  R(s'|s, a) = \begin{cases}
-              -\gamma, &\textrm{ caso $v_1 \le 0$,} \\
-              +\gamma, &\textrm{ caso $v_2 \le 0$,} \\
-              v_1 + v_2 + \sum\limits_{e \in B_1} pow(e) - \sum\limits_{e \in B_2} pow(e), &\textrm{ cc.}
-            \end{cases},
-\end{equation}
-onde $\gamma$ deve ser uma recompensa para o agente suficientemente alta para incentivar a derrota do oponente e evitar a própria. A função $pow(e)$ retorna o poder da permanente $e$.
-
 \vskip1ex
-
-Podemos, então, calcular as recompensas de acordo com $R$ por sair dos estados nos exemplos demonstrados por meio das ações escolhidas:
-
-\begin{itemize}
-  \item $R(s_2 | s_1, Mountain) = v_1 - v_2 = 10 - 10 = 0.$
-  \item $R(s_3 | s_2, PensiveMinotaur(3)) = v_1 - v_2 + pow(PensiveMinotaur) = 0 + 2 = 2.$
-  \item $R(s_4 | s_3, FlameSlash(1, PensiveMinotaur)) = v_1 - v_2 + 0 = 0.$
-\end{itemize}
-
-Vamos examinar agora as recompensas no exemplo de combate tomando como agente o jogador defensor (portanto, as recompensas são contrárias - $v_2$ e $B_2$ são relativos aos agentes):
-
-\begin{itemize}
-  \item $R(t_3 | t_2, \{WalkingCorpse1 : GrizzlyBears2, WalkingCorpse2 : None\}) = v_2 - v_1 + \sum\limits_e(pow(e) : e \in B_2) - \sum\limits_e(pow(e) : e \in B_1) = 7 - 10 + 2 - 5 = -6.$
-  \item $R(t'_3| t_2, \{WalkingCorpse1 : GrizzlyBears2, WalkingCorpse2 : CentaurCourser\}) = 10 - 10 + 0 - 3 = -3.$
-  \item $R(t''_3| t_2, \{WalkingCorpse1 : CentaurCourser, WalkingCorpse2 : CentaurCourser\}) = 8 - 10 + 2 - 2 = -2.$
-\end{itemize}
-Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável para o jogador defensor do que os outros.
-
-\end{itemize}
 
 \newpage
 
