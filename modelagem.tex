@@ -121,8 +121,6 @@ número de não-terrenos e uma carta a menos deve sempre ser considerada
 pior do que a alternativa.
 \end{itemize}
 
-
-
 Dessa maneira, chegamos a uma fórmula geral, $R_k(i, j) = r(j) + \alpha
 i$, onde $r(j)$ assume valores pré-determinados de acordo com
 as desigualdades \ref{eq:idealhand}.
@@ -261,15 +259,15 @@ associada à ação \textit{Mulligan}. As recompensas em vermelho indicam estado
 
 \subsection{Detalhes da Implementação}
 
-O primeiro agente inteligente do projeto é \texttt{MulliganAgent}, derivado da classe \texttt{Player}. A intenção desta classe é providenciar a qualquer agente uma possibilidade maior de obter uma ``mão jogável''.
+Como descrito no capítulo \ref{chap:impl}, o agente de Mulligan é representado por uma classe herdada de \texttt{Player}.
 
 \input{code-examples/mulliganclass.tex}
 
 O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de valor de horizonte finito em \texttt{mulliganValueIteration()} para decidir se vale a pena ou não manter a mão atual. Apesar da decisão ser feita várias vezes, o algoritmo é executado apenas uma vez, para preencher as tabelas inicializadas em \texttt{initMulliganTables()}. A tabela-base de recompensa pode assumir dois conjuntos de valores, relacionados à diferença de ``pontuação'' caso o jogador comece ou não o jogo (fato indicado pela \textit{flag} \texttt{onThePlay}\footnote{O termo ``on the play'' é uma expressão em \textit{Magic} que significa que o jogador começa o jogo, ou seja, joga (``plays'') o primeiro turno. Sobre o segundo jogador, diz-se que está ``on the draw'', pois este compra uma carta no seu primeiro turno enquanto seu antecessor, não. Estas diferenças representam um esforço de equilíbrio nas regras.}).
 \begin{figure}[h!]
   \input{code-examples/valueiteration.tex}
-  \label{code:valueit}
   \caption{Método de iteração de valor na classe \texttt{MulliganAgent}}
+  \label{code:valueit}
 \end{figure}
 
 Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O laço nas linhas 5-13 contém a comparação entre a soma $\Sigma(i)$ (definida na seção anterior para cada quantidade de cartas na mão), calculada em 7-10 de acordo com a equação \ref{eq:valuefunc}, e o valor da recompensa $R_k(i, j)$ para cada estado $(i, j)$. A atribuição (ou não) na linha 13 definirá a extração da política posteriormente.
@@ -338,6 +336,21 @@ O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase
 
 \subsubsection{Exemplo - Fase Principal}
 \input{mainphaseexample.tex}
+
+\subsection{Busca local em uma Fase Principal}
+Um turno inteiro de \textit{Magic} tem, como mostrado, muitos estados possíveis. Para determinar
+em primeira instância as ações de um turno, é possível realizar uma busca local exaustiva dentre todas as
+possibilidades. Tomando alguma Fase Principal como escopo, podemos definir uma recompensa para qualquer
+estado final (que sempre será após a ação \textit{Pass}).
+\vskip1ex
+
+Para realizar uma busca em grafo numa fase principal, podemos definir cada estado $s$ como um vértice do grafo e cada ação $a$ um arco que leva um estado $s$ a algum estado $s'$. Como mencionado anteriormente, todas as ações de Fase Principal levam a exclusivamente um estado sucessor, o que nos permite fazer esta transição para representação em grafo. Esta busca possui algumas diferenças em relação ao exemplo especificado em \ref{sec:search}:
+\begin{itemize}
+  \item Temos um vértice inicial fixo determinado pelo estado inicial de uma Fase Principal.
+  \item A árvore de estados não está pronta de antemão -- o agente precisa ``testar'' as ações para observar os estados sucessores.
+  \item Não estamos interessados em encontrar caminhos para todos os vértices, mas apenas caminhos para os vértices finais (ou seja, ``criados'' a partir de uma ação \textit{Pass}).
+  \item Em vez de procurar caminhos de custo mínimo, estamos buscando um \textit{estado final com recompensa máxima}. Pode-se considerar, então, que este problema de busca procura o caminho até um estado-objetivo, mas não sabemos de antemão se algum estado é o objetivo (já que precisamos construir a árvore e compararmos)
+\end{itemize}
 
 \newpage
 

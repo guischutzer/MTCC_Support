@@ -1,36 +1,20 @@
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k}{class} \PY{n+nc}{MulliganAgent}\PY{p}{(}\PY{n}{Player}\PY{p}{)}\PY{p}{:}
 
-    \PY{k}{def} \PY{n+nf+fm}{\PYZus{}\PYZus{}init\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{ID}\PY{p}{,} \PY{n}{onThePlay}\PY{p}{,} \PY{n}{verbosity}\PY{o}{=}\PY{n+nb+bp}{False}\PY{p}{)}\PY{p}{:}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{name} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Unknown Player}\PY{l+s+s1}{\PYZsq{}}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{life} \PY{o}{=} \PY{l+m+mi}{20}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{hand} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{library} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{lose} \PY{o}{=} \PY{n+nb+bp}{False}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{ID} \PY{o}{=} \PY{n}{ID}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{creatures} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{lands} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{active} \PY{o}{=} \PY{n+nb+bp}{False}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{graveyard} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{untappedLands} \PY{o}{=} \PY{l+m+mi}{0}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{landRewards} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{landDrop} \PY{o}{=} \PY{n+nb+bp}{False}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{verbosity} \PY{o}{=} \PY{n}{verbosity}
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{onThePlay} \PY{o}{=} \PY{n}{onThePlay}
+    \PY{k}{def} \PY{n+nf+fm}{\PYZus{}\PYZus{}init\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{ID}\PY{p}{,} \PY{n}{onThePlay}\PY{p}{)}\PY{p}{:}
+        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{initializeAttributes}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{ID}\PY{p}{,} \PY{n}{onThePlay}\PY{p}{)}
 
         \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{onThePlay}\PY{p}{:}
             \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{landRewards} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{7}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{4}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{6}\PY{p}{]}
         \PY{k}{else}\PY{p}{:}
             \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{landRewards} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{4}\PY{p}{,}  \PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,}  \PY{l+m+mi}{0}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{]}
 
-        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{initMulliganTables}\PY{p}{(}\PY{p}{)}
-
-      \PY{k}{def} \PY{n+nf}{initMulliganTables}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}     \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{setLibrary}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{deck}\PY{p}{)}\PY{p}{:}       \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{mulligan}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}               \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{getHandReward}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{hand}\PY{p}{)}\PY{p}{:}    \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{getKeepReward}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{:}    \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{mulliganValueIteration}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:} \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{getMulliganProb}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{:}  \PY{o}{.}\PY{o}{.}\PY{o}{.}
-      \PY{k}{def} \PY{n+nf}{getMulliganValue}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{hand}\PY{p}{)}\PY{p}{:} \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{initMulliganTables}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}     \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{setLibrary}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{deck}\PY{p}{)}\PY{p}{:}       \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{mulligan}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}               \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{getHandReward}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{hand}\PY{p}{)}\PY{p}{:}    \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{getKeepReward}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{:}    \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{mulliganValueIteration}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:} \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{getMulliganProb}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{:}  \PY{o}{.}\PY{o}{.}\PY{o}{.}
+    \PY{k}{def} \PY{n+nf}{getMulliganValue}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{hand}\PY{p}{)}\PY{p}{:} \PY{o}{.}\PY{o}{.}\PY{o}{.}
 \end{Verbatim}
