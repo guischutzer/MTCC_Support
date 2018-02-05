@@ -38,7 +38,8 @@ Suponhamos que o jogador ativo escolheu a ação $\{GrizzlyBears2, CentaurCourse
 
 \begin{mdframed}
     \begin{center}
-    $t_2 = \left\{ v_1 = v_2 = 10, G_1 = G_2 = \emptyset, B_1, B_2 \right\}$
+    $t_2 = \left\{ v_1 = v_2 = 10, G_1 = G_2 = \emptyset, B_1, B_2 \right\}$\\
+    $R(t_2) = \frac{10-10}{5} + (7 - 4) + \frac{7-4}{2} = 4,5$
     \vskip1ex
     \includegraphics[width=0.5\textwidth]{picstcc/att2.png}
     \vskip1ex
@@ -98,6 +99,9 @@ Assim, há alguns estados sucessores possíveis. Vamos examinar algumas configur
            B_1 = \{ GrizzlyBears1(u), CentaurCourser(t)\}, \\
            B_2 = \{ WalkingCorpse2(u) \}.
            \end{lrdcases}\]
+    \begin{equation*}
+      $R(t_3) = \frac{7}{5} + (5-2) + \frac{5-2}{2} = 5,9$
+    \end{equation*}
     O parâmetro $u$ de uma permanente significa que ela está desvirada, enquanto $t$ significa que está virada.
 \end{mdframed}
 
@@ -132,6 +136,9 @@ Em $t_3$, ambos os jogadores tem uma criatura (essencialmente igual, pois têm o
            B_1 = \{ GrizzlyBears1(u), CentaurCourser(t)\}, \\
            B_2 = \emptyset.
            \end{lrdcases}\]
+    \begin{equation*}
+      R(t'_3) = \frac{10-10}{5} + (5) + \frac{5}{2} = 7,5
+    \end{equation*}
 \end{mdframed}
 
 Em $t'_3$, o total de pontos de vida não foi alterado, mas a balança do combate também parece negativa para o jogador defensor, que acabou sem criaturas na mesa. Note que o dano causado a ``Centaur Courser'' não foi suficiente para destruí-lo\footnote{De acordo com as regras, o dano causado a uma criatura permanece até o final do turno. Se, porventura, algum dano fosse causado a ``Centaur Courser'' na segunda fase principal, a criatura também seria destruída.}.
@@ -150,8 +157,8 @@ Em $t'_3$, o total de pontos de vida não foi alterado, mas a balança do combat
     \begin{itemize}
       \item ``Centaur Courser'' causou um número igual a seu poder (3) de dano aos ``Walking Corpse'' que o bloquearam.
       \item Os dois ``Walking Corpse'' causaram um número igual a seu poder (2 + 2) de dano ao ``Centaur Courser'' bloqueado.
-      \item ``Grizzly Bears'' causou um número igual a seu poder (2) de dano ao ``Walking Corpse'' que o bloqueou.
-      \item ``Walking Corpse'' causou um número igual a seu poder (2) de dano ao ``Centaur Corser'' bloqueado.
+      \item ``Grizzly Bears'' não foi bloqueado, causando um número igual a seu poder (2) de dano ao jogador defensor.
+      \item ``Walking Corpse'' causou um número igual a seu poder (2) de dano ao ``Centaur Courser'' bloqueado.
     \end{itemize}
     \end{center}
 
@@ -163,6 +170,9 @@ Em $t'_3$, o total de pontos de vida não foi alterado, mas a balança do combat
            B_1 = \{ GrizzlyBears1(u), GrizzlyBears2(t)\}, \\
            B_2 = \{ WalkingCorpse2 \}.
            \end{lrdcases}\]
+    \begin{equation*}
+      $R(t''_3) = \frac{10-8}{5} + (4 -2) + \frac{4-2}{2} = 3,4$
+    \end{equation*}
 \end{mdframed}
 
-Podemos perceber que, para o jogador defensor, a situação é estritamente melhor em $t''_3$ do que em $t_3$, pois $v_2(t''_3) > v_2(t_3)$ e, apesar de ter perdido a mesma criatura em ambos os casos, em $t''_3$ o jogador defensor conseguiu destruir uma criatura maior do oponente no processo. Além disso, apesar de não ser estritamente pior, pois não houve perda de vida, a situação em $t'_3$ parece também pior para o jogador defensor do que em $t''_3$, já que acabou perdendo suas duas criaturas.
+Podemos perceber que, para o jogador defensor, a situação é estritamente melhor em $t''_3$ do que em $t_3$, pois $R(t''_3) > R(t_3)$ e, apesar de ter perdido a mesma criatura em ambos os casos, em $t''_3$ o jogador defensor conseguiu destruir uma criatura maior do oponente no processo. Além disso, apesar de não ser estritamente pior, pois não houve perda de vida, a situação em $t'_3$ parece também pior para o jogador defensor do que em $t''_3$, já que acabou perdendo suas duas criaturas.

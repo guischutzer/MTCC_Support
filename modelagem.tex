@@ -389,36 +389,6 @@ Nas próximas páginas demonstraremos por exemplos os estados e conjuntos de aç
 \subsubsection{Exemplo - Combate}
 \input{combatexample.tex}
 
-$R$ : Por fim, precisamos definir as recompensas por sair de cada estado. Uma boa definição inicial leva em conta os pontos de vida do agente e do oponente, assim como as ``presenças de campo'', termo vago que dá a ideia de progresso no jogo. Escolhemos medir a ``presença de campo'' de cada jogador com o dano que suas criaturas podem causar, ou seja, a soma do poder de todas as suas criaturas. Assim, dados pontos de vida $v_1, v_2$ respectivos do agente e seu oponente e seus conjuntos de permanentes $B_1, B_2$, temos
-
-\begin{equation}
-  R(s'|s, a) = \begin{cases}
-              -\gamma, &\textrm{ caso $v_1 \le 0$,} \\
-              +\gamma, &\textrm{ caso $v_2 \le 0$,} \\
-              v_1 + v_2 + \sum\limits_{e \in B_1} pow(e) - \sum\limits_{e \in B_2} pow(e), &\textrm{ cc.}
-            \end{cases},
-\end{equation}
-onde $\gamma$ deve ser uma recompensa para o agente suficientemente alta para incentivar a derrota do oponente e evitar a própria. A função $pow(e)$ retorna o poder da permanente $e$.
-
-\vskip1ex
-
-Podemos, então, calcular as recompensas de acordo com $R$ por sair dos estados nos exemplos demonstrados por meio das ações escolhidas:
-
-\begin{itemize}
-  \item $R(s_2 | s_1, Mountain) = v_1 - v_2 = 10 - 10 = 0.$
-  \item $R(s_3 | s_2, PensiveMinotaur(3)) = v_1 - v_2 + pow(PensiveMinotaur) = 0 + 2 = 2.$
-  \item $R(s_4 | s_3, FlameSlash(1, PensiveMinotaur)) = v_1 - v_2 + 0 = 0.$
-\end{itemize}
-
-Vamos examinar agora as recompensas no exemplo de combate tomando como agente o jogador defensor (portanto, as recompensas são contrárias - $v_2$ e $B_2$ são relativos aos agentes):
-
-\begin{itemize}
-  \item $R(t_3 | t_2, \{WalkingCorpse1 : GrizzlyBears2, WalkingCorpse2 : None\}) = v_2 - v_1 + \sum\limits_e(pow(e) : e \in B_2) - \sum\limits_e(pow(e) : e \in B_1) = 7 - 10 + 2 - 5 = -6.$
-  \item $R(t'_3| t_2, \{WalkingCorpse1 : GrizzlyBears2, WalkingCorpse2 : CentaurCourser\}) = 10 - 10 + 0 - 3 = -3.$
-  \item $R(t''_3| t_2, \{WalkingCorpse1 : CentaurCourser, WalkingCorpse2 : CentaurCourser\}) = 8 - 10 + 2 - 2 = -2.$
-\end{itemize}
-Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável para o jogador defensor do que os outros.
-
 \subsection{Minimax na fase de Combate}
 
 O Combate se resume em 3 decisões alternadas entre os dois jogadores, começando e terminando pelo jogador ativo. Assim, o jogador ativo é o jogador \textsc{Max}, pois pretende maximizar sua recompensa no turno, enquanto seu oponente é o jogador \textsc{Min} (ambos descritos na seção \ref{sec:minimax}), que deve se esforçar para diminuir a recompensa de \textsc{Max}. Assim, temos uma árvore de profundidade 2. As decisões, em ordem, são:
