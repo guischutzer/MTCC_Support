@@ -328,7 +328,44 @@ O exemplo nas páginas seguintes demonstra uma sequência de estados em uma fase
 \subsubsection{Exemplo - Fase Principal}
 \input{mainphaseexample.tex}
 
-\subsubsection{Combate}
+\subsection{Busca local em uma Fase Principal}
+Para determinar em primeira instância as ações de uma fase, é possível realizar uma busca local exaustiva dentre todas as
+possibilidades. Assim, podemos examinar cada conjunto de ações -- que levará a um estado final próprio -- e determinar, pela função de recompensa definida na seção anterior -- o estado terminal (ou seja, após uma ação \textit{Pass}) desejado.
+\vskip1ex
+
+Para realizar uma busca em grafo numa fase principal, podemos definir cada estado $s$ como um vértice do grafo e cada ação $a$ um arco que leva um estado $s$ a algum estado $s'$. Como mencionado anteriormente, todas as ações de Fase Principal levam a exclusivamente um estado sucessor, o que nos permite fazer esta transição para representação em grafo. Esta busca possui algumas diferenças em relação ao exemplo especificado em \ref{sec:search}:
+\begin{itemize}
+  \item Temos um vértice inicial fixo determinado pelo estado inicial de uma Fase Principal.
+  \item A árvore de estados não está pronta de antemão -- o agente precisa ``testar'' as ações para observar os estados sucessores.
+  \item Não estamos interessados em encontrar caminhos para todos os vértices, mas apenas caminhos para os vértices finais (ou seja, ``criados'' a partir de uma ação \textit{Pass}).
+  \item Em vez de procurar caminhos de custo mínimo, estamos buscando um \textit{estado final com recompensa máxima}. Pode-se considerar, então, que este problema de busca procura o caminho até um estado-objetivo, mas não sabemos de antemão se algum estado é o objetivo (já que precisamos construir a árvore e comparar todos os estados terminais possíveis.)
+\end{itemize}
+
+\subsection{Detalhes da implementação}
+
+A classe \texttt{SearchAgent} descrita no capítulo \ref{chap:impl} conta com um método de busca em largura. Este método é invocado, por sua vez, pelo método \texttt{mainPhaseAction()} do agente, chamado pela classe \texttt{Game} no início de cada Fase Principal.
+
+\begin{figure}[!h]
+  \centering
+  \input{code-examples/breadthfirstsearch.tex}
+  \caption{Método de busca em largura do agente inteligente.}
+  \label{breadthfirstsearch}
+\end{figure}
+
+A função é bastante parecida com o algoritmo descrito no capítulo \ref{chap:fund}, mas adaptada para o problema da Fase Principal. No caso, as recompensas só são checadas para estados terminais, e cada estado \texttt{state} tem seu caminho a partir do estado inicial retornável por \texttt{state.getActionPath()}. A função \texttt{getChildren()} retorna a lista de estados sucessores de um estado dado $s$, ou seja, aplicando cada ação legal ao estado e colocando o estado resultante na lista (neste momento a árvore de busca vai sendo ``desbravada''). Assim, após determinado o estado terminal desejado, a função retorna a sequência de ações escolhida pelo agente, então submetida e aplicada no cliente de jogo.
+
+ \begin{figure}[!h]
+   \centering
+   \input{code-examples/stateclass.tex}
+   \caption{Código da classe de estado.}
+   \label{code:state}
+ \end{figure}
+
+\vskip1ex
+ Cada estado recebe como argumento uma instância de \texttt{Game}, a fase em que o estado se encontra e o caminho de ações que lhe deu origem. Seus métodos principais já foram explicados. Por fim, devemos notar que esta busca é \textit{menos} eficiente do que uma busca em largura convencional pois \textit{não} há checagem se um estado já foi visitado: como, na implementação, estados são objetos diferentes, seria muito custoso guardar na memória todos os estados visitados e comparar os atributos de cada estado novo com estes.
+
+\subsection{Combate}
+
 O combate é bem diferente da fase principal, pois não há jogada de cartas ou informação incompleta: tudo acontece com as criaturas já no campo de batalha. Sua estrutura é a seguinte: o jogador ativo \textit{declara atacantes}, ou seja, escolhe quais das suas criaturas atacarão e, em seguida, seu oponente \textit{declara bloqueadores}, escolhendo quais das suas criaturas bloquearão cada criatura atacante. Após isso, cada criatura atacante causa dano igual a seu poder às criaturas que a bloquearam ou ao jogador defensor (caso não tenha sido bloqueada), e cada criatura bloqueadora causa dano igual a seu poder à criatura que bloqueou. Todo dano é causado ao mesmo tempo. Por fim, cada criatura com dano maior ou igual à sua resistência é destruída: sua carta sai do campo de batalha e passa para a pilha de descarte correspondente.\footnote{Nesta seção não trataremos das \textit{habilidades de criatura} relevantes para o combate, de maneira a simplificar as explicações. Trataremos melhor disso mais a frente.}
 
 \vskip1ex
@@ -351,9 +388,43 @@ Nas próximas páginas demonstraremos por exemplos os estados e conjuntos de aç
 \subsubsection{Exemplo - Combate}
 \input{combatexample.tex}
 
-\vskip1ex
+\subsection{Minimax na fase de Combate}
 
-\newpage
+O Combate se resume em 3 decisões alternadas entre os dois jogadores, começando e terminando pelo jogador ativo. Assim, o jogador ativo é o jogador \textsc{Max}, pois pretende maximizar sua recompensa no turno, enquanto seu oponente é o jogador \textsc{Min} (ambos descritos na seção), que deve se esforçar para diminuir a recompensa de \textsc{Max}
+
+\begin{algorithm}
+\caption*{\textbf{Minimax para Combate} (estado $s$):}
+\begin{algorithmic}
+  \STATE $a_{max} \gets \emptyset$
+  \STATE recompensa máxima $r^1_{max} \gets -\infty$
+  \STATE configurações de ataque $A^C_1 \gets A(s)$
+  \STATE \textbf{para cada} ação de ataque $a \in A^C_1:$
+    \STATE \ind $s' \gets $ aplica ação($s, a$)
+    \STATE \ind recompensa mínima $r^2_{min} \gets +\infty$
+    \STATE \ind configurações de bloqueio $A^C_2 \gets A(s')$
+    \STATE
+    \STATE \ind \textbf{para cada} ação de bloqueio $b \in A^C_2:$
+      \STATE \ind \ind $s'' \gets $ aplica ação($s', b$)
+      \STATE \ind \ind recompensa máxima $r^3_{max} \gets -\infty$
+      \STATE \ind \ind ordenações de bloqueio $A^C_3 \gets A(s'')$
+      \STATE
+      \STATE \ind \ind \textbf{para cada} ação de ordenação $c \in A^C_3:$
+        \STATE \ind \ind \ind $s'''\gets $ aplica ação($s'', c$)
+        \STATE \ind \ind \ind $r \gets $ recompensa($s'''$)
+        \STATE \ind \ind \ind \textbf{se } $r > r^3_{max}$ \textbf{então: }
+        \STATE \ind \ind \ind \ind $r^3_{max} \gets r$
+      \STATE
+      \STATE \ind \ind \textbf{se } $r^3_{max} < r^2_{min}$ \textbf{então: }
+      \STATE \ind \ind \ind $r^2_{min} \gets r^3_{max}$
+      \STATE \ind \ind \ind $b_{min} \gets b$
+    \STATE
+    \STATE \ind \textbf{se } $r^2_{min} > r^1_{max}$ \textbf{então: }
+    \STATE \ind \ind $r^1_{max} \gets r^2_{min}$
+    \STATE \ind \ind $a_{max} \gets a$
+    \STATE
+    \STATE \textbf{devolva } $a_{max}$
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Estratégias e algoritmos}
 
@@ -428,40 +499,3 @@ O construtor da classe recebe como parâmetro o jogo, a fase atual de jogo (em u
 \input{code-examples/getchildren.tex}
 
 O método \texttt{getChildren()} no estado encontra todas as ações legais de uma Fase Principal e, para cada uma, faz uma \textbf{cópia profunda} do jogo. Por fim,  ``dentro da cópia'' (pois não queremos alterar o jogo ``real''), joga a ação. A partir dos resultados da ação, um novo estado é criado (com a cópia do jogo como referência). O método retorna a lista de todos os estados criados desta maneira. Ainda, o método \texttt{combatMinimax()} da classe do agente funciona com a mesma ideia: explorar a árvore \textit{Minimax} criando cópias do jogo. Como o método é mais complexo (e chama 2 métodos parecidos), vamos simplificá-lo em pseudocódigo.
-
-\begin{algorithm}
-\caption*{\textbf{Minimax para Combate} (estado $s$):}
-\begin{algorithmic}
-  \STATE $a_{max} \gets \emptyset$
-  \STATE recompensa máxima $r^1_{max} \gets -\infty$
-  \STATE configurações de ataque $A^C_1 \gets A(s)$
-  \STATE \textbf{para cada} ação de ataque $a \in A^C_1:$
-    \STATE \ind $s' \gets $ cópia($s$)
-    \STATE \ind $s' \gets $ aplica ação($s', a$)
-    \STATE \ind recompensa mínima $r^2_{min} \gets +\infty$
-    \STATE \ind configurações de bloqueio $A^C_2 \gets A(s')$
-    \STATE
-    \STATE \ind \textbf{para cada} ação de bloqueio $b \in A^C_2:$
-      \STATE \ind \ind $s'' \gets $ cópia($s'$)
-      \STATE \ind \ind $s'' \gets $ aplica ação($s'', b$)
-      \STATE \ind \ind recompensa máxima $r^3_{max} \gets -\infty$
-      \STATE \ind \ind ordenações de bloqueio $A^C_3 \gets A(s'')$
-      \STATE
-      \STATE \ind \ind \textbf{para cada} ação de ordenação $c \in A^C_3:$
-        \STATE \ind \ind \ind $s'''\gets $ cópia($s''$)
-        \STATE \ind \ind \ind $s'''\gets $ aplica ação($s''', c$)
-        \STATE \ind \ind \ind $r \gets $ recompensa($s'''$)
-        \STATE \ind \ind \ind \textbf{se } $r > r^3_{max}$ \textbf{então: }
-        \STATE \ind \ind \ind \ind $r^3_{max} \gets r$
-      \STATE
-      \STATE \ind \ind \textbf{se } $r^3_{max} < r^2_{min}$ \textbf{então: }
-      \STATE \ind \ind \ind $r^2_{min} \gets r^3_{max}$
-      \STATE \ind \ind \ind $b_{min} \gets b$
-    \STATE
-    \STATE \ind \textbf{se } $r^2_{min} > r^1_{max}$ \textbf{então: }
-    \STATE \ind \ind $r^1_{max} \gets r^2_{min}$
-    \STATE \ind \ind $a_{max} \gets a$
-    \STATE
-    \STATE \textbf{devolva } $a_{max}$
-\end{algorithmic}
-\end{algorithm}

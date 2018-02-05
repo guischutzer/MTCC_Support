@@ -103,9 +103,10 @@ Os dois tipos básicos de algoritmo de busca genérica são a \textbf{busca em l
 Fica como o exercício para o leitor aplicar o algoritmo ao grafo do exemplo \ref{costedgraph}.
 
 \section{Minimax}
-Nas modelagens de problemas de busca em jogos individuais, normalmente a solução ótima é obtida a partir de uma sequência de ações levando a um estado desejado (que normalmente representa a vitória do agente). Quando o jogo envolve mais de um jogador, é possível que as ações dos outros jogadores influenciem o estado e quais ações podem ser tomadas. Neste caso, chamamos de MAX o agente que está querendo maximizar a recompensa final, enquanto o adversário de MAX que está tentando fazer com que MAX não atinja seu objetivo é chamado de MIN. O objetivo de MAX é, então, encontrar uma estratégia para conseguir a maior recompensa possível, levando em consideração que MIN irá sempre tomar a ação que minimiza a recompensa final.
+\label{sec:minimax}
+Nas modelagens de problemas de busca em jogos individuais, normalmente a solução ótima é obtida a partir de uma sequência de ações levando a um estado desejado (que normalmente representa a vitória do agente). Quando o jogo envolve mais de um jogador, é possível que as ações dos outros jogadores influenciem o estado e quais ações podem ser tomadas. Neste caso, chamamos de \textsc{Max} o agente que está querendo maximizar a recompensa final, enquanto o adversário de \textsc{Max} que está tentando fazer com que este não atinja seu objetivo é chamado de \textsc{Min}. O objetivo de \textsc{Max} é, então, encontrar uma estratégia para conseguir a maior recompensa possível, levando em consideração que \textsc{Min} irá sempre tomar a ação que minimiza a recompensa final.
 
-Para exemplificar, vamos supor um jogo trivial representado pela árvore da imagem \ref{minimax} onde MAX escolhe uma de três ações alterando o estado inicial, e então MIN escolhe uma de três ações alterando o estado obtido pela ação de MAX, levando a um estado final com uma recompensa associada.
+Para exemplificar, vamos supor um jogo trivial representado pela árvore da imagem \ref{minimax} onde \textsc{Max} escolhe uma de três ações alterando o estado inicial, e então \textsc{Min} escolhe uma de três ações alterando o estado obtido pela ação de \textsc{Max}, levando a um estado final com uma recompensa associada.
 
 \begin{figure}[!h]
         \centering
@@ -116,7 +117,7 @@ Para exemplificar, vamos supor um jogo trivial representado pela árvore da imag
 
 Dada a árvore de jogo, a estratégia ótima pode ser determinada pelo \textbf{valor minimax} de cada nó, que escreveremos como $Minimax(n)$. O valor minimax de um nó é a utilidade, do ponto de vista de MAX, de estar no estado correspondente, assumindo que ambos os jogadores joguem otimamente. Dada uma escolha, MAX prefere mover para um estado de valor máximo, enquanto MIN prefere mover para um estado de valor mínimo:
 \begin{equation*}
-  Minmax(s) = \\
+  Minimax(s) = \\
   \begin{cases} Utilidade(s), &\textrm{se s é um estado terminal}\\
                 \max\limits_{a\in A(s)}Minimax(T(s,a)), &\textrm{se o jogador é MAX}\\
                 \min\limits_{a\in A(s)}Minimax(T(s,a)), &\textrm{se o jogador é MIN}\\
