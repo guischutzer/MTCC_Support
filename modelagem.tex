@@ -24,10 +24,10 @@ conjunto de estados.
 
 \begin{figure}
   \centering
-  \label{mulligan}
   \input{mulligan.tex}
   \caption{Representação visual de um problema de \textit{mulligan}. Cada
 nível $i$ representa o número de cartas na mão inicial do jogador. $K$ significa a decisão de manter a mão, $M$ realizar um \textit{mulligan}, $T$ deixar a carta no topo em um \textit{scry} e $B$ colocá-la no fundo.}
+  \label{mulligan}
 \end{figure}
 
 Definimos vagamente uma mão como jogável se esta contém tanto cartas que
@@ -268,8 +268,8 @@ O primeiro agente inteligente do projeto é \texttt{MulliganAgent}, derivado da 
 O método \texttt{mulligan()}, sobrescrito, chama o algoritmo de iteração de valor de horizonte finito em \texttt{mulliganValueIteration()} para decidir se vale a pena ou não manter a mão atual. Apesar da decisão ser feita várias vezes, o algoritmo é executado apenas uma vez, para preencher as tabelas inicializadas em \texttt{initMulliganTables()}. A tabela-base de recompensa pode assumir dois conjuntos de valores, relacionados à diferença de ``pontuação'' caso o jogador comece ou não o jogo (fato indicado pela \textit{flag} \texttt{onThePlay}\footnote{O termo ``on the play'' é uma expressão em \textit{Magic} que significa que o jogador começa o jogo, ou seja, joga (``plays'') o primeiro turno. Sobre o segundo jogador, diz-se que está ``on the draw'', pois este compra uma carta no seu primeiro turno enquanto seu antecessor, não. Estas diferenças representam um esforço de equilíbrio nas regras.}).
 \begin{figure}[h!]
   \input{code-examples/valueiteration.tex}
-  \label{code:valueit}
   \caption{Método de iteração de valor na classe \texttt{MulliganAgent}}
+  \label{code:valueit}
 \end{figure}
 
 Os valores $V^*_0$ iniciais são iguais às recompensas $R_k(i,j)$ associadas às ações $Keep$, portanto, nas linhas 2-4 do código \ref{code:valueit} temos a inicialização de $V*(i, j)$ para cada estado $(i, j)$ do problema. O laço nas linhas 5-13 contém a comparação entre a soma $\Sigma(i)$ (definida na seção anterior para cada quantidade de cartas na mão), calculada em 7-10 de acordo com a equação \ref{eq:valuefunc}, e o valor da recompensa $R_k(i, j)$ para cada estado $(i, j)$. A atribuição (ou não) na linha 13 definirá a extração da política posteriormente.
@@ -299,8 +299,6 @@ O conjunto de ações pode ser pensado como dois conjuntos: o conjunto das açõ
 
 \subsubsection{Fase Principal}
 Durante a Fase Principal o jogador ativo pode jogar cartas. Para que o conjunto de ações $A^P$ em uma Fase Principal seja não-vazio, é necessário que o agente seja o jogador ativo (o jogador ativo alterna todo turno). Definimos $A^P$ da seguinte maneira, onde cada ação significa jogar uma carta (fora a ação de terminar a fase) e pode ser atribuída aos seguintes subconjuntos, cada um com condições próprias:
-
-
 
 \begin{equation*}
   A^P := \begin{lrdcases} Land, Creature(c), Sorcery(c, T), CreatWithEff(c, T), Pass\end{lrdcases}
@@ -362,7 +360,9 @@ A função é bastante parecida com o algoritmo descrito no capítulo \ref{chap:
  \end{figure}
 
 \vskip1ex
- Cada estado recebe como argumento uma instância de \texttt{Game}, a fase em que o estado se encontra e o caminho de ações que lhe deu origem. Seus métodos principais já foram explicados. Por fim, devemos notar que esta busca é \textit{menos} eficiente do que uma busca em largura convencional pois \textit{não} há checagem se um estado já foi visitado: como, na implementação, estados são objetos diferentes, seria muito custoso guardar na memória todos os estados visitados e comparar os atributos de cada estado novo com estes.
+O construtor da classe recebe como parâmetro o jogo, a fase atual de jogo (em uma \textit{string}) e o caminho de ações escolhido para chegar nele. A partir das informações do jogo é possível extrair os atributos do estado relevantes para a determinação da recompensa. Retomaremos o detalhamento da classe no final do capítulo.
+  \vskip1ex
+ Por fim, devemos notar que esta busca é \textit{menos} eficiente do que uma busca em largura convencional pois \textit{não} há checagem se um estado já foi visitado: como, na implementação, estados são objetos diferentes, seria muito custoso guardar na memória todos os estados visitados e comparar os atributos de cada estado novo com estes.
 
 \subsection{Combate}
 
@@ -374,7 +374,8 @@ O conjunto $A^C_1$ de ações do jogador ativo no combate, portanto, é o conjun
 
 \vskip1ex
 
-O conjunto $A^C_2$ de ações do jogador não-ativo durante o combate, por sua vez, é o conjunto de escolhas de todas as combinações de criaturas bloqueadoras e aquelas que estas bloqueiam. Como cada criatura desvirada pode bloquear até uma criatura atacante, temos que \begin{equation} |A^C_2| = (N' + 1)^M \le (N + 1)^M, \end{equation} onde $N'$ é o número de criaturas atacantes e $M$ o número de criaturas aptas a bloquearem.
+O conjunto $A^C_2$ de ações do jogador não-ativo durante o combate, por sua vez, é o conjunto de escolhas de todas as combinações de criaturas bloqueadoras e aquelas que estas bloqueiam. Como cada criatura desvirada pode bloquear até uma criatura atacante, temos que \begin{equation}
+\label{eq:blocks} |A^C_2| = (N' + 1)^M \le (N + 1)^M, \end{equation} onde $N'$ é o número de criaturas atacantes e $M$ o número de criaturas aptas a bloquearem.
 
 \vskip1ex
 
@@ -387,7 +388,6 @@ Nas próximas páginas demonstraremos por exemplos os estados e conjuntos de aç
 \newpage
 \subsubsection{Exemplo - Combate}
 \input{combatexample.tex}
-
 
 $R$ : Por fim, precisamos definir as recompensas por sair de cada estado. Uma boa definição inicial leva em conta os pontos de vida do agente e do oponente, assim como as ``presenças de campo'', termo vago que dá a ideia de progresso no jogo. Escolhemos medir a ``presença de campo'' de cada jogador com o dano que suas criaturas podem causar, ou seja, a soma do poder de todas as suas criaturas. Assim, dados pontos de vida $v_1, v_2$ respectivos do agente e seu oponente e seus conjuntos de permanentes $B_1, B_2$, temos
 
@@ -421,7 +421,19 @@ Estas recompensas refletem a noção de que o estado $t''_3$ é mais desejável 
 
 \subsection{Minimax na fase de Combate}
 
-O Combate se resume em 3 decisões alternadas entre os dois jogadores, começando e terminando pelo jogador ativo. Assim, o jogador ativo é o jogador \textsc{Max}, pois pretende maximizar sua recompensa no turno, enquanto seu oponente é o jogador \textsc{Min} (ambos descritos na seção), que deve se esforçar para diminuir a recompensa de \textsc{Max}
+O Combate se resume em 3 decisões alternadas entre os dois jogadores, começando e terminando pelo jogador ativo. Assim, o jogador ativo é o jogador \textsc{Max}, pois pretende maximizar sua recompensa no turno, enquanto seu oponente é o jogador \textsc{Min} (ambos descritos na seção \ref{sec:minimax}), que deve se esforçar para diminuir a recompensa de \textsc{Max}. Assim, temos uma árvore de profundidade 2. As decisões, em ordem, são:
+
+\begin{enumerate}
+  \item Jogador Ativo (\textsc{Max}): declara criaturas atacantes.
+  \item Jogador Defensor (\textsc{Min}): declara sua configuração de criaturas bloqueadoras.
+  \item Jogador Ativo (\textsc{Max}): determina a ordem que o dano será atribuido se mais de uma criatura bloquear uma de suas criaturas.
+\end{enumerate}
+
+Assim, os \textbf{valores minimax} no nível 2 são as recompensas máximas de ordenação para cada configuração de bloqueio, enquanto no nível 1 são as recompensas mínimas assumindo ordenações com recompensa máxima para cada configuração de ataque e, finalmente, na raiz é a recompensa máxima dentre as recompensas mínimas por cada configuração de ataque.
+
+\subsection{Detalhes do algoritmo}
+
+A função \texttt{combatMinimax()} de um agente iteligente (\texttt{SearchAgent}) chama mais dois métodos parecidos (representando cada nível da árvore) e tem muitos detalhes, portanto é mais útil apresentá-la em pseudocódigo.
 
 \begin{algorithm}
 \caption*{\textbf{Minimax para Combate} (estado $s$):}
@@ -430,17 +442,17 @@ O Combate se resume em 3 decisões alternadas entre os dois jogadores, começand
   \STATE recompensa máxima $r^1_{max} \gets -\infty$
   \STATE configurações de ataque $A^C_1 \gets A(s)$
   \STATE \textbf{para cada} ação de ataque $a \in A^C_1:$
-    \STATE \ind $s' \gets $ aplica ação($s, a$)
+    \STATE \ind $s' \gets $ aplica ação $a$ no estado $s$
     \STATE \ind recompensa mínima $r^2_{min} \gets +\infty$
     \STATE \ind configurações de bloqueio $A^C_2 \gets A(s')$
     \STATE
     \STATE \ind \textbf{para cada} ação de bloqueio $b \in A^C_2:$
-      \STATE \ind \ind $s'' \gets $ aplica ação($s', b$)
+      \STATE \ind \ind $s'' \gets $ aplica ação $b$ no estado $s'$
       \STATE \ind \ind recompensa máxima $r^3_{max} \gets -\infty$
       \STATE \ind \ind ordenações de bloqueio $A^C_3 \gets A(s'')$
       \STATE
       \STATE \ind \ind \textbf{para cada} ação de ordenação $c \in A^C_3:$
-        \STATE \ind \ind \ind $s'''\gets $ aplica ação($s'', c$)
+        \STATE \ind \ind \ind $s'''\gets $ aplica ação $c$ no estado $s''$
         \STATE \ind \ind \ind $r \gets $ recompensa($s'''$)
         \STATE \ind \ind \ind \textbf{se } $r > r^3_{max}$ \textbf{então: }
         \STATE \ind \ind \ind \ind $r^3_{max} \gets r$
@@ -457,76 +469,33 @@ O Combate se resume em 3 decisões alternadas entre os dois jogadores, começand
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Estratégias e algoritmos}
+Quando um \texttt{SearchAgent} é o jogador ativo, chamará os três níveis do algoritmo encadeados para decidir sua configuração de ataque. Por outro lado, quando um \texttt{SearchAgent} é o jogador defensor, executa a busca Minimax na subárvore relativa apenas às configurações e ordenações de bloqueio.
 
-Um turno inteiro de \textit{Magic} tem, como mostrado, muitos estados possíveis. Para determinar
-em primeira instância as ações de um turno, é possível realizar uma busca local exaustiva dentre todas as
-possibilidades. Tomando o turno atual como escopo, podemos definir uma recompensa para qualquer
-estado final (que sempre será após a ação \textit{Pass} na segunda Fase Principal), que assumirá o valor 0
-nos outros casos (como examinaremos todas as possibilidades, faz sentido que a recompensa só seja avaliada
-após a aplicação de toda a sequência). Esta busca, analogamente à divisão do turno, tem três partes:
+\subsection{Combinando estratégias}
 
-\subsubsection{Busca Local - Fase Principal}
-
-Uma busca local em um problema de Inteligência Artificial consiste, resumidamente, em construir uma árvore
-de estados através de uma função $Vizinhos(s, a)$ que retorna os possíveis estados-sucessores de um estado $s$ após
-a aplicação de uma ação $a$ (dadas as restrições já impostas no problema, sabemos que a função $Vizinhos(s, a)$ sempre
-retornará apenas um estado). Assim, o agente pode prever o resultado da aplicação de uma sequência de ações e explorar o espaço de estados até encontrar o que deseja. Os dois algoritmos básicos de busca local são a busca em \textbf{profundidade} e busca
-em \textbf{largura}.
-
-\vskip1ex
-Na busca em profundidade, usa-se uma estrutura de pilha:toda vez que uma ação exploratória é tomada, o
-estado sucessor é empilhado, geralmente havendo \textit{backtracking} quando um estado admite estados sucessores diferentes. Por exemplo,
-suponhamos que um agente deve resolver um labirinto. Ao efetuar uma busca em profundidade, empilhará estados explorados até encontrar
-um estado sem sucessores. Caso este estado seja a saída do labirinto, o problema é resolvido; caso contrário, o agente retira estados
-da pilha até encontrar o último estado com sucessores não-explorados do caminho -- e, a partir dele, continua a busca.
-
-\vskip1ex
-Por outro lado, a busca em largura utiliza uma fila: dado um estado examinado $s$, todos os seus sucessores
-não-visitados são inseridos na fila, de modo a serem explorados posteriormente. A busca em largura permite comparar mais naturalmente
-custos (ou, no nosso caso, recompensas) associados a estados finais e/ou caminhos, sendo mais adequada para examinar exaustivamente
-todos os estados -- justamente o que queremos. Sendo assim, é um algoritmo adequado para decidir a sequência de ações com maior
-recompensa em um turno.
-
-\subsubsection{Minimax - Combate}
-
-A etapa de combate consiste em três decisões, como explicado na seção \ref{gamestructure}:
-
-\begin{enumerate}
-  \item \textbf{Jogador ativo} declara criaturas atacantes.
-  \item \textbf{Jogador defensor} declara criaturas bloqueadoras.
-  \item \textbf{Jogador ativo} escolhe a ordem da atribuição do dano (caso haja mais de uma criatura bloqueadora
-  para alguma criatura atacante).
-\end{enumerate}
-
-Dada a natureza alternada das ações, escolhemos utilizar a regra de decisão \textit{Minimax} (de minimização-maximização, também podendo ser escrita como \textit{Maximin}) para submeter uma ação. O \textit{Minimax}, intuitivamente, busca minimizar a maior perda futura possível ao realizar uma ação. Para isso, supõe-se que, dada uma ação $a$ escolhida pelo agente em questão, seu adversário escolherá racionalmente uma ação $a'$ que maximize a perda do agente. Assim, o agente consegue realizar uma busca dentre todas as suas ações e determinar a mais ``segura'', ou seja, que minimiza a perda máxima após a escolha da ação $a_1$ por seu adversário. Podemos definir a seguinte função-valor para um estado $s$ e seu sucessor $s'$ lembrando que a ação em $s$ é escolhida pelo agente e, em $s'$, por seu adversário:
-
-\begin{equation*}
-  MM_s = \max\limits_{a \in A(s)}\left(\min\limits_{a' \in A(s')}\left(MM_{s'}\right)\right)
-\end{equation*}
-
-Como a função é definida recursivamente, é necessário definir um critério de parada e seu comportamento neste caso. O usual para o \textit{Minimax} é definir uma profundidade máxima $n$ e, de alguma maneira, avaliar os ganhos (ou perdas) de todos os estados possíveis nesta profundidade (que se propagarão até a ``superfície'' -- a primeira decisão). No caso do combate, como temos 3 decisões, podemos definir sem preocupações a profundidade $n = 2$ e os ganhos com uma função-recompensa igual à da busca em largura da primeira Fase Principal (afinal, os objetivos são os mesmos). Quando o agente é o jogador defensor, sua decisão (ou seja, como declarar as criaturas bloqueadoras) levará em conta apenas a ordem que o jogador ativo escolherá, depois, a atribuição de dano, logo, neste caso, a profundidade da árvore \textit{Minimax} é 1.
-
-\subsubsection{Combinando estratégias}
-
-Para definir a recompensa no final de um turno, então, devemos combinar ambas buscas. Isso é feito naturalmente ao expandirmos a busca em largura em uma fase principal para o turno todo, incorporando o estado pós-combate determinado pela busca \textit{Minimax}. Como o combate é influenciado pelas ações tomadas no primeiro turno, cada sequência de ações terá uma previsão de combate própria. O estado pós-combate é o começo da segunda Fase Principal e, partir dele, podemos continuar a busca em largura até o final do turno, quando avaliaremos a recompensa associada a cada sequência (total) de ações.
+Para definir a recompensa no final de um turno, então, devemos combinar as três buscas (busca em largura na primeira Fase Principal, busca Minimax no Combate e busca em largura na segunda Fase Principal). Isso é feito naturalmente ao expandirmos a busca na primeira fase principal para o turno todo, incorporando o estado pós-combate determinado pela busca \textit{Minimax}. Como o combate é influenciado pelas ações tomadas no primeiro turno, cada sequência de ações terá uma previsão de combate própria. O estado pós-combate é o começo da segunda Fase Principal e, partir dele, podemos continuar a busca em largura até o final do turno, quando avaliaremos a recompensa associada a cada sequência (total) de ações.
 
 \vskip1ex
 
 Como o agente pode prever incorretamente as escolhas de bloqueio de seu oponente (caso este não realize um \textit{Minimax} ou avalie recompensas de um modo diferente, por exemplo), é possível que o estado no início da segunda Fase Principal seja diferente do previsto. Assim, a busca na segunda Fase Principal deve ser refeita para encontrar a ``nova'' melhor recompensa total do turno. Como isso ocorre quando o jogador defensor não escolhe sua ``melhor'' (segundo os critérios do agente) configuração de bloqueio, é de certa forma positivo para o agente, pois lhe dá a chance de encontrar sequência de ações com uma recompensa maior para o turno.
 
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{picstcc/fullsearch.png}
+  \caption{Diagrama representando espaço total de estados na busca realizada em um turno inteiro. $t^*$ representa o estado terminal com recompensa máxima.}
+  \label{searchdiagram}
+\end{figure}
+
 \subsection{Detalhes da Implementação}
 
-A classe \texttt{SearchAgent} é derivada de \texttt{MulliganAgent} para que decida o \textit{mulligan} baseando-se nas políticas encontradas pela iteração de valor. Iremos examinar seus métodos principais a seguir.
-
-\input{code-examples/breadthfirstsearch.tex}
-
-A partir de um estado inicial \texttt{startState}, este método inicializa a fila de estados e, enquanto a fila não está vazia, repete a seguinte rotina: 8-12 checa se o estado é terminal, caso seja compara sua recompensa com a maior recompensa encontrada; caso não seja, nas linhas 13-15 coloca seus sucessores na fila. O método é simples, mas faz uso de outra classe: \texttt{State}, que define os estados.
-
-\input{code-examples/stateclass.tex}
-
-O construtor da classe recebe como parâmetro o jogo, a fase atual de jogo (em uma \textit{string}) e o caminho de ações escolhido para chegar nele. A partir das informações do jogo é possível extrair os atributos do estado relevantes para a determinação da recompensa. O método \texttt{isTerminal()} retorna \texttt{True} ou \texttt{False} dependendo se o estado é terminal ou não. Isso é determinado caso a fase seja \texttt{'End'} (sucessora de um estado na segunda Fase Principal) ou algum dos jogadores tenha perdido o jogo (o que pode acontecer a qualquer fase). O método \texttt{getChildren()} (equivalente à função $Vizinhos(s, a)$ aplicada a todas as ações possíveis de um estado) é chamado pelo método homônimo na classe \texttt{SearchAgent} (que simplesmente chama \texttt{state.getchildren()} quando a fase é alguma das duas fases principais ou o método \texttt{combatMinimax()}, quando a fase do estado atual é \texttt{'Combate'}).
+  O agente \texttt{SearchAgent}, quando jogador ativo, faz sua busca total em um turno no momento em que o objeto \texttt{Game} lhe ``pergunta'' qual será sua primeira ação na primeira Fase Principal. Assim, retorna sua sequência de ações -- incluindo as ações da primeira Fase Principal, a configuração de ataque escolhida e as ações da segunda Fase Principal -- determinada pelas buscas encadeadas. Examinaremos melhor como isso acontece.
+  \vskip1ex
+  O método \texttt{getChildren()} da classe \texttt{SearchAgent} (presente na figura \ref{breadthfirstsearch}), na verdade, pode, por sua vez, chamar dois métodos diferentes. Caso a fase do estado em questão seja alguma Fase Principal (\texttt{'First Main'} ou \texttt{'Second Main'}), é chamado um método homônimo, mas presente na classe \texttt{State}:
 
 \input{code-examples/getchildren.tex}
 
-O método \texttt{getChildren()} no estado encontra todas as ações legais de uma Fase Principal e, para cada uma, faz uma \textbf{cópia profunda} do jogo. Por fim,  ``dentro da cópia'' (pois não queremos alterar o jogo ``real''), joga a ação. A partir dos resultados da ação, um novo estado é criado (com a cópia do jogo como referência). O método retorna a lista de todos os estados criados desta maneira. Ainda, o método \texttt{combatMinimax()} da classe do agente funciona com a mesma ideia: explorar a árvore \textit{Minimax} criando cópias do jogo. Como o método é mais complexo (e chama 2 métodos parecidos), vamos simplificá-lo em pseudocódigo.
+O método \texttt{getChildren()} \textit{do estado}, então, encontra todas as ações legais de uma Fase Principal e, para cada uma, faz uma \textit{cópia profunda}\footnote{Em Python, uma cópia profunda cria, além de um objeto novo, objetos novos idênticos para cada objeto pertencente ao que queremos copiar.} do jogo. Por fim,  ``dentro da cópia'' (pois não queremos alterar o jogo ``real''), joga a ação. A partir dos resultados da ação, um novo estado é criado (com a cópia do jogo como referência) e com o caminho \texttt{actionPath} correto para se chegar no estado. Ainda, a atribuição da fase correta a ser examinada é feita.
+\vskip1ex
+Por outro lado, caso a fase do estado a ser expandido seja  \texttt{'Combat'}, o método chamado é \texttt{combatMinimax()}. (como comentado, pouparemos o leitor de muitos detalhes do método). Assim como com \texttt{state.getChildren()}, \texttt{combatMinimax()} realiza \textbf{três laços de cópias} examinando todas as configurações de ataque, bloqueio e ordenação de bloqueio possíveis \textbf{para cada} início de combate colocado na fila da busca em largura.
+\vskip1ex
+A grande quantidade de cópias utilizada na busca total acabou sendo a maior causa de lentidão no programa, aliada à natureza exponencial do crescimento da árvore de buscas. Como a gama de configurações de combate cresce exponencialmente de acordo com o número de criaturas aptas a atacar ou bloquear (lembrando da equação \ref{eq:blocks}), a árvore pode realmente crescer ``fora de controle''. Dito isso, o comportamento geral dos agentes mantém o número total de criaturas em campo não muito grande.
