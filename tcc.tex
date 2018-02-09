@@ -1,4 +1,4 @@
-\documentclass[dvipsnames]{book}
+\documentclass[dvipsnames, openany]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[portuguese]{babel}
 \usepackage{graphicx}
@@ -19,6 +19,12 @@
 \usepackage{algorithmic}
 \usepackage{algorithm}
 \usepackage{caption}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true, %set true if you want colored links
+    linktoc=all,     %set to all if you want both sections and subsections linked
+    linkcolor=black,  %choose some color if you want links to stand out
+}
 
 \makeatletter
 \newcases{lrdcases}
@@ -64,7 +70,16 @@
   \end{titlepage}
 
 \chapter*{Resumo}
-Este trabalho é um estudo do problema de Inteligência Artificial aplicado ao jogo de cartas americano \textbf{Magic: the Gathering}. O objetivo é criar uma inteligência artificial que tenha chances de ganhar jogos em uma versão simplificada do jogo. O projeto inclui a implementação a partir do zero de um cliente próprio em modo texto de \textbf{Magic}, a modelagem do pré-problema do mulligan (parte inicial do jogo), resolvido pelo algoritmo de Iteração de Valor e a modelagem do problema de um jogo de \textbf{Magic}. A estratégia utilizada pela IA é uma busca local da melhor sequência de ações possível visando a recompensa imediata (ou seja, no mesmo turno -- os jogadores alternam entre turnos), utilizando busca em grafo e o algoritmo Minimax em jogadas alternadas. Como resultado, temos um agente que consegue ganhar um número considerável de partidas (apesar de ser uim contra um jogador humano com experiência) e, inclusive, tem um estilo de jogo caracterizável como ``agressivo'' (em grande parte por considerar somente ganhos a curto prazo).
+Este trabalho é um estudo do problema de Inteligência Artificial aplicado ao jogo de cartas americano \textbf{Magic: the Gathering}. O objetivo é criar uma inteligência artificial que tenha chances de ganhar em uma versão simplificada do jogo. O projeto inclui a implementação a partir do zero de um cliente próprio em modo texto de \textbf{Magic}, a modelagem do pré-problema do \textit{mulligan} (parte inicial do jogo), resolvido pelo algoritmo de Iteração de Valor e a modelagem do problema de um jogo de \textbf{Magic}. A estratégia utilizada pela IA no jogo é uma busca local da melhor sequência de ações possível visando a recompensa imediata (ou seja, no mesmo turno -- os jogadores alternam entre turnos), utilizando busca em grafo e o algoritmo Minimax em jogadas alternadas. Como resultado, temos um agente que consegue ganhar um número considerável de partidas (apesar de ser ruim contra um jogador humano com experiência) e, inclusive, tem um estilo de jogo caracterizável como ``agressivo'' (em grande parte por considerar somente ganhos a curto prazo).
+
+\vskip2ex
+
+{\let\clearpage\relax \chapter*{Abstract}}
+This work is a study of the Artificial Intelligence problem applied to the \textbf{Magic: the Gathering} trading card game. The goal is to create an artificial intelligence able to play and sometimes win in a simplified version of the game. The project includes full implementation of our own text-based \textbf{Magic} client, modelling of the mulligan pre-problem (which precedes every game), solved by the Iteration Value algorithm and modelling of a proper \textbf{Magic} game. The strategy used by the in-game AI agent is searching locally for the best possible sequence of actions in terms of immediate reward (as player take alternating turns, the immediate reward is measured in the end of a player's turn), using search in graphs and the Minimax algorithm for alternate players. As a result, we have an agent capable of winning a considerable amount of matches (despite bad performances against experienced human players) with an ``aggressive''-caracterized playing style (largely due to its immediate-gains ``philosophy'').
+
+\tableofcontents
+
+\newpage
 
 \input{intro.tex}
 
